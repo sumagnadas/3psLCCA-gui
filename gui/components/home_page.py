@@ -5,7 +5,7 @@ Home screen for the LCCA application.
 """
 
 import os
-from PySide6.QtCore import Qt, QSize, QPoint, QRect
+from PySide6.QtCore import Qt, QSize, QPoint, QRect, QTimer
 from PySide6.QtGui import QFont, QColor, QPainter, QBrush, QPen
 from PySide6.QtWidgets import (
     QWidget,
@@ -58,10 +58,13 @@ class ProjectCardDelegate(QStyledItemDelegate):
         return QSize(option.rect.width(), self.CARD_HEIGHT)
 
     def paint(self, painter: QPainter, option: QStyleOptionViewItem, index):
-        painter.save()
-        painter.setRenderHint(QPainter.Antialiasing)
 
         data = index.data(Qt.UserRole)
+        if not isinstance(data, dict):
+            super().paint(painter, option, index)
+            return
+        painter.save()
+        painter.setRenderHint(QPainter.Antialiasing)
         rect = option.rect.adjusted(6, 3, -6, -3)
 
         # ── Background ────────────────────────────────────────────────────────
@@ -127,7 +130,7 @@ class ProjectCardDelegate(QStyledItemDelegate):
         name_font.setBold(True)
         painter.setFont(name_font)
         painter.setPen(text_col)
-
+        print(data)
         name = (data.get("display_name") or "Unnamed") if data else "Unnamed"
         name_fm = painter.fontMetrics()
         name_text = name_fm.elidedText(name, Qt.ElideRight, text_maxw)
@@ -201,28 +204,72 @@ class HomePage(QWidget):
 
         root.addWidget(self._make_footer())
 
-    def _make_header(self) -> QWidget:
+    def _make_header(self, special_effect: bool = True) -> QWidget:
         bar = QFrame()
         bar.setFrameShape(QFrame.StyledPanel)
         bar.setFixedHeight(64)
 
-        layout = QHBoxLayout(bar)
+        layout = QHBoxLayout(bar)  # keep horizontal layout
         layout.setContentsMargins(28, 0, 28, 0)
 
-        title = QLabel("OS Bridge  LCCA")
+        # ── Title ───────────────────────────────────────────────
+        title = QLabel("✨ 3psLCCA")
         f = QFont()
         f.setPointSize(15)
         f.setBold(True)
         title.setFont(f)
         layout.addWidget(title)
-        layout.addStretch()
+        layout.addStretch()  # same as original
 
-        subtitle = QLabel("Life Cycle Cost Analysis")
-        sub_f = QFont()
-        sub_f.setPointSize(10)
-        subtitle.setFont(sub_f)
-        subtitle.setEnabled(False)
-        layout.addWidget(subtitle)
+        # ── Subtitle ────────────────────────────────────────────
+        if special_effect:
+            quotes = [
+                "💡 Small steps today lead to big savings tomorrow.",
+                "📊 Measure twice, cut once and track the cost.",
+                "⚙️ Efficiency is doing things right; effectiveness is doing the right things.",
+                "🧭 Data is the compass, cost is the path.",
+                "📖 Every project tells a story make yours count.",
+            ]
+
+            # Subtitle label
+            subtitle = QLabel(quotes[0])
+            sub_f = QFont()
+            sub_f.setPointSize(8)
+            subtitle.setFont(sub_f)
+            subtitle.setEnabled(True)
+
+            # Allow multi-line wrapping
+            subtitle.setWordWrap(True)
+
+            # Fix the maximum width to keep header stable
+            subtitle.setFixedWidth(250)
+
+            # Ensure it expands vertically if needed
+            subtitle.setSizePolicy(
+                subtitle.sizePolicy().horizontalPolicy(),  # keep horizontal policy as is
+                subtitle.sizePolicy().verticalPolicy(),  # vertical can expand with text
+            )
+
+            layout.addWidget(subtitle)
+
+            # Rotate quotes every 5 seconds (special effect)
+            index = {"value": 0}
+
+            def update_quote():
+                index["value"] = (index["value"] + 1) % len(quotes)
+                subtitle.setText(quotes[index["value"]])
+
+            timer = QTimer(subtitle)  # attach to label for auto-cleanup
+            timer.timeout.connect(update_quote)
+            timer.start(5000)
+        else:
+            # default static subtitle
+            subtitle = QLabel("Life Cycle Cost Analysis")
+            sub_f = QFont()
+            sub_f.setPointSize(10)
+            subtitle.setFont(sub_f)
+            subtitle.setEnabled(False)
+            layout.addWidget(subtitle)
 
         return bar
 
@@ -312,7 +359,7 @@ class HomePage(QWidget):
         layout = QHBoxLayout(bar)
         layout.setContentsMargins(16, 0, 16, 0)
 
-        lbl = QLabel("OS Bridge LCCA  •  v1.5.0")
+        lbl = QLabel("3psLCCA  •  0.1.0-dev")
         lbl.setEnabled(False)
         f = QFont()
         f.setPointSize(9)
@@ -372,9 +419,13 @@ class HomePage(QWidget):
         }
 
         if not projects:
-            placeholder = QListWidgetItem("No projects found.")
+            placeholder = QListWidgetItem(
+                "✨ Click '+ New Project' above to create your first project.\n"
+                "Your projects will appear here once you create them."
+            )
             placeholder.setFlags(placeholder.flags() & ~Qt.ItemIsSelectable)
             placeholder.setForeground(QColor("#888888"))
+            placeholder.setTextAlignment(Qt.AlignCenter)
             self.project_list.addItem(placeholder)
         else:
             for p in projects:

@@ -28,7 +28,7 @@ class ProjectController(QObject):
         project_id: str,
         is_new: bool = False,
         display_name: str = None,
-        readable: bool = True,
+        readable: bool = False,
     ) -> bool:
         if self.engine:
             self.close_project()

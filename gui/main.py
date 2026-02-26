@@ -1,7 +1,7 @@
 # gui/main.py
 import sys
 import os
-from PySide6.QtWidgets import QApplication, QSpinBox, QDoubleSpinBox
+from PySide6.QtWidgets import QApplication, QSpinBox, QDoubleSpinBox, QComboBox
 from PySide6.QtCore import QObject, QEvent
 from gui.project_manager import ProjectManager
 
@@ -9,12 +9,16 @@ from gui.project_manager import ProjectManager
 class DisableSpinBoxScroll(QObject):
     """
     Global event filter to disable mouse wheel changes
-    on all QSpinBox and QDoubleSpinBox widgets.
+    on all QSpinBox, QDoubleSpinBox and QComboBox widgets.
     """
+
     def eventFilter(self, obj, event):
         if event.type() == QEvent.Wheel:
-            if isinstance(obj, (QSpinBox, QDoubleSpinBox)):
-                return True  # Block wheel event completely
+            if isinstance(obj, (QSpinBox, QDoubleSpinBox, QComboBox)):
+                # Forward the wheel event to the parent so scroll area still scrolls
+                if obj.parent():
+                    QApplication.instance().sendEvent(obj.parent(), event)
+                return True  # Block from the spinbox/combobox itself
         return super().eventFilter(obj, event)
 
 

@@ -17,7 +17,7 @@ from PySide6.QtCore import Qt, QTimer, QUrl
 from PySide6.QtGui import QDoubleValidator, QDesktopServices, QColor
 import datetime
 
-from ...utils.definitions import FIELD_DEFINITIONS, BASE_DOCS_URL
+from ...utils.input_fields.add_material import FIELD_DEFINITIONS, BASE_DOCS_URL
 from ...utils.unit_resolver import analyze_conversion_sympy
 
 

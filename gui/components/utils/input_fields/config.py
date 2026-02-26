@@ -1,0 +1,1 @@
+BASE_DOCS_URL = "https://yourdocs.com/structure/"

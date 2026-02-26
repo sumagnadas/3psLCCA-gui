@@ -21,12 +21,13 @@ import uuid
 import datetime
 from .base_table import StructureTableWidget
 from ...utils.definitions import (
-    FIELD_DEFINITIONS,
-    BASE_DOCS_URL,
     UNIT_TO_KG,
     UNIT_DROPDOWN_DATA,
     _CONSTRUCTION_UNITS,
 )
+
+from ...utils.input_fields.add_material import FIELD_DEFINITIONS, BASE_DOCS_URL
+
 
 # ---------------------------------------------------------------------------
 # Info Popup

@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, QUrl
 from PySide6.QtGui import QDesktopServices
 
-from gui.components.base_widget import BaseDataWidget
+from gui.components.base_widget import ScrollableForm
 
 
 BASE_DOCS_URL = "https://yourdocs.com/financial/"
@@ -85,7 +85,7 @@ FINANCIAL_FIELDS = [
 ]
 
 
-class FinancialData(BaseDataWidget):
+class FinancialData(ScrollableForm):
     def __init__(self, controller=None):
         super().__init__(controller=controller, chunk_name="financial_data")
 
