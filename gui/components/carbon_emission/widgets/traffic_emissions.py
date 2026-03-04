@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (
     QTableWidgetItem,
     QWidget,
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QColor
 
 from ...base_widget import ScrollableForm
@@ -127,6 +127,13 @@ class _EmissionsTable(QTableWidget):
             self.setItem(row, _COL_EMISSIONS, em_item)
             self._emission_items[key] = em_item
 
+    def sizeHint(self):
+        header_h = self.horizontalHeader().height() or 36
+        rows_h = self.rowCount() * self.verticalHeader().defaultSectionSize()
+        return QSize(super().sizeHint().width(), max(60, header_h + rows_h + 10))
+
+    def minimumSizeHint(self):
+        return self.sizeHint()
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
@@ -389,17 +396,6 @@ class TrafficEmissions(ScrollableForm):
         is_india = country == "INDIA"
         can_calculate = is_india and traffic_mode == "INDIA"
 
-        # # ── Debug Output ───────────────────────────────────────────────────
-        # print("==== Traffic Context Debug ====")
-        # print(f"bridge_data.location_country (raw) : {raw_country}")
-        # print(f"country (normalized)              : {country}")
-        # print(f"traffic.mode (raw)                : {raw_mode}")
-        # print(f"traffic_mode (normalized)         : {traffic_mode}")
-        # print(f"additional_reroute_distance_km    : {reroute}")
-        # print(f"is_india                         : {is_india}")
-        # print(f"can_calculate                    : {can_calculate}")
-        # print("================================")
-
         # ── Mode Handling ──────────────────────────────────────────────────
         self._suppress_mode_signal = True
 
@@ -447,7 +443,7 @@ class TrafficEmissions(ScrollableForm):
         return {
             "mode": self.mode.currentText(),
             "emission_factors": self._emissions_table.collect_factors(),
-            # "total_calculated_emissions": self._emissions_table.total_emissions(),
+            "total_calculated_emissions": self._emissions_table.total_emissions(),
             "total_direct_emissions": (
                 self.total_direct_emissions.value()
                 if hasattr(self, "total_direct_emissions")

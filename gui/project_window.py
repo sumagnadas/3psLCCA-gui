@@ -46,8 +46,8 @@ SIDEBAR_TREE = {
     "Input Parameters": {
         "Construction Work Data": [
             "Foundation",
-            "Super Structure",
             "Sub Structure",
+            "Super Structure",
             "Miscellaneous",
         ],
         "Traffic Data": [],

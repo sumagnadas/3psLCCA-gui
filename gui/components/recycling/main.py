@@ -9,11 +9,12 @@ from PySide6.QtWidgets import (
     QHeaderView,
     QFrame,
     QSizePolicy,
+    QScrollArea,
     QDialog,
     QLineEdit,
     QMessageBox,
 )
-from PySide6.QtCore import Qt, QTimer, QUrl
+from PySide6.QtCore import Qt, QSize, QTimer, QUrl
 from PySide6.QtGui import QDoubleValidator, QDesktopServices
 import time
 import datetime
@@ -125,10 +126,9 @@ class RecyclingTable(QTableWidget):
         self.verticalHeader().setVisible(False)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
 
         self._set_column_widths()
-        self.update_height()
 
     def _set_column_widths(self):
         if self.is_included:
@@ -138,14 +138,20 @@ class RecyclingTable(QTableWidget):
         for i, w in enumerate(widths):
             self.setColumnWidth(i, w)
 
-    def update_height(self):
+    def sizeHint(self):
         header_h = self.horizontalHeader().height() or 35
         rows_h = self.rowCount() * self.verticalHeader().defaultSectionSize()
-        self.setFixedHeight(max(60, header_h + rows_h + 10))
+        return QSize(super().sizeHint().width(), max(60, header_h + rows_h + 10))
+
+    def minimumSizeHint(self):
+        return self.sizeHint()
+
+    def update_height(self):
+        self.updateGeometry()
 
     def clear_rows(self):
         self.setRowCount(0)
-        self.update_height()
+        self.updateGeometry()
 
 
 class RecyclingFixDialog(QDialog):
@@ -284,7 +290,16 @@ class Recycling(QWidget):
 
         self._details_visible = False
 
-        main_layout = QVBoxLayout(self)
+        outer_layout = QVBoxLayout(self)
+        outer_layout.setContentsMargins(0, 0, 0, 0)
+        outer_layout.setSpacing(0)
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.NoFrame)
+
+        container = QWidget()
+        main_layout = QVBoxLayout(container)
         main_layout.setSpacing(8)
 
         # ── Summary Bar ──────────────────────────────────────────────────
@@ -342,6 +357,9 @@ class Recycling(QWidget):
         main_layout.addWidget(self.excluded_table)
 
         main_layout.addStretch()
+
+        scroll.setWidget(container)
+        outer_layout.addWidget(scroll)
 
     # ── UI Helpers ───────────────────────────────────────────────────────
 

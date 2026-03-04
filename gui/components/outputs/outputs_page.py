@@ -42,7 +42,7 @@ class OutputsPage(ScrollableForm):
         btn_layout = QHBoxLayout(btn_row)
         btn_layout.setContentsMargins(0, 8, 0, 8)
 
-        self.btn_calculate = QPushButton("▶  Calculate")
+        self.btn_calculate = QPushButton("Validate  ▶")
         self.btn_calculate.setMinimumHeight(38)
         self.btn_calculate.setFixedWidth(160)
         self.btn_calculate.clicked.connect(self.run_validation)

@@ -20,7 +20,7 @@ from PySide6.QtWidgets import (
     QTableWidgetItem,
     QWidget,
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QSize
 
 from ..base_widget import ScrollableForm
 from ..utils.form_builder.form_definitions import FieldDef, Section, ValidationStatus
@@ -298,7 +298,8 @@ class _VehicleTrafficTable(QTableWidget):
         self.verticalHeader().setDefaultSectionSize(36)
         self.setEditTriggers(QTableWidget.NoEditTriggers)
         self.setSelectionMode(QTableWidget.NoSelection)
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
 
         self._vpd, self._acc, self._pwr = {}, {}, {}
         for row, (key, label) in enumerate(_VEHICLES):
@@ -338,13 +339,18 @@ class _VehicleTrafficTable(QTableWidget):
                 na.setTextAlignment(Qt.AlignCenter)
                 self.setItem(row, 3, na)
 
-        self.update_height()
+        self.updateGeometry()
+
+    def sizeHint(self):
+        header_h = self.horizontalHeader().height() or 35
+        rows_h = self.rowCount() * self.verticalHeader().defaultSectionSize()
+        return QSize(super().sizeHint().width(), header_h + rows_h + 10)
+
+    def minimumSizeHint(self):
+        return self.sizeHint()
 
     def update_height(self):
-        h = self.horizontalHeader().height() or 35
-        for r in range(self.rowCount()):
-            h += self.rowHeight(r)
-        self.setFixedHeight(h + 10)
+        self.updateGeometry()
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
@@ -386,7 +392,8 @@ class _PeakHoursTable(QTableWidget):
         self.verticalHeader().setVisible(False)
         self.verticalHeader().setDefaultSectionSize(36)
         self.setEditTriggers(QTableWidget.NoEditTriggers)
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
 
         self._on_change = on_change
         self._spinboxes = []
@@ -428,11 +435,16 @@ class _PeakHoursTable(QTableWidget):
         self._recalculate()
         self.update_height()
 
+    def sizeHint(self):
+        header_h = self.horizontalHeader().height() or 35
+        rows_h = self.rowCount() * self.verticalHeader().defaultSectionSize()
+        return QSize(super().sizeHint().width(), header_h + rows_h + 10)
+
+    def minimumSizeHint(self):
+        return self.sizeHint()
+
     def update_height(self):
-        h = self.horizontalHeader().height() or 35
-        for r in range(self.rowCount()):
-            h += self.rowHeight(r)
-        self.setFixedHeight(h + 10)
+        self.updateGeometry()
 
     def _on_value_changed(self):
         if not self._rebuilding:

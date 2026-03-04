@@ -6,6 +6,8 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QPushButton,
     QWidget,
+    QDoubleSpinBox,
+    QSpinBox
 )
 
 from ..base_widget import ScrollableForm
@@ -22,10 +24,10 @@ MAINTENANCE_FIELDS = [
     FieldDef(
         "routine_inspection_cost",
         "Routine Inspection Cost",
-        "Cost of routine inspection expressed as a percentage of initial construction cost.",
+        "Cost of routine inspection expressed as a percentage of initial construction cost per year.",
         "float",
         options=(0.0, 100.0, 2),
-        unit="(%)",
+        unit="(%/yr)",
         required=True,
         doc_slug="routine-inspection-cost",
         warn=(0.01, 100.0, "Routine Inspection Cost is 0 — cost will not be included"),
@@ -39,20 +41,43 @@ MAINTENANCE_FIELDS = [
         unit="(yr)",
         required=True,
         doc_slug="routine-inspection-freq",
-        warn=(1, 50, "Routine Inspection Frequency seems unusual — expected between 1 and 50 years"),
+        warn=(
+            1,
+            50,
+            "Routine Inspection Frequency seems unusual — expected between 1 and 50 years",
+        ),
     ),
     # ── Periodic Maintenance ─────────────────────────────────────────────
     Section("Periodic Maintenance"),
     FieldDef(
         "periodic_maintenance_cost",
         "Periodic Maintenance Cost",
-        "Cost of periodic maintenance expressed as a percentage of initial construction cost.",
+        "Cost of periodic maintenance expressed as a percentage of initial construction cost per year.",
         "float",
         options=(0.0, 100.0, 1),
-        unit="(%)",
+        unit="(%/yr)",
         required=True,
         doc_slug="periodic-maintenance-cost",
-        warn=(0.01, 100.0, "Periodic Maintenance Cost is 0 — cost will not be included"),
+        warn=(
+            0.01,
+            100.0,
+            "Periodic Maintenance Cost is 0 — cost will not be included",
+        ),
+    ),
+    FieldDef(
+        "periodic_maintenance_carbon_cost",
+        "Periodic Maintenance Carbon Cost",
+        "Carbon emission cost of periodic maintenance expressed as a percentage of initial carbon emission cost.",
+        "float",
+        options=(0.0, 100.0, 2),
+        unit="(%)",
+        required=True,
+        doc_slug="periodic-maintenance-carbon-cost",
+        warn=(
+            0.01,
+            100.0,
+            "Periodic Maintenance Carbon Cost is 0 — cost will not be included",
+        ),
     ),
     FieldDef(
         "periodic_maintenance_freq",
@@ -63,7 +88,11 @@ MAINTENANCE_FIELDS = [
         unit="(yr)",
         required=True,
         doc_slug="periodic-maintenance-freq",
-        warn=(1, 100, "Periodic Maintenance Frequency seems unusual — expected between 1 and 100 years"),
+        warn=(
+            1,
+            100,
+            "Periodic Maintenance Frequency seems unusual — expected between 1 and 100 years",
+        ),
     ),
     # ── Major Works ──────────────────────────────────────────────────────
     Section("Major Works"),
@@ -87,7 +116,11 @@ MAINTENANCE_FIELDS = [
         unit="(yr)",
         required=True,
         doc_slug="major-inspection-freq",
-        warn=(1, 100, "Major Inspection Frequency seems unusual — expected between 1 and 100 years"),
+        warn=(
+            1,
+            100,
+            "Major Inspection Frequency seems unusual — expected between 1 and 100 years",
+        ),
     ),
     FieldDef(
         "major_repair_cost",
@@ -101,6 +134,17 @@ MAINTENANCE_FIELDS = [
         warn=(0.01, 100.0, "Major Repair Cost is 0 — cost will not be included"),
     ),
     FieldDef(
+        "major_repair_carbon_cost",
+        "Major Repair Carbon Cost",
+        "Carbon emission cost of major repair expressed as a percentage of initial carbon emission cost.",
+        "float",
+        options=(0.0, 100.0, 2),
+        unit="(%)",
+        required=True,
+        doc_slug="major-repair-carbon-cost",
+        warn=(0.01, 100.0, "Major Repair Carbon Cost is 0 — cost will not be included"),
+    ),
+    FieldDef(
         "major_repair_freq",
         "Major Repair Frequency",
         "Interval between major repair works.",
@@ -109,54 +153,101 @@ MAINTENANCE_FIELDS = [
         unit="(yr)",
         required=True,
         doc_slug="major-repair-freq",
-        warn=(1, 100, "Major Repair Frequency seems unusual — expected between 1 and 100 years"),
+        warn=(
+            1,
+            100,
+            "Major Repair Frequency seems unusual — expected between 1 and 100 years",
+        ),
+    ),
+    FieldDef(
+        "major_repair_duration",
+        "Major Repair Duration",
+        "Duration of major repair works.",
+        "int",
+        options=(0, 60),
+        unit="(mo)",
+        required=True,
+        doc_slug="major-repair-duration",
+        warn=(
+            1,
+            60,
+            "Major Repair Duration seems unusual — expected between 1 and 60 months",
+        ),
     ),
     # ── Bearings & Expansion Joints ──────────────────────────────────────
     Section("Bearings & Expansion Joints"),
     FieldDef(
         "bearing_exp_joint_cost",
-        "Bearing & Expansion Joint Repair Cost",
-        "Cost of bearing and expansion joint repair expressed as a percentage of initial construction cost.",
+        "Bearing & Expansion Joint Replacement Cost",
+        "Cost of bearing and expansion joint replacement expressed as a percentage of superstructure cost.",
         "float",
         options=(0.0, 100.0, 2),
         unit="(%)",
         required=True,
         doc_slug="bearing-exp-joint-cost",
-        warn=(0.01, 100.0, "Bearing & Expansion Joint Cost is 0 — cost will not be included"),
+        warn=(
+            0.01,
+            100.0,
+            "Bearing & Expansion Joint Cost is 0 — cost will not be included",
+        ),
     ),
     FieldDef(
         "bearing_exp_joint_freq",
-        "Bearing & Expansion Joint Repair Frequency",
-        "Interval between bearing and expansion joint repair works.",
+        "Bearing & Expansion Joint Replacement Frequency",
+        "Interval between bearing and expansion joint replacements.",
         "int",
         options=(0, 100),
         unit="(yr)",
         required=True,
         doc_slug="bearing-exp-joint-freq",
-        warn=(1, 100, "Bearing & Expansion Joint Frequency seems unusual — expected between 1 and 100 years"),
+        warn=(
+            1,
+            100,
+            "Bearing & Expansion Joint Frequency seems unusual — expected between 1 and 100 years",
+        ),
     ),
-    # ── Strategy ─────────────────────────────────────────────────────────
-    Section("Strategy"),
     FieldDef(
-        "maintenance_strategy",
-        "Maintenance Strategy",
-        "Overall maintenance approach applied over the bridge service life.",
-        "combo",
-        options=["Corrective", "Preventive", "Condition-based"],
+        "bearing_exp_joint_duration",
+        "Bearing & Expansion Joint Replacement Duration",
+        "Duration of bearing and expansion joint replacement works.",
+        "int",
+        options=(0, 365),
+        unit="(days)",
         required=True,
-        doc_slug="maintenance-strategy",
-    ),
+        doc_slug="bearing-exp-joint-duration",
+        warn=(
+            1,
+            365,
+            "Replacement Duration seems unusual — expected between 1 and 365 days",
+        ),
+    )
 ]
 
-SUGGESTED_VALUES = {
-    "routine_inspection_freq": 1,
-    "periodic_maintenance_freq": 5,
-    "major_inspection_freq": 10,
-    "major_repair_freq": 20,
-    "bearing_exp_joint_freq": 20,
-    "maintenance_strategy": "Preventive",
-}
 
+SUGGESTED_VALUES = {
+    # ── Routine Maintenance ──────────────────────────────────────────────
+    "routine_inspection_cost": 0.1,
+    "routine_inspection_freq": 1,
+    # ── Periodic Maintenance ─────────────────────────────────────────────
+    "periodic_maintenance_cost": 0.55,
+    "periodic_maintenance_carbon_cost": 0.55,
+    "periodic_maintenance_freq": 5,
+    # ── Major Works ──────────────────────────────────────────────────────
+    "major_inspection_cost": 0.5,
+    "major_inspection_freq": 5,
+    "major_repair_cost": 10.0,
+    "major_repair_carbon_cost": 0.55,
+    "major_repair_freq": 20,
+    "major_repair_duration": 3,
+    # ── Bearings & Expansion Joints ──────────────────────────────────────
+    "bearing_exp_joint_cost": 12.5,
+    "bearing_exp_joint_freq": 25,
+    "bearing_exp_joint_duration": 2,
+    # ── End of Life ───────────────────────────────────────────────────────
+    "demolition_cost": 10.0,
+    "demolition_carbon_cost": 10.0,
+    "demolition_duration": 1,
+}
 
 
 class Maintenance(ScrollableForm):
@@ -235,4 +326,3 @@ class Maintenance(ScrollableForm):
 
     def get_data(self) -> dict:
         return {"chunk": "maintenance_data", "data": self.get_data_dict()}
-

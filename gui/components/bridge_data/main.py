@@ -113,6 +113,16 @@ BRIDGE_FIELDS = [
         doc_slug="span",
     ),
     FieldDef(
+        "carriageway_width",
+        "Carriageway Width",
+        "Clear width of the roadway portion of the bridge deck.",
+        "float",
+        options=(0.0, 9999.0, 2),
+        unit="(m)",
+        required=True,
+        doc_slug="carriageway-width",
+    ),
+    FieldDef(
         "num_lanes",
         "Number of Lanes",
         "Total number of traffic lanes on the bridge deck.",
@@ -120,6 +130,15 @@ BRIDGE_FIELDS = [
         options=(0, 20),
         required=True,
         doc_slug="num-lanes",
+    ),
+    FieldDef(
+        "vehicle_path_direction",
+        "Vehicle Path Direction",
+        "Indicates whether the road allows one-way or two-way traffic.",
+        "combo",
+        options=["One Way", "Two Way"],
+        required=True,
+        doc_slug="vehicle-path-direction",
     ),
     FieldDef(
         "footpath",
@@ -140,21 +159,21 @@ BRIDGE_FIELDS = [
         required=True,
         doc_slug="wind-speed",
     ),
+    # ── Life Cycle ───────────────────────────────────────────────────────
+    Section("Life Cycle"),
     FieldDef(
-        "carriageway_width",
-        "Carriageway Width",
-        "Clear width of the roadway portion of the bridge deck.",
-        "float",
-        options=(0.0, 9999.0, 2),
-        unit="(m)",
+        "design_life",
+        "Design Life",
+        "Expected operational lifetime of the bridge structure.",
+        "int",
+        options=(0, 999),
+        unit="(years)",
         required=True,
-        doc_slug="carriageway-width",
+        doc_slug="design-life",
     ),
-    # ── Timeline ─────────────────────────────────────────────────────────
-    Section("Timeline"),
     FieldDef(
         "year_of_construction",
-        "Year of Construction / Present Year",
+        "Year of Construction",
         "Year the bridge was (or is planned to be) constructed, used as the "
         "baseline for life cycle cost assessment.",
         "int",
@@ -162,6 +181,8 @@ BRIDGE_FIELDS = [
         required=True,
         doc_slug="year-of-construction",
     ),
+    # ── Construction Schedule ─────────────────────────────────────────────
+    Section("Construction Schedule"),
     FieldDef(
         "duration_construction_months",
         "Duration of Construction",
@@ -180,27 +201,14 @@ BRIDGE_FIELDS = [
         unit="(days)",
         doc_slug="working-days-per-month",
     ),
-    # ── Life Cycle ───────────────────────────────────────────────────────
-    Section("Life Cycle"),
     FieldDef(
-        "design_life",
-        "Design Life",
-        "Expected operational lifetime of the bridge structure.",
+        "days_per_month",
+        "Days per Month",
+        "Calendar days assumed per month for time-based cost calculations.",
         "int",
-        options=(0, 999),
-        unit="(years)",
-        required=True,
-        doc_slug="design-life",
-    ),
-    FieldDef(
-        "service_life",
-        "Service Life",
-        "Actual or anticipated years the bridge remains in serviceable condition.",
-        "int",
-        options=(0, 999),
-        unit="(years)",
-        required=True,
-        doc_slug="service-life",
+        options=(0, 31),
+        unit="(days)",
+        doc_slug="days-per-month",
     ),
 ]
 
@@ -215,8 +223,7 @@ class BridgeData(ScrollableForm):
 
         # location_country is set at project creation — lock it
 
-        self.required_keys = [
-            k for k in self.required_keys if k not in self._LOCKED]
+        self.required_keys = [k for k in self.required_keys if k not in self._LOCKED]
         for key in self._LOCKED:
             w = getattr(self, key, None)
             if w is not None:

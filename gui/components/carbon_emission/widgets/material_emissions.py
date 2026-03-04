@@ -12,13 +12,24 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QFrame,
     QSizePolicy,
+    QScrollArea,
 )
-from PySide6.QtCore import Qt, QTimer, QUrl
+from PySide6.QtCore import Qt, QSize, QTimer, QUrl
 from PySide6.QtGui import QDoubleValidator, QDesktopServices, QColor
 import datetime
 
 from ...utils.input_fields.add_material import FIELD_DEFINITIONS, BASE_DOCS_URL
 from ...utils.unit_resolver import analyze_conversion_sympy
+
+# Cache for expensive SymPy analysis — keyed by (unit, carbon_denom, conv_factor)
+_analysis_cache: dict = {}
+
+
+def _cached_analysis(unit: str, carbon_denom: str, conv_factor) -> dict:
+    key = (unit, carbon_denom, str(conv_factor))
+    if key not in _analysis_cache:
+        _analysis_cache[key] = analyze_conversion_sympy(unit, carbon_denom, conv_factor)
+    return _analysis_cache[key]
 
 
 # ---------------------------------------------------------------------------
@@ -230,7 +241,8 @@ class CarbonTable(QTableWidget):
         self.setSelectionMode(QTableWidget.NoSelection)
         self.verticalHeader().setDefaultSectionSize(35)
         self.verticalHeader().setVisible(False)
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self._set_column_widths()
 
     def _set_column_widths(self):
@@ -242,10 +254,16 @@ class CarbonTable(QTableWidget):
         for i, w in enumerate(widths):
             self.setColumnWidth(i, w)
 
-    def update_height(self):
+    def sizeHint(self):
         header_h = self.horizontalHeader().height() or 35
         rows_h = self.rowCount() * self.verticalHeader().defaultSectionSize()
-        self.setFixedHeight(max(60, header_h + rows_h + 10))
+        return QSize(super().sizeHint().width(), max(60, header_h + rows_h + 10))
+
+    def minimumSizeHint(self):
+        return self.sizeHint()
+
+    def update_height(self):
+        self.updateGeometry()
 
     def set_row_style(self, row: int, color_hex: str):
         bg = QColor(color_hex)
@@ -279,7 +297,18 @@ class MaterialEmissions(QWidget):
         self.controller = controller
         self._details_visible = False
 
-        main_layout = QVBoxLayout(self)
+        # Outer layout holds only the scroll area, so growing tables never
+        # overlap sibling widgets — the scroll area absorbs all extra height.
+        outer_layout = QVBoxLayout(self)
+        outer_layout.setContentsMargins(0, 0, 0, 0)
+        outer_layout.setSpacing(0)
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.NoFrame)
+
+        container = QWidget()
+        main_layout = QVBoxLayout(container)
         main_layout.setSpacing(8)
 
         # Summary Bar
@@ -321,6 +350,9 @@ class MaterialEmissions(QWidget):
         self.excluded_table = CarbonTable(is_included=False)
         main_layout.addWidget(self.excluded_table)
         main_layout.addStretch()
+
+        scroll.setWidget(container)
+        outer_layout.addWidget(scroll)
 
     def _section_label(self, text: str) -> QLabel:
         lbl = QLabel(f"<b>{text}</b>")
@@ -374,8 +406,8 @@ class MaterialEmissions(QWidget):
                         carbon_unit.split("/")[-1] if "/" in carbon_unit else ""
                     )
 
-                    # SymPy Resolver Analysis
-                    analysis = analyze_conversion_sympy(
+                    # SymPy Resolver Analysis (cached — same inputs always yield same result)
+                    analysis = _cached_analysis(
                         v.get("unit", ""), carbon_denom, v.get("conversion_factor", 1)
                     )
 
@@ -408,6 +440,7 @@ class MaterialEmissions(QWidget):
 
     def _populate_included(self, items):
         t = self.included_table
+        t.setUpdatesEnabled(False)
         t.clear_rows()
         for category, chunk_id, comp_name, idx, item, carbon, analysis in items:
             v = item.get("values", {})
@@ -452,9 +485,11 @@ class MaterialEmissions(QWidget):
             # t.set_row_style(row, "#ffffff")
 
         t.update_height()
+        t.setUpdatesEnabled(True)
 
     def _populate_excluded(self, items):
         t = self.excluded_table
+        t.setUpdatesEnabled(False)
         t.clear_rows()
         for category, chunk_id, comp_name, idx, item, reason, analysis in items:
             v = item.get("values", {})
@@ -503,6 +538,7 @@ class MaterialEmissions(QWidget):
 
             t.setCellWidget(row, 7, btn)
         t.update_height()
+        t.setUpdatesEnabled(True)
 
     def _update_summary(
         self, total: float, included: int, total_count: int, cat_totals: dict

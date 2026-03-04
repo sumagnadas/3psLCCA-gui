@@ -5,7 +5,7 @@ from PySide6.QtWidgets import (
     QHeaderView,
     QSizePolicy,
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QSize
 
 
 class StructureTableWidget(QTableWidget):
@@ -33,7 +33,7 @@ class StructureTableWidget(QTableWidget):
         self.setColumnWidth(5, 70)  # Action
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
 
         # Disable direct typing in cells (Double-click logic handles editing)
         self.setEditTriggers(QTableWidget.NoEditTriggers)
@@ -50,12 +50,17 @@ class StructureTableWidget(QTableWidget):
         """Pass the visual row index to the manager to find the data and open the edit dialog."""
         self.manager.open_edit_dialog(self.component_name, row)
 
+    def sizeHint(self):
+        header_h = self.horizontalHeader().height() or 35
+        rows_h = self.rowCount() * self.verticalHeader().defaultSectionSize()
+        return QSize(super().sizeHint().width(), max(150, header_h + rows_h + 15))
+
+    def minimumSizeHint(self):
+        return self.sizeHint()
+
     def update_height(self):
-        """Adjusts the widget height based on row count to avoid nested scrollbars."""
-        header_height = self.horizontalHeader().height() or 35
-        row_heights = self.rowCount() * self.verticalHeader().defaultSectionSize()
-        total_h = max(150, header_height + row_heights + 15)
-        self.setFixedHeight(total_h)
+        """Notifies the layout that the size hint changed — no fixed height needed."""
+        self.updateGeometry()
 
     def add_row(self, item_data, original_index):
         """

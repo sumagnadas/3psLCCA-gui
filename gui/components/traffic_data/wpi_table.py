@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt, QSize, Signal
 from PySide6.QtGui import QFont, QPalette
 from PySide6.QtWidgets import (
     QCheckBox,
@@ -134,7 +134,8 @@ class _WPITable(QTableWidget):
     def _setup_table(self):
         self.setEditTriggers(QTableWidget.NoEditTriggers)
         self.setSelectionMode(QTableWidget.NoSelection)
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
 
         # Hide Qt's built-in column header — we use row 0 and 1 instead
         self.horizontalHeader().setVisible(False)
@@ -233,12 +234,15 @@ class _WPITable(QTableWidget):
 
     # ── Height ────────────────────────────────────────────────────────────────
 
+    def sizeHint(self):
+        h = sum(self.rowHeight(r) for r in range(self.rowCount()))
+        return QSize(super().sizeHint().width(), h + 4)
+
+    def minimumSizeHint(self):
+        return self.sizeHint()
+
     def update_height(self):
-        """Fix height to exact content — no empty space, no scrollbar."""
-        h = 0
-        for r in range(self.rowCount()):
-            h += self.rowHeight(r)
-        self.setFixedHeight(h + 4)
+        self.updateGeometry()
 
     def resizeEvent(self, event):
         super().resizeEvent(event)

@@ -1429,5 +1429,10 @@ data = [
     },
 ]
 
-COUNTRIES = sorted(set(item["COUNTRY"] for item in data))
-CURRENCIES = sorted(set(item["CURRENCY_CODE"] for item in data))
+COUNTRIES = sorted(
+    set(item["COUNTRY"] for item in data), key=lambda x: (x != "INDIA", x)
+)
+
+CURRENCIES = sorted(
+    set(item["CURRENCY_CODE"] for item in data), key=lambda x: (x != "INR", x)
+)

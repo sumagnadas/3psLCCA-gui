@@ -16,11 +16,12 @@ from ..utils.validation_helpers import clear_field_styles, validate_form
 BASE_DOCS_URL = "https://yourdocs.com/financial/"
 
 FINANCIAL_FIELDS = [
+    Section("Economic Parameters"),
     FieldDef(
         "discount_rate",
         "Discount Rate",
         "The rate used to convert future cash flows into present value. "
-        "It reflects the time value of money and investment risk.",
+        "Reflects the time value of money and investment risk.",
         "float",
         options=(0.0, 100.0, 2),
         unit="(%)",
@@ -57,45 +58,30 @@ FINANCIAL_FIELDS = [
         required=True,
         doc_slug="investment-ratio",
     ),
-    FieldDef(
-        "design_life",
-        "Design Life",
-        "Expected operational lifetime of the system in years.",
-        "int",
-        options=(0, 999),
-        unit="(years)",
-        required=True,
-        doc_slug="design-life",
-    ),
-    FieldDef(
-        "duration_of_construction",
-        "Duration of Construction",
-        "Time required to complete construction before operation begins.",
-        "float",
-        options=(0.0, 999.0, 2),
-        unit="(years)",
-        doc_slug="duration-of-construction",
-    ),
+    Section("Analysis"),
     FieldDef(
         "analysis_period",
         "Analysis Period",
-        "Total time horizon used for financial evaluation.",
+        "Total time horizon used for life cycle financial evaluation.",
         "int",
         options=(0, 999),
         unit="(years)",
         required=True,
         doc_slug="analysis-period",
-    ),
+    )
 ]
 
 SUGGESTED_VALUES = {
+    # ── Economic Parameters ───────────────────────────────────────────────
     "discount_rate": 6.70,
     "inflation_rate": 5.15,
     "interest_rate": 7.75,
     "investment_ratio": 0.5,
-    "design_life": 50,
-    "duration_of_construction": 0.0,
-    "analysis_period": 50,
+    # ── Carbon & Currency ─────────────────────────────────────────────────
+    "social_cost_of_carbon": 86.40,
+    "currency_conversion": 88.73,
+    # ── Analysis ─────────────────────────────────────────────────────────
+    "analysis_period": 150,
 }
 
 
