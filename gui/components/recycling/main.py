@@ -437,7 +437,7 @@ class Recycling(QWidget):
         return w
 
     def _open_recyclability_edit(self, chunk_id: str, comp_name: str, data_index: int, item: dict):
-        from ..structure.widgets.manager import MaterialDialog
+        from ..structure.widgets.material_dialog import MaterialDialog
         dialog = MaterialDialog(comp_name, parent=self, data=item, recyclability_only=True)
         if dialog.exec():
             vals = dialog.get_values()

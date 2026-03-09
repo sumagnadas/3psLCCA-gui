@@ -465,7 +465,7 @@ class MaterialEmissions(QWidget):
     def _open_emission_edit(
         self, chunk_id: str, comp_name: str, data_index: int, item: dict
     ):
-        from ...structure.widgets.manager import MaterialDialog
+        from ...structure.widgets.material_dialog import MaterialDialog
         dialog = MaterialDialog(comp_name, parent=self, data=item, emissions_only=True)
         if dialog.exec():
             vals = dialog.get_values()

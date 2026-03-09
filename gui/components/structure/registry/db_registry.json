@@ -1,7 +1,7 @@
 {
   "MumbaiSOR": {
     "db_key": "MumbaiSOR",
-    "path": "c:\\Users\\Asus\\Desktop\\3psLCCA is here\\osbridgelcca_new\\gui\\components\\structure\\registry\\material_database\\INDIA\\Maharashtra\\MumbaiSOR.json",
+    "path": "material_database\\INDIA\\Maharashtra\\MumbaiSOR.json",
     "country": "INDIA",
     "region": "Maharashtra",
     "status": "OK",
@@ -84,8 +84,8 @@
     }
   },
   "_meta": {
-    "built_at": "2026-03-08T20:44:05.477976",
-    "root": "c:\\Users\\Asus\\Desktop\\3psLCCA is here\\osbridgelcca_new\\gui\\components\\structure\\registry\\material_database",
+    "built_at": "2026-03-09T17:12:22.747680",
+    "root": "material_database",
     "total_files": 1,
     "ok": 1,
     "failed": 0

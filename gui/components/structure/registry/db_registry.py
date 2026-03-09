@@ -210,8 +210,9 @@ def check_integrity(db_key: str) -> dict:
             "warnings": [], "record_count": 0, "file_meta": {},
             "checked_at": datetime.datetime.now().isoformat(),
         }
-    entry  = registry[db_key]
-    report = check_integrity_by_path(entry["path"])
+    entry    = registry[db_key]
+    abs_path = str((Path(REGISTRY_MANIFEST_PATH).parent / entry["path"]).resolve())
+    report   = check_integrity_by_path(abs_path)
     report["db_key"]  = db_key
     report["country"] = entry.get("country")
     report["region"]  = entry.get("region")
@@ -274,9 +275,12 @@ def build_registry(root: str = MATERIAL_DB_ROOT,
             except Exception:
                 pass
 
+        manifest_dir = Path(manifest_path).parent
+        rel_path = str(jf.relative_to(manifest_dir))
+
         manifest[db_key] = {
             "db_key":       db_key,
-            "path":         jf_str,
+            "path":         rel_path,
             "country":      info["country"],
             "region":       info["region"],
             "status":       report["status"],
@@ -291,9 +295,10 @@ def build_registry(root: str = MATERIAL_DB_ROOT,
     ok_count     = sum(1 for v in manifest.values() if v["status"] == "OK")
     failed_count = sum(1 for v in manifest.values() if v["status"] == "FAILED")
 
+    manifest_dir = Path(manifest_path).parent
     manifest["_meta"] = {
         "built_at":    datetime.datetime.now().isoformat(),
-        "root":        root,
+        "root":        str(Path(root).relative_to(manifest_dir)),
         "total_files": len(json_files),
         "ok":          ok_count,
         "failed":      failed_count,
@@ -327,16 +332,17 @@ def get_registry(manifest_path: str = REGISTRY_MANIFEST_PATH) -> dict:
     return {k: v for k, v in full.items() if k != "_meta"}
 
 
-def get_path(db_key: str) -> str:
+def get_path(db_key: str, manifest_path: str = REGISTRY_MANIFEST_PATH) -> str:
     """Return absolute path for a registered db_key."""
-    registry = get_registry()
+    registry = get_registry(manifest_path)
     if db_key not in registry:
         raise KeyError(f"'{db_key}' not in registry. "
                        f"Available: {list(registry.keys())}")
-    path = registry[db_key]["path"]
-    if not os.path.isfile(path):
-        raise FileNotFoundError(f"File for '{db_key}' missing on disk: {path}")
-    return path
+    rel_path = registry[db_key]["path"]
+    abs_path = str((Path(manifest_path).parent / rel_path).resolve())
+    if not os.path.isfile(abs_path):
+        raise FileNotFoundError(f"File for '{db_key}' missing on disk: {abs_path}")
+    return abs_path
 
 
 def list_databases(country: str = None, region: str = None) -> list[dict]:
