@@ -1,6 +1,6 @@
 import os
 
-from PySide6.QtCore import Qt, QRect, QSize
+from PySide6.QtCore import Qt, QRect, QSize, QEvent, QPoint
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
@@ -22,6 +22,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 from PySide6.QtGui import QAction, QColor, QPainter, QPalette
+from PySide6.QtWidgets import QToolTip
 
 from gui.components.save_status_bar import SaveStatusBar
 from gui.components.logs import Logs
@@ -36,6 +37,7 @@ from gui.components.recycling.main import Recycling
 from gui.components.demolition.main import Demolition
 from gui.components.home_page import HomePage
 from gui.components.outputs.outputs_page import OutputsPage
+from gui.components.utils.validation_helpers import set_lock_tooltip_target
 
 
 # ── Sidebar tree definition ───────────────────────────────────────────────────
@@ -352,7 +354,14 @@ class ProjectWindow(QMainWindow):
         self.btn_calculate = QPushButton("Calculate")
         self.btn_calculate.clicked.connect(self._run_calculate)
         top_bar_layout.addWidget(self.btn_calculate)
-        top_bar_layout.addWidget(QPushButton("Lock"))
+
+        self._frozen = False
+        self._lock_tooltip = "Lock project to prevent editing"
+        self.btn_lock = QPushButton("Lock")
+        self.btn_lock.setCheckable(True)
+        self.btn_lock.installEventFilter(self)
+        self.btn_lock.clicked.connect(self._on_lock_toggled)
+        top_bar_layout.addWidget(self.btn_lock)
 
         master_layout.setMenuBar(top_bar)
 
@@ -468,6 +477,30 @@ class ProjectWindow(QMainWindow):
         return self.project_id is not None
 
     # ── Calculate ─────────────────────────────────────────────────────────────
+
+    def eventFilter(self, obj, event):
+        if obj is self.btn_lock:
+            if event.type() == QEvent.Type.Enter:
+                pos = self.btn_lock.mapToGlobal(
+                    QPoint(self.btn_lock.width() // 2, self.btn_lock.height() + 4)
+                )
+                QToolTip.showText(pos, self._lock_tooltip, None, QRect(), 3000)
+            elif event.type() == QEvent.Type.Leave:
+                QToolTip.hideText()
+        return super().eventFilter(obj, event)
+
+    def _on_lock_toggled(self, checked: bool):
+        self._frozen = checked
+        self.btn_lock.setText("Unlock" if checked else "Lock")
+        self._lock_tooltip = (
+            "Project is locked — click here to unlock"
+            if checked else
+            "Lock project to prevent editing"
+        )
+        set_lock_tooltip_target(self.btn_lock if checked else None)
+        for page in self.widget_map.values():
+            if hasattr(page, "freeze"):
+                page.freeze(checked)
 
     def _run_calculate(self):
         self.outputs_page.run_validation()

@@ -48,7 +48,6 @@ EXPECTED_SCHEMA = {
         "name", "unit", "rate", "rate_src",
         "carbon_emission", "carbon_emission_units_den",
         "conversion_factor", "carbon_emission_src",
-        "recycleable",
     ],
     "numeric_item_fields": ["rate", "conversion_factor"],
 }

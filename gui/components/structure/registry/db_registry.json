@@ -78,13 +78,13 @@
       "Record[0] (sheetName='Foundation', type='Excavation') \u203a Item[44] ('Laterite Rock (Above 6 m)'): carbon_emission is 'not_available'."
     ],
     "file_meta": {
-      "size_bytes": 188389,
-      "last_modified": "2026-03-08T20:43:59.207709",
-      "md5": "b30bcfa39ff6c83da4868eeb6a8d9e16"
+      "size_bytes": 171989,
+      "last_modified": "2026-03-10T14:49:32.958229",
+      "md5": "836c4803cc3ec1c98b17d78a64595418"
     }
   },
   "_meta": {
-    "built_at": "2026-03-09T17:12:22.747680",
+    "built_at": "2026-03-10T14:50:33.430613",
     "root": "material_database",
     "total_files": 1,
     "ok": 1,

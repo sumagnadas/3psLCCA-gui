@@ -30,6 +30,9 @@ class StructureManagerWidget(QWidget):
         self.sections = {}
         self.data = {}
 
+        self._frozen = False
+        self._add_material_btns = []
+
         self.main_layout = QVBoxLayout(self)
 
         self.scroll = QScrollArea()
@@ -78,6 +81,7 @@ class StructureManagerWidget(QWidget):
                 widget.setParent(None)
 
         self.sections = {}
+        self._add_material_btns = []
 
         for comp_name, items in self.data.items():
             self.create_section(comp_name)
@@ -99,6 +103,8 @@ class StructureManagerWidget(QWidget):
 
         add_row_btn = QPushButton(f"Add Material to {name}")
         add_row_btn.clicked.connect(lambda checked=False, n=name: self.open_dialog(n))
+        add_row_btn.setEnabled(not self._frozen)
+        self._add_material_btns.append(add_row_btn)
 
         g_layout.addWidget(table)
         g_layout.addWidget(add_row_btn)
@@ -222,6 +228,14 @@ class StructureManagerWidget(QWidget):
                     chunk_name=self.chunk_name, data=current_data
                 )
                 self.save_current_state()
+
+    def freeze(self, frozen: bool = True):
+        self._frozen = frozen
+        self.add_comp_btn.setEnabled(not frozen)
+        for btn in self._add_material_btns:
+            btn.setEnabled(not frozen)
+        for table in self.sections.values():
+            table.freeze(frozen)
 
     def save_current_state(self):
         if self.controller and self.controller.engine:

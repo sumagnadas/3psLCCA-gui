@@ -52,6 +52,13 @@ def main():
 
     app = QApplication(sys.argv)
 
+    # Load user-defined custom units from DB into the global cache
+    try:
+        from gui.components.utils.unit_resolver import load_custom_units
+        load_custom_units()
+    except Exception as _e:
+        print(f"Warning: Could not load custom units: {_e}")
+
     wheel_filter = DisableSpinBoxScroll()
     app.installEventFilter(wheel_filter)
 

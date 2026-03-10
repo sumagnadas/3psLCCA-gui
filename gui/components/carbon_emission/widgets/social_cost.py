@@ -162,14 +162,14 @@ class SocialCost(ScrollableForm):
         QTimer.singleShot(0, self._fit_stack)
 
         # Clear button
-        btn = QPushButton("Clear All")
-        btn.setFixedWidth(120)
-        btn.setMinimumHeight(35)
-        btn.setMaximumHeight(35)
-        btn.clicked.connect(self.clear_all)
+        self.btn_clear = QPushButton("Clear All")
+        self.btn_clear.setFixedWidth(120)
+        self.btn_clear.setMinimumHeight(35)
+        self.btn_clear.setMaximumHeight(35)
+        self.btn_clear.clicked.connect(self.clear_all)
         row = QHBoxLayout()
         row.setContentsMargins(0, 4, 0, 0)
-        row.addWidget(btn)
+        row.addWidget(self.btn_clear)
         row.addStretch()
         f.addRow(row)
 
@@ -559,6 +559,15 @@ class SocialCost(ScrollableForm):
             else:
                 warnings.append("Social Cost of Carbon is 0.")
         return {"errors": [], "warnings": warnings}
+
+    def freeze(self, frozen: bool = True):
+        self.btn_clear.setEnabled(not frozen)
+        self.source.setEnabled(not frozen)
+        self.inr_to_local_rate.setEnabled(not frozen)
+        self.usd_to_local_rate.setEnabled(not frozen)
+        self.scc_value.setEnabled(not frozen)
+        self.ssp_scenario.setEnabled(not frozen)
+        self.rcp_scenario.setEnabled(not frozen)
 
     def get_data(self) -> dict:
         return {"chunk": CHUNK, "data": self.collect_data()}

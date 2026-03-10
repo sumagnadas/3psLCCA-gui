@@ -13,7 +13,7 @@ from PySide6.QtWidgets import (
 from ..base_widget import ScrollableForm
 from ..utils.form_builder.form_definitions import FieldDef, Section
 from ..utils.form_builder.form_builder import build_form
-from ..utils.validation_helpers import clear_field_styles, validate_form
+from ..utils.validation_helpers import clear_field_styles, freeze_form, freeze_widgets, validate_form
 
 
 BASE_DOCS_URL = "https://yourdocs.com/maintenance/"
@@ -318,6 +318,10 @@ class Maintenance(ScrollableForm):
             self.controller.engine._log("Maintenance: All fields cleared.")
 
     # ── Validation ───────────────────────────────────────────────────────
+    def freeze(self, frozen: bool = True):
+        freeze_form(MAINTENANCE_FIELDS, self, frozen)
+        freeze_widgets(frozen, self.btn_load_suggested, self.btn_clear_all)
+
     def clear_validation(self):
         clear_field_styles(MAINTENANCE_FIELDS, self)
 

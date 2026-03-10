@@ -209,6 +209,7 @@ class VehicleCard(QGroupBox):
         total_emission: float,
         on_edit,
         on_trash,
+        frozen: bool = False,
         parent=None,
     ):
         v = entry.get("vehicle", {})
@@ -260,6 +261,8 @@ class VehicleCard(QGroupBox):
         trash_btn = QPushButton("Remove")
         edit_btn.clicked.connect(on_edit)
         trash_btn.clicked.connect(on_trash)
+        edit_btn.setEnabled(not frozen)
+        trash_btn.setEnabled(not frozen)
         btn_row.addStretch()
         btn_row.addWidget(edit_btn)
         btn_row.addWidget(trash_btn)
@@ -377,6 +380,7 @@ class TransportEmissions(QWidget):
         self.setObjectName("TransportEmissions")
 
         self._details_visible = False
+        self._frozen = False
 
         outer = QVBoxLayout(self)
         outer.setSpacing(8)
@@ -494,6 +498,7 @@ class TransportEmissions(QWidget):
                 total_emission=emission,
                 on_edit=lambda _, eid=entry_id: self._open_edit_dialog(eid),
                 on_trash=lambda _, eid=entry_id: self._trash_vehicle(eid),
+                frozen=self._frozen,
             )
             self.container_layout.addWidget(card)
 
@@ -687,6 +692,11 @@ class TransportEmissions(QWidget):
                 "active_vehicle_count": result["active_count"],
             },
         }
+
+    def freeze(self, frozen: bool = True):
+        self._frozen = frozen
+        self.add_btn.setEnabled(not frozen)
+        self.on_refresh()  # rebuild cards with updated button states
 
     def showEvent(self, event):
         super().showEvent(event)

@@ -43,9 +43,13 @@ Each layer only runs on fields that passed the previous layer:
     required=any,   value present, out of range → warning
 """
 
+from PySide6.QtCore import QEvent, QObject, QPoint, QRect, QTimer
 from PySide6.QtWidgets import (
     QAbstractSpinBox,
+    QComboBox,
     QLineEdit,
+    QTextEdit,
+    QToolTip,
 )
 
 from .form_builder.form_definitions import FieldDef
@@ -119,7 +123,15 @@ def validate_form(
             widget.setStyleSheet("border: 1px solid #dc3545;")
             errors.append(f"Missing: {f.title}")
             error_keys.add(f.key)
-        # QSpinBox/QDoubleSpinBox: 0 is a valid value, not "missing" — use warn_rules for unusual values
+        elif (isinstance(widget, QAbstractSpinBox)
+              and f.default is not None
+              and widget.value() == widget.minimum()):
+            # Spinbox with an explicit default uses the minimum as the "blank" sentinel.
+            # If still at minimum it has never been filled — treat as a required error.
+            widget.setStyleSheet("border: 1px solid #dc3545;")
+            errors.append(f"Required: {f.title}")
+            error_keys.add(f.key)
+        # QSpinBox/QDoubleSpinBox without default: 0 is a valid value — use warn_rules
         # QComboBox: always has a selection — no check needed
 
     # ── Step 3: Range/warn checks ─────────────────────────────────────────────
@@ -173,3 +185,147 @@ def validate_form(
     res = {"errors": errors, "warnings": warnings}
     # print(res)
     return res
+
+
+# ── Form freeze / unfreeze ────────────────────────────────────────────────────
+
+
+LOCK_TOOLTIP = "Project is locked — click Unlock in the toolbar to edit."
+
+
+class _LockEventFilter(QObject):
+    """Blocks input events on frozen widgets and shows a native tooltip on the Lock button."""
+
+    _TRIGGER = {
+        QEvent.Type.MouseButtonPress,
+        QEvent.Type.MouseButtonDblClick,
+        QEvent.Type.Wheel,
+        QEvent.Type.KeyPress,
+    }
+    _TOOLTIP_TRIGGER = {
+        QEvent.Type.MouseButtonPress,
+        QEvent.Type.MouseButtonDblClick,
+        QEvent.Type.KeyPress,
+    }
+    _TOOLTIP_MS  = 1200  # how long the tooltip stays visible
+    _THROTTLE_MS = 1200  # min gap between successive shows
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.target_widget = None
+
+        # 200 ms delay ensures MouseButtonRelease and all related Qt events
+        # are fully processed before showText fires, so nothing hides it.
+        self._show_timer = QTimer(self)
+        self._show_timer.setSingleShot(True)
+        self._show_timer.setInterval(200)
+        self._show_timer.timeout.connect(self._show_tooltip)
+
+        # Throttle gate: starts after tooltip is shown; suppresses re-shows
+        # while it is still visible.
+        self._throttle = QTimer(self)
+        self._throttle.setSingleShot(True)
+
+    def _show_tooltip(self):
+        if self.target_widget is None:
+            return
+        w = self.target_widget
+        pos = w.mapToGlobal(QPoint(w.width() // 2, w.height() + 4))
+        QToolTip.showText(pos, "Project is locked — click here to unlock",
+                          None, QRect(), self._TOOLTIP_MS)
+        self._throttle.start(self._THROTTLE_MS)
+
+    def eventFilter(self, obj, event):
+        if event.type() not in self._TRIGGER:
+            return super().eventFilter(obj, event)
+
+        # Wheel: only block on value-changing widgets so page scrolling works.
+        if event.type() == QEvent.Type.Wheel:
+            if not isinstance(obj, (QAbstractSpinBox, QComboBox)):
+                return super().eventFilter(obj, event)
+
+        if (
+            self.target_widget is not None
+            and event.type() in self._TOOLTIP_TRIGGER
+            and not self._throttle.isActive()
+        ):
+            # Debounce: rapid clicks restart the timer, collapsing into one show.
+            self._show_timer.start()
+
+        return True  # consume — prevent any accidental change
+
+
+# Module-level singleton — one filter object serves every frozen widget.
+_lock_filter = _LockEventFilter()
+
+
+def set_lock_tooltip_target(widget) -> None:
+    """
+    Register the Lock button so the filter can point users to it.
+    Call with the button when locking, None when unlocking.
+    """
+    _lock_filter.target_widget = widget
+
+
+def freeze_form(
+    fields: list,
+    widget_owner,
+    frozen: bool = True,
+    skip_keys: set = None,
+) -> None:
+    """
+    Make all FieldDef widgets in *fields* non-editable (frozen=True) or
+    restore them to editable (frozen=False).
+
+    Widget behaviour:
+        QLineEdit / QTextEdit      → setReadOnly  (value stays visible)
+        QAbstractSpinBox           → setReadOnly  (value stays visible)
+        QComboBox                  → setEnabled   (no readOnly equivalent)
+
+    All affected widgets receive the lock tooltip and event filter when frozen
+    so the tooltip fires immediately on any interaction attempt.
+    """
+    skip = skip_keys or set()
+    for f in fields:
+        if not isinstance(f, FieldDef) or f.key in skip:
+            continue
+        widget = getattr(widget_owner, f.key, None)
+        if widget is None:
+            continue
+        if frozen:
+            widget.setToolTip(LOCK_TOOLTIP)
+            widget.installEventFilter(_lock_filter)
+        else:
+            widget.removeEventFilter(_lock_filter)
+            widget.setToolTip("")
+        if isinstance(widget, (QLineEdit, QTextEdit)):
+            widget.setReadOnly(frozen)
+        elif isinstance(widget, QAbstractSpinBox):
+            widget.setReadOnly(frozen)
+        elif isinstance(widget, QComboBox):
+            # Keep enabled so the event filter can intercept clicks;
+            # read-only appearance comes from the filter consuming all input.
+            pass
+
+
+def freeze_widgets(frozen: bool, *widgets) -> None:
+    """Freeze/unfreeze arbitrary non-FieldDef widgets (buttons, tables, etc.).
+
+    When frozen: disables the widget AND installs the lock event filter so
+    the tooltip fires immediately if the user somehow interacts with it.
+    When unfrozen: re-enables and removes the filter.
+
+        def freeze(self, frozen: bool = True):
+            freeze_form(MY_FIELDS, self, frozen)
+            freeze_widgets(frozen, self.btn_clear_all, self.btn_load_suggested)
+    """
+    for w in widgets:
+        if w is None:
+            continue
+        w.setEnabled(not frozen)
+        if frozen:
+            w.setToolTip(LOCK_TOOLTIP)
+            w.installEventFilter(_lock_filter)
+        else:
+            w.setToolTip("")
+            w.removeEventFilter(_lock_filter)

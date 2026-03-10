@@ -35,6 +35,7 @@ from ...utils.definitions import (
     UNIT_DIMENSION,
     SI_BASE_UNITS,
 )
+from ...utils.unit_resolver import get_custom_units, load_custom_units
 from ...utils.input_fields.add_material import FIELD_DEFINITIONS, BASE_DOCS_URL
 
 
@@ -163,25 +164,41 @@ def _divider() -> QFrame:
 
 
 class CustomUnitDialog(QDialog):
-    def __init__(self, parent=None):
+    # (dimension label, SI base unit code, display symbol, placeholder example, note)
+    _DIMS = [
+        ("Mass",   "kg",  "kg",  "e.g. 50  (1 bag = 50 kg)",     "SI base: kilogram (kg)"),
+        ("Length", "m",   "m",   "e.g. 0.3048  (1 ft = 0.3048 m)", "SI base: meter (m)"),
+        ("Area",   "m2",  "m²",  "e.g. 25.29  (1 perch = 25.29 m²)", "SI base: square meter (m²)"),
+        ("Volume", "m3",  "m³",  "e.g. 0.0283  (1 cft = 0.0283 m³)", "SI base: cubic meter (m³)"),
+        ("Count",  "nos", "nos", "e.g. 100  (1 bundle = 100 nos)",  "SI base: number (nos)"),
+    ]
+
+    def __init__(self, parent=None, existing_symbols: list | None = None):
         super().__init__(parent)
+        self._existing_symbols = {s.lower() for s in (existing_symbols or [])}
+
         self.setWindowTitle("Add Custom Unit")
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
-        self.setMinimumWidth(400)
-        self.setMaximumWidth(500)
+        self.setMinimumWidth(420)
+        self.setMaximumWidth(520)
 
         dbl = QDoubleValidator()
+        dbl.setBottom(1e-12)
         dbl.setNotation(QDoubleValidator.StandardNotation)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(20, 16, 20, 16)
         layout.setSpacing(12)
 
-        desc = QLabel("Define a custom unit and its equivalent in the SI base unit for its dimension.")
+        desc = QLabel(
+            "Define a custom unit by selecting its dimension and providing "
+            "its equivalent in the SI base unit."
+        )
         desc.setWordWrap(True)
         desc.setStyleSheet("font-size: 11px; color: #555;")
         layout.addWidget(desc)
 
+        # ── Symbol + Name ─────────────────────────────────────────────────────
         row1 = QHBoxLayout()
         row1.setSpacing(12)
 
@@ -189,7 +206,7 @@ class CustomUnitDialog(QDialog):
         sym_col.setSpacing(3)
         sym_col.addWidget(_lbl("Symbol *"))
         self.symbol_in = QLineEdit()
-        self.symbol_in.setPlaceholderText("e.g. bag, rft, point")
+        self.symbol_in.setPlaceholderText("e.g. bag, rft, perch")
         self.symbol_in.setMinimumHeight(32)
         sym_col.addWidget(self.symbol_in)
         row1.addLayout(sym_col, stretch=1)
@@ -205,65 +222,149 @@ class CustomUnitDialog(QDialog):
 
         layout.addLayout(row1)
 
-        layout.addWidget(_lbl("Weight Equivalent"))
+        # ── Dimension selector ────────────────────────────────────────────────
+        layout.addWidget(_lbl("Dimension *"))
+        self.dim_cb = QComboBox()
+        self.dim_cb.setMinimumHeight(32)
+        self.dim_cb.wheelEvent = lambda event: event.ignore()
+        for dim_label, si_code, si_sym, _, _ in self._DIMS:
+            self.dim_cb.addItem(f"{dim_label}  (SI base: {si_sym})", dim_label)
+        layout.addWidget(self.dim_cb)
+
+        # ── SI equivalent row ─────────────────────────────────────────────────
+        layout.addWidget(_lbl("SI Equivalent *"))
         conv_row = QHBoxLayout()
         conv_row.setSpacing(8)
-        conv_row.addWidget(QLabel("1 [symbol]  ="))
+        self.conv_prefix_lbl = QLabel("1 unit  =")
+        self.conv_prefix_lbl.setStyleSheet("color: #555; font-size: 12px;")
+        conv_row.addWidget(self.conv_prefix_lbl)
         self.conv_in = QLineEdit()
-        self.conv_in.setPlaceholderText("e.g. 50")
         self.conv_in.setMinimumHeight(32)
         self.conv_in.setValidator(dbl)
         conv_row.addWidget(self.conv_in, stretch=1)
-        self.si_unit_in = QLineEdit("kg")
-        self.si_unit_in.setReadOnly(True)
-        self.si_unit_in.setMinimumHeight(32)
-        self.si_unit_in.setMaximumWidth(70)
-        self.si_unit_in.setStyleSheet("background: #f5f5f5; color: #595959;")
-        conv_row.addWidget(self.si_unit_in)
-        conv_row.addStretch()
+        self.si_sym_lbl = QLabel("kg")
+        self.si_sym_lbl.setStyleSheet(
+            "background: #f5f5f5; color: #595959; padding: 4px 8px; "
+            "border: 1px solid #ccc; border-radius: 3px; font-size: 12px;"
+        )
+        self.si_sym_lbl.setMinimumHeight(32)
+        self.si_sym_lbl.setMinimumWidth(48)
+        self.si_sym_lbl.setAlignment(Qt.AlignCenter)
+        conv_row.addWidget(self.si_sym_lbl)
         layout.addLayout(conv_row)
 
-        note = QLabel("Weight equivalent in kg — used for transport trip calculations.")
-        note.setStyleSheet("font-size: 10px; color: #888;")
-        note.setWordWrap(True)
-        layout.addWidget(note)
+        # ── Live preview ──────────────────────────────────────────────────────
+        self.preview_lbl = QLabel("")
+        self.preview_lbl.setStyleSheet(
+            "font-size: 12px; color: #1a6b3c; background: #eaf7ef; "
+            "padding: 6px 10px; border-radius: 4px;"
+        )
+        self.preview_lbl.setWordWrap(True)
+        self.preview_lbl.setVisible(False)
+        layout.addWidget(self.preview_lbl)
+
+        # ── Note ──────────────────────────────────────────────────────────────
+        self._note_lbl = QLabel("")
+        self._note_lbl.setStyleSheet("font-size: 10px; color: #888;")
+        self._note_lbl.setWordWrap(True)
+        layout.addWidget(self._note_lbl)
 
         layout.addStretch()
 
+        # ── Buttons ───────────────────────────────────────────────────────────
         btn_row = QHBoxLayout()
-        add_btn = QPushButton("Add Unit")
-        add_btn.setStyleSheet("font-weight: bold; padding: 6px 20px;")
-        add_btn.setMinimumHeight(32)
-        add_btn.clicked.connect(self._validate_and_accept)
+        self._add_btn = QPushButton("Add Unit")
+        self._add_btn.setStyleSheet("font-weight: bold; padding: 6px 20px;")
+        self._add_btn.setMinimumHeight(32)
+        self._add_btn.clicked.connect(self._validate_and_accept)
         cancel_btn = QPushButton("Cancel")
         cancel_btn.setMinimumHeight(32)
         cancel_btn.clicked.connect(self.reject)
-        btn_row.addWidget(add_btn)
+        btn_row.addWidget(self._add_btn)
         btn_row.addWidget(cancel_btn)
         btn_row.addStretch()
         layout.addLayout(btn_row)
 
+        # ── Wire signals ──────────────────────────────────────────────────────
+        self.dim_cb.currentIndexChanged.connect(self._on_dim_changed)
+        self.symbol_in.textChanged.connect(self._update_preview)
+        self.conv_in.textChanged.connect(self._update_preview)
+
+        self._on_dim_changed(0)  # initialise labels for Mass
+
+    # ── Slots ─────────────────────────────────────────────────────────────────
+
+    def _on_dim_changed(self, idx: int):
+        if idx < 0 or idx >= len(self._DIMS):
+            return
+        _, _, si_sym, placeholder, note = self._DIMS[idx]
+        self.si_sym_lbl.setText(si_sym)
+        self.conv_in.setPlaceholderText(placeholder.split("(")[0].strip())
+        self._note_lbl.setText(note)
+        self._update_preview()
+
+    def _update_preview(self):
+        sym = self.symbol_in.text().strip()
+        raw = self.conv_in.text().strip()
+        idx = self.dim_cb.currentIndex()
+
+        # Update "1 <symbol> =" prefix
+        self.conv_prefix_lbl.setText(f"1 {sym}  =" if sym else "1 unit  =")
+
+        if not sym or not raw:
+            self.preview_lbl.setVisible(False)
+            return
+
+        try:
+            val = float(raw)
+            if val <= 0:
+                raise ValueError
+        except ValueError:
+            self.preview_lbl.setVisible(False)
+            return
+
+        _, _, si_sym, _, _ = self._DIMS[idx]
+        self.preview_lbl.setText(f"1 {sym} = {val:g} {si_sym}")
+        self.preview_lbl.setVisible(True)
+
+    # ── Validation & output ───────────────────────────────────────────────────
+
     def _validate_and_accept(self):
-        if not self.symbol_in.text().strip():
+        sym = self.symbol_in.text().strip()
+        if not sym:
             QMessageBox.critical(self, "Error", "Symbol is required.")
             return
+
+        if sym.lower() in self._existing_symbols:
+            QMessageBox.critical(
+                self, "Symbol Already Exists",
+                f'"{sym}" is already defined. Choose a different symbol.'
+            )
+            return
+
+        raw = self.conv_in.text().strip()
+        try:
+            val = float(raw)
+            if val <= 0:
+                raise ValueError
+        except ValueError:
+            QMessageBox.critical(
+                self, "Invalid Value",
+                "SI equivalent must be a positive number."
+            )
+            return
+
         self.accept()
 
     def get_unit(self) -> dict:
-        si_unit = self.si_unit_in.text().strip() or "kg"
-        dimension = {
-            "kg": "Mass", "g": "Mass",
-            "m": "Length",
-            "m²": "Area", "m2": "Area",
-            "m³": "Volume", "m3": "Volume",
-            "nos": "Count",
-        }.get(si_unit)
+        idx = self.dim_cb.currentIndex()
+        dim_label, si_code, si_sym, _, _ = self._DIMS[max(idx, 0)]
         return {
             "symbol": self.symbol_in.text().strip(),
             "name": self.name_in.text().strip(),
-            "dimension": dimension,
-            "to_si": float(self.conv_in.text() or 1),
-            "si_unit": si_unit,
+            "dimension": dim_label,
+            "to_si": float(self.conv_in.text()),
+            "si_unit": si_code,
         }
 
 
@@ -489,6 +590,38 @@ class _SaveToCustomDBDialog(QDialog):
 
 
 # ---------------------------------------------------------------------------
+# Migration helper — moves custom units embedded in old project data → DB
+# ---------------------------------------------------------------------------
+
+
+def _migrate_embedded_custom_units(values: dict) -> None:
+    """If *values* contains a legacy '_custom_units' list (old per-material
+    storage), save any unknown symbols to the global DB and refresh the cache.
+    Safe to call on every dialog open; does nothing when no legacy data exists.
+    """
+    raw = values.get("_custom_units") or values.get("_custom_unit")
+    if not raw:
+        return
+    units = [raw] if isinstance(raw, dict) else list(raw)
+    if not units:
+        return
+
+    known = {c["symbol"] for c in get_custom_units()}
+    new_units = [u for u in units if u.get("symbol") and u["symbol"] not in known]
+    if not new_units:
+        return
+
+    try:
+        from ..registry.custom_material_db import CustomMaterialDB
+        cdb = CustomMaterialDB()
+        for u in new_units:
+            cdb.save_custom_unit(u)
+        load_custom_units()  # refresh global cache
+    except Exception as exc:
+        print(f"[MaterialDialog] Custom unit migration failed: {exc}")
+
+
+# ---------------------------------------------------------------------------
 # MaterialDialog
 # ---------------------------------------------------------------------------
 
@@ -509,6 +642,7 @@ class MaterialDialog(QDialog):
         self._sor_filling = False
         self._is_modified_by_user = False
         self._pre_allow_edit_source = None   # saved when "Allow editing" is checked
+        self._sor_carbon_available = True    # False when SOR has no carbon data
 
         mat_name = (data.get("values", {}).get("material_name", "") if data else "") or comp_name
         if recyclability_only:
@@ -520,18 +654,13 @@ class MaterialDialog(QDialog):
         else:
             self.setWindowTitle(f"Add Material — {comp_name}")
         self.setMinimumWidth(520)
-        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
+        self.setWindowFlag(Qt.WindowContextHelpButtonHint, False)
 
         v = data.get("values", {}) if self.is_edit else {}
         s = data.get("state", {}) if self.is_edit else {}
 
-        saved_cu = v.get("_custom_units", v.get("_custom_unit"))
-        if saved_cu is None:
-            self._custom_units = []
-        elif isinstance(saved_cu, dict):
-            self._custom_units = [saved_cu]
-        else:
-            self._custom_units = list(saved_cu)
+        # Migrate any custom units embedded in old project data → global DB
+        _migrate_embedded_custom_units(v)
 
         dbl = QDoubleValidator()
         dbl.setNotation(QDoubleValidator.StandardNotation)
@@ -855,31 +984,71 @@ class MaterialDialog(QDialog):
 
         # ── Button bar ────────────────────────────────────────────────────
         btn_bar = QWidget()
-        btn_bar.setStyleSheet("border-top: 1px solid #ddd;")
+        btn_bar.setObjectName("btn_bar")
+        btn_bar.setStyleSheet("#btn_bar { border-top: 1px solid #ddd; }")
         btn_layout = QHBoxLayout(btn_bar)
         btn_layout.setContentsMargins(20, 10, 20, 10)
+        btn_layout.setSpacing(8)
+
+        self.custom_db_btn = QPushButton("Save to Custom DB…")
+        self.custom_db_btn.setMinimumHeight(34)
+        self.custom_db_btn.setMinimumWidth(150)
+        self.custom_db_btn.setToolTip("Save this material to a user-created custom database")
+        self.custom_db_btn.clicked.connect(self._on_save_to_custom_db)
+
+        self.cancel_btn = QPushButton("Cancel")
+        self.cancel_btn.setMinimumHeight(34)
+        self.cancel_btn.setMinimumWidth(90)
+        self.cancel_btn.clicked.connect(self.reject)
 
         self.save_btn = QPushButton(
             "Update Changes" if self.is_edit else "Add to Table"
         )
-        self.save_btn.setStyleSheet("font-weight: bold; padding: 6px 20px;")
         self.save_btn.setMinimumHeight(34)
+        self.save_btn.setMinimumWidth(120)
+        self.save_btn.setDefault(True)
         self.save_btn.clicked.connect(self.validate_and_accept)
 
-        self.cancel_btn = QPushButton("Cancel")
-        self.cancel_btn.setMinimumHeight(34)
-        self.cancel_btn.clicked.connect(self.reject)
-
-        self.custom_db_btn = QPushButton("Save to Custom DB…")
-        self.custom_db_btn.setMinimumHeight(34)
-        self.custom_db_btn.setToolTip("Save this material to a user-created custom database")
-        self.custom_db_btn.clicked.connect(self._on_save_to_custom_db)
-
-        btn_layout.addWidget(self.save_btn)
-        btn_layout.addWidget(self.cancel_btn)
-        btn_layout.addStretch()
         btn_layout.addWidget(self.custom_db_btn)
+        btn_layout.addStretch()
+        btn_layout.addWidget(self.cancel_btn)
+        btn_layout.addWidget(self.save_btn)
         outer.addWidget(btn_bar)
+
+        # ── Disable save/db buttons when project is locked ────────────────
+        # Walk up the parent chain to find the ProjectWindow._frozen flag.
+        # Works regardless of which module opens this dialog.
+        _w, _frozen = parent, False
+        while _w is not None:
+            if hasattr(_w, "_frozen"):
+                _frozen = bool(_w._frozen)
+                break
+            _w = _w.parent() if callable(getattr(_w, "parent", None)) else None
+        if _frozen:
+            # Buttons
+            self.custom_db_btn.setEnabled(False)
+            self.save_btn.setEnabled(False)
+
+            # Text inputs → read-only
+            for _w in (
+                self.name_in, self.qty_in, self.rate_in, self.src_in,
+                self.carbon_em_in, self.conv_factor_in,
+                self.scrap_in, self.recycling_perc_in, self.grade_in,
+            ):
+                _w.setReadOnly(True)
+
+            # Dropdowns and checkboxes → disabled
+            for _w in (
+                self.unit_in, self.carbon_denom_cb, self.type_in,
+                self._allow_edit_chk, self.carbon_chk, self.recycle_chk,
+            ):
+                _w.setEnabled(False)
+
+            # Optional widgets (may be None)
+            if self.sor_cb:
+                self.sor_cb.setEnabled(False)
+            if self.type_filter_cb:
+                self.type_filter_cb.setEnabled(False)
 
         # ── Freeze fields for emissions_only / recyclability_only modes ───
         if emissions_only:
@@ -1001,12 +1170,13 @@ class MaterialDialog(QDialog):
     def _on_allow_edit_toggled(self, checked: bool):
         """Unlock autofilled fields when checked; restore values and re-lock when unchecked."""
         if checked:
-            # Save current source values then clear them so the user can enter their own
+            # User is declaring this as custom — enable carbon checkbox so they can include it
             self._pre_allow_edit_source = self.src_in.text()
             self._sor_filling = True
             self.src_in.clear()
             self._sor_filling = False
             self._is_modified_by_user = True
+            self.carbon_chk.setEnabled(True)
         else:
             if self._sor_item is not None:
                 # Restore all values from the DB suggestion that was selected
@@ -1026,17 +1196,21 @@ class MaterialDialog(QDialog):
                     self.src_in.setText(str(src) if src not in ('', 'not_available', None) else '')
 
                     carbon = item.get('carbon_emission', 'not_available')
-                    if carbon not in ('not_available', '', None):
-                        self.carbon_em_in.setText(str(carbon))
-                        self.carbon_chk.setChecked(True)
-                    else:
-                        self.carbon_em_in.setText('')
-
                     denom = item.get('carbon_emission_units_den', 'not_available')
-                    if denom not in ('not_available', '', None):
+                    carbon_available = (
+                        carbon not in ('not_available', '', None)
+                        and denom not in ('not_available', '', None)
+                    )
+                    self._sor_carbon_available = carbon_available
+                    if carbon_available:
+                        self.carbon_em_in.setText(str(carbon))
                         didx = _resolve_unit_code(denom, self.carbon_denom_cb)
                         if didx >= 0:
                             self.carbon_denom_cb.setCurrentIndex(didx)
+                    else:
+                        self.carbon_em_in.setText('')
+                    self.carbon_chk.setChecked(carbon_available)
+                    self.carbon_chk.setEnabled(carbon_available)
 
                     cf = item.get('conversion_factor', 'not_available')
                     self.conv_factor_in.setText(str(cf) if cf not in ('not_available', '', None) else '')
@@ -1121,15 +1295,22 @@ class MaterialDialog(QDialog):
                 self.src_in.setText(str(src))
 
             carbon = item.get('carbon_emission', 'not_available')
-            if carbon not in ('not_available', '', None):
-                self.carbon_em_in.setText(str(carbon))
-                self.carbon_chk.setChecked(True)
-
             denom = item.get('carbon_emission_units_den', 'not_available')
-            if denom not in ('not_available', '', None):
+            carbon_available = (
+                carbon not in ('not_available', '', None)
+                and denom not in ('not_available', '', None)
+            )
+            self._sor_carbon_available = carbon_available
+
+            if carbon_available:
+                self.carbon_em_in.setText(str(carbon))
                 didx = _resolve_unit_code(denom, self.carbon_denom_cb)
                 if didx >= 0:
                     self.carbon_denom_cb.setCurrentIndex(didx)
+            else:
+                self.carbon_em_in.setText('')
+            self.carbon_chk.setChecked(carbon_available)
+            self.carbon_chk.setEnabled(carbon_available)
 
             cf = item.get('conversion_factor', 'not_available')
             if cf not in ('not_available', '', None):
@@ -1183,11 +1364,12 @@ class MaterialDialog(QDialog):
                 item.setData(tooltip, Qt.ToolTipRole)
                 model.appendRow(item)
 
-        if self._custom_units:
+        _global_custom = get_custom_units()
+        if _global_custom:
             sep_c = QStandardItem("── Custom ──")
             sep_c.setFlags(Qt.ItemFlag(0))
             model.appendRow(sep_c)
-            for cu in self._custom_units:
+            for cu in _global_custom:
                 display = f"{cu['symbol']} — {cu['name']}" if cu.get("name") else cu["symbol"]
                 item = QStandardItem(display)
                 item.setData(cu["symbol"], Qt.UserRole)
@@ -1219,7 +1401,7 @@ class MaterialDialog(QDialog):
         si_val = UNIT_TO_SI.get(code)
         dim = UNIT_DIMENSION.get(code)
         if si_val is None:
-            cu = next((c for c in self._custom_units if c["symbol"] == code), None)
+            cu = next((c for c in get_custom_units() if c["symbol"] == code), None)
             if cu:
                 si_val = cu["to_si"]
                 dim = cu["dimension"]
@@ -1248,10 +1430,17 @@ class MaterialDialog(QDialog):
         prev_mat = self.unit_in.currentData()
         prev_denom = self.carbon_denom_cb.currentData()
 
-        dialog = CustomUnitDialog(self)
+        existing_syms = list(UNIT_TO_SI.keys()) + [c["symbol"] for c in get_custom_units()]
+        dialog = CustomUnitDialog(self, existing_symbols=existing_syms)
         if dialog.exec():
             cu = dialog.get_unit()
-            self._custom_units.append(cu)
+            # Persist to DB and refresh the global cache so all open dialogs see it
+            try:
+                from ..registry.custom_material_db import CustomMaterialDB
+                CustomMaterialDB().save_custom_unit(cu)
+                load_custom_units()
+            except Exception as exc:
+                print(f"[MaterialDialog] Could not save custom unit: {exc}")
             new_sym = cu["symbol"]
             mat_sel = new_sym if triggering_cb is self.unit_in else (prev_mat if prev_mat != self._CUSTOM_CODE else new_sym)
             denom_sel = new_sym if triggering_cb is self.carbon_denom_cb else (prev_denom if prev_denom != self._CUSTOM_CODE else new_sym)
@@ -1446,7 +1635,6 @@ class MaterialDialog(QDialog):
             "quantity": float(self.qty_in.text() or 0),
             "unit": actual_unit,
             "unit_to_si": unit_to_si,
-            "_custom_units": self._custom_units,
             "rate": float(self.rate_in.text() or 0),
             "rate_source": self.src_in.text().strip(),
             "carbon_emission": (
@@ -1476,3 +1664,25 @@ class MaterialDialog(QDialog):
             "_is_customized": self._is_customized if self._sor_item is not None else False,
             "_is_modified_by_user": self._is_modified_by_user,
         }
+
+    # ── Window close / Escape ─────────────────────────────────────────────
+
+    def closeEvent(self, event):
+        """X button on the title bar — always treated as Cancel."""
+        self.reject()
+        event.accept()
+
+    def keyPressEvent(self, event):
+        """Escape → Cancel. Enter/Return → trigger the default button only if
+        focus is not on a text field (prevents accidental submission)."""
+        from PySide6.QtCore import Qt as _Qt
+        if event.key() == _Qt.Key_Escape:
+            self.reject()
+        elif event.key() in (_Qt.Key_Return, _Qt.Key_Enter):
+            focused = self.focusWidget()
+            if isinstance(focused, QLineEdit):
+                event.ignore()  # let the line-edit handle it, don't submit
+            else:
+                self.save_btn.click()
+        else:
+            super().keyPressEvent(event)

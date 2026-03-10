@@ -123,6 +123,13 @@ class StructureTableWidget(QTableWidget):
         self.blockSignals(False)
         self.update_height()
 
+    def freeze(self, frozen: bool = True):
+        """Disable/enable the Trash button in every row."""
+        for row in range(self.rowCount()):
+            btn = self.cellWidget(row, 5)
+            if btn:
+                btn.setEnabled(not frozen)
+
     def resizeEvent(self, event):
         super().resizeEvent(event)
         total = self.viewport().width()

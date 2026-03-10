@@ -42,10 +42,11 @@ class RemarksEditor(QGroupBox):
         root.setSpacing(4)
 
         # ── Toolbar ───────────────────────────────────────────────────────
-        toolbar = QToolBar()
-        toolbar.setMovable(False)
-        toolbar.setFloatable(False)
-        toolbar.setStyleSheet("QToolBar { spacing: 2px; }")
+        self._toolbar = QToolBar()
+        self._toolbar.setMovable(False)
+        self._toolbar.setFloatable(False)
+        self._toolbar.setStyleSheet("QToolBar { spacing: 2px; }")
+        toolbar = self._toolbar
 
         # Bold
         self._act_bold = QAction("B", self)
@@ -308,3 +309,17 @@ class RemarksEditor(QGroupBox):
 
     def clear_content(self):
         self._editor.clear()
+
+    def freeze(self, frozen: bool = True):
+        """Freeze/unfreeze the editor. Read-only keeps content visible; toolbar is disabled."""
+        from .validation_helpers import _lock_filter, LOCK_TOOLTIP
+
+        self._editor.setReadOnly(frozen)
+        self._toolbar.setEnabled(not frozen)
+
+        if frozen:
+            self._editor.setToolTip(LOCK_TOOLTIP)
+            self._editor.installEventFilter(_lock_filter)
+        else:
+            self._editor.removeEventFilter(_lock_filter)
+            self._editor.setToolTip("")

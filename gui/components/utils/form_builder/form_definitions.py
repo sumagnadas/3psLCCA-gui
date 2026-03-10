@@ -91,3 +91,4 @@ class FieldDef:
     required: bool = False
     doc_slug: str = ""
     warn: tuple | None = None  # (low, high) or (low, high, msg) or (low, high, low_msg, high_msg)
+    default: Any = None  # explicit initial value; if None, the widget's lower bound is used

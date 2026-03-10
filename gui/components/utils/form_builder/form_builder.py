@@ -273,6 +273,10 @@ def build_form(
             widget.setRange(lo, hi)
             if f.unit:
                 widget.setSuffix(f" {f.unit}")
+            if f.default is not None:
+                widget.setValue(int(f.default))
+                if int(f.default) == lo:
+                    widget.setSpecialValueText(" ")
             widget.setMinimumHeight(30)
             setattr(host, f.key, host.field(f.key, widget))
             widget.valueChanged.connect(
@@ -300,6 +304,10 @@ def build_form(
             widget.setDecimals(decimals)
             if f.unit:
                 widget.setSuffix(f" {f.unit}")
+            if f.default is not None:
+                widget.setValue(float(f.default))
+                if float(f.default) == lo:
+                    widget.setSpecialValueText(" ")
             widget.setMinimumHeight(30)
             setattr(host, f.key, host.field(f.key, widget))
             widget.valueChanged.connect(

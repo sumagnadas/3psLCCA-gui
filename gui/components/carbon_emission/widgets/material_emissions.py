@@ -37,7 +37,7 @@ def _fmt_carbon_unit(carbon_unit: str) -> str:
     return unit
 
 
-# Cache for expensive SymPy analysis — keyed by (unit, carbon_denom, conv_factor)
+# Cache for unit analysis — keyed by (unit, carbon_denom, conv_factor)
 _analysis_cache: dict = {}
 
 
@@ -188,6 +188,7 @@ class MaterialEmissions(QWidget):
         super().__init__()
         self.controller = controller
         self._details_visible = False
+        self._frozen = False
 
         # Outer layout holds only the scroll area, so growing tables never
         # overlap sibling widgets — the scroll area absorbs all extra height.
@@ -298,7 +299,7 @@ class MaterialEmissions(QWidget):
                         carbon_unit.split("/")[-1] if "/" in carbon_unit else ""
                     )
 
-                    # SymPy Resolver Analysis (cached — same inputs always yield same result)
+                    # Unit resolver analysis (cached — same inputs always yield same result)
                     analysis = _cached_analysis(
                         v.get("unit", ""), carbon_denom, v.get("conversion_factor", 1)
                     )
@@ -374,6 +375,7 @@ class MaterialEmissions(QWidget):
             excl_btn.clicked.connect(
                 lambda _, ci=chunk_id, cn=comp_name, i=idx: self._toggle_inclusion(ci, cn, i, False)
             )
+            excl_btn.setEnabled(not self._frozen)
             t.setCellWidget(row, 7, self._btn_container(edit_btn, excl_btn))
 
         t.update_height()
@@ -421,6 +423,7 @@ class MaterialEmissions(QWidget):
                 incl_btn.clicked.connect(
                     lambda _, ci=chunk_id, cn=comp_name, i=idx: self._toggle_inclusion(ci, cn, i, True)
                 )
+                incl_btn.setEnabled(not self._frozen)
                 t.setCellWidget(row, 7, self._btn_container(edit_btn, incl_btn))
         t.update_height()
         t.setUpdatesEnabled(True)
@@ -626,6 +629,10 @@ class MaterialEmissions(QWidget):
                 "total_count": result["total_count"],
             },
         }
+
+    def freeze(self, frozen: bool = True):
+        self._frozen = frozen
+        self.on_refresh()  # repopulate so button states reflect new frozen state
 
     def showEvent(self, event):
         super().showEvent(event)

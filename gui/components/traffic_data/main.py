@@ -25,7 +25,7 @@ from PySide6.QtCore import Qt, QSize
 from ..base_widget import ScrollableForm
 from ..utils.form_builder.form_definitions import FieldDef, Section, ValidationStatus
 from ..utils.form_builder.form_builder import build_form
-from ..utils.validation_helpers import clear_field_styles, validate_form
+from ..utils.validation_helpers import clear_field_styles, freeze_form, freeze_widgets, validate_form
 from ..utils.remarks_editor import RemarksEditor
 from ..utils.wpi_manager import WPIManager, WPIProfile
 from .wpi_table import _WPITable
@@ -958,6 +958,11 @@ class TrafficData(ScrollableForm):
         self._on_field_changed()
 
     # ── Validation / data export ──────────────────────────────────────────────
+
+    def freeze(self, frozen: bool = True):
+        freeze_form(TRAFFIC_FIELDS, self, frozen)
+        freeze_form(OUTSIDE_INDIA_FIELDS, self, frozen)
+        freeze_widgets(frozen, self._vehicle_table, self.mode)
 
     def clear_validation(self):
         clear_field_styles(TRAFFIC_FIELDS, self)

@@ -288,6 +288,15 @@ class _EquipmentRow:
         self.emissions_item.setText(f"{emissions:,.2f}")
         return emissions
 
+    def freeze(self, frozen: bool = True):
+        self.name.setReadOnly(frozen)
+        self.source.setEnabled(not frozen)
+        self.rate.setEnabled(not frozen)
+        self.hrs.setEnabled(not frozen)
+        self.days.setEnabled(not frozen)
+        self.ef.setEnabled(not frozen)
+        self.btn_delete.setEnabled(not frozen)
+
     def to_dict(self) -> dict:
         return {
             "name": self.name.text(),
@@ -397,24 +406,25 @@ class _DetailedTable(QWidget):
 
         # Buttons
         btn_layout = QHBoxLayout()
-        btn_add = QPushButton("＋ Add Equipment")
-        btn_add.setMinimumHeight(35)
-        btn_add.clicked.connect(self._add_blank_row)
-        btn_defaults = QPushButton("Load Defaults")
-        btn_defaults.setMinimumHeight(35)
-        btn_defaults.clicked.connect(self._load_defaults)
-        btn_clear = QPushButton("Clear All")
-        btn_clear.setMinimumHeight(35)
-        btn_clear.clicked.connect(self._clear_all)
-        btn_apply = QPushButton("Apply Days to All Rows")
-        btn_apply.setMinimumHeight(35)
-        btn_apply.clicked.connect(self._apply_default_days)
-        btn_layout.addWidget(btn_add)
-        btn_layout.addWidget(btn_defaults)
-        btn_layout.addWidget(btn_clear)
-        btn_layout.addWidget(btn_apply)
+        self.btn_add = QPushButton("＋ Add Equipment")
+        self.btn_add.setMinimumHeight(35)
+        self.btn_add.clicked.connect(self._add_blank_row)
+        self.btn_defaults = QPushButton("Load Defaults")
+        self.btn_defaults.setMinimumHeight(35)
+        self.btn_defaults.clicked.connect(self._load_defaults)
+        self.btn_clear = QPushButton("Clear All")
+        self.btn_clear.setMinimumHeight(35)
+        self.btn_clear.clicked.connect(self._clear_all)
+        self.btn_apply = QPushButton("Apply Days to All Rows")
+        self.btn_apply.setMinimumHeight(35)
+        self.btn_apply.clicked.connect(self._apply_default_days)
+        btn_layout.addWidget(self.btn_add)
+        btn_layout.addWidget(self.btn_defaults)
+        btn_layout.addWidget(self.btn_clear)
+        btn_layout.addWidget(self.btn_apply)
         btn_layout.addStretch()
         layout.addLayout(btn_layout)
+        self._frozen = False
 
         # Size the table to exactly fit header-only on startup.
         # _refresh_table_height() pins both min and max, so the table never
@@ -454,6 +464,9 @@ class _DetailedTable(QWidget):
 
         if d:
             eq.load_dict(d)
+
+        if self._frozen:
+            eq.freeze(True)
 
         row_idx = self._table.rowCount()
         self._rows.append(eq)
@@ -527,6 +540,15 @@ class _DetailedTable(QWidget):
         self._lbl_elec_sub.setText(f"Electricity: {elec_total:,.2f} kg CO₂e")
         self._lbl_detail_total.setText(f"Subtotal: {self._cached_total:,.2f} kg CO₂e")
         self._on_change()
+
+    def freeze(self, frozen: bool = True):
+        self._frozen = frozen
+        self.btn_add.setEnabled(not frozen)
+        self.btn_defaults.setEnabled(not frozen)
+        self.btn_clear.setEnabled(not frozen)
+        self.btn_apply.setEnabled(not frozen)
+        for row in self._rows:
+            row.freeze(frozen)
 
     def get_total(self) -> float:
         """Return last recalculated total — avoids redundant row traversal."""
@@ -894,6 +916,18 @@ class MachineryEmissions(ScrollableForm):
                     "lumpsum fuel and electricity values are zero."
                 )
         return {"errors": [], "warnings": warnings}
+
+    def freeze(self, frozen: bool = True):
+        self._radio_detailed.setEnabled(not frozen)
+        self._radio_lumpsum.setEnabled(not frozen)
+        self._detailed_table.freeze(frozen)
+        for key, _ in _LUMPSUM_KEYS:
+            w = getattr(self, key, None)
+            if w is not None:
+                w.setEnabled(not frozen)
+        if hasattr(self, "default_days"):
+            self.default_days.setEnabled(not frozen)
+        self._remarks.freeze(frozen)
 
     def get_data(self) -> dict:
         return {"chunk": CHUNK, "data": self.get_data_dict()}

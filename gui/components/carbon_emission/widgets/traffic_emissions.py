@@ -197,6 +197,10 @@ class _EmissionsTable(QTableWidget):
             em = vpd * factor * self._reroute_km
             self._emission_items[key].setText(f"{em:.4f}")
 
+    def freeze(self, frozen: bool = True):
+        for sb in self._factors.values():
+            sb.setEnabled(not frozen)
+
     def _set_row_zero_state(self, row: int, key: str, is_zero: bool):
         bg = _YELLOW_BG if is_zero else _NORMAL_BG
         fg = _YELLOW_FG if is_zero else _NORMAL_FG
@@ -298,12 +302,12 @@ class TrafficEmissions(ScrollableForm):
         self._total_label = QLabel("0.0000")
         calc_layout.addRow("<b>Total Emissions (kgCO₂e/day):</b>", self._total_label)
 
-        btn_defaults = QPushButton("Load Default Factors")
-        btn_defaults.setFixedWidth(160)
-        btn_defaults.setMinimumHeight(30)
-        btn_defaults.clicked.connect(self._on_load_defaults)
-        btn_defaults.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        calc_layout.addRow(btn_defaults)
+        self.btn_defaults = QPushButton("Load Default Factors")
+        self.btn_defaults.setFixedWidth(160)
+        self.btn_defaults.setMinimumHeight(30)
+        self.btn_defaults.clicked.connect(self._on_load_defaults)
+        self.btn_defaults.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        calc_layout.addRow(self.btn_defaults)
 
         self._stack.addWidget(calc_widget)  # index 0
 
@@ -333,14 +337,14 @@ class TrafficEmissions(ScrollableForm):
         main_form.addRow(self._remarks)
 
         # Clear All
-        btn_clear = QPushButton("Clear All")
-        btn_clear.setMinimumHeight(35)
-        btn_clear.setFixedWidth(120)
-        btn_clear.clicked.connect(self.clear_all)
-        btn_clear.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.btn_clear = QPushButton("Clear All")
+        self.btn_clear.setMinimumHeight(35)
+        self.btn_clear.setFixedWidth(120)
+        self.btn_clear.clicked.connect(self.clear_all)
+        self.btn_clear.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
         btn_row = QHBoxLayout()
-        btn_row.addWidget(btn_clear)
+        btn_row.addWidget(self.btn_clear)
         btn_row.addStretch()
         btn_widget = QWidget()
         btn_widget.setLayout(btn_row)
@@ -517,6 +521,14 @@ class TrafficEmissions(ScrollableForm):
                     "enter the total emission value in the field."
                 )
         return {"errors": [], "warnings": warnings}
+
+    def freeze(self, frozen: bool = True):
+        self.btn_defaults.setEnabled(not frozen)
+        self.btn_clear.setEnabled(not frozen)
+        self._emissions_table.freeze(frozen)
+        if hasattr(self, "total_direct_emissions"):
+            self.total_direct_emissions.setEnabled(not frozen)
+        self._remarks.freeze(frozen)
 
     def get_data(self) -> dict:
         return {"chunk": CHUNK, "data": self.collect_data()}

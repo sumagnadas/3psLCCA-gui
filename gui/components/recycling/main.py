@@ -522,6 +522,11 @@ class Recycling(QWidget):
             "currency": currency,
         }
 
+    def freeze(self, frozen: bool = True):
+        # Recycling is display-only; freeze disables table interaction (Edit/Include/Exclude buttons)
+        self.included_table.setEnabled(not frozen)
+        self.excluded_table.setEnabled(not frozen)
+
     def validate(self) -> dict:
         result = self._compute()
         warnings = []

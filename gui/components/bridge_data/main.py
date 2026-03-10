@@ -17,7 +17,7 @@ from PySide6.QtWidgets import (
 from ..base_widget import ScrollableForm
 from ..utils.form_builder.form_definitions import FieldDef, Section
 from ..utils.form_builder.form_builder import build_form, _IMG_PREVIEWS_ATTR
-from ..utils.validation_helpers import clear_field_styles, validate_form
+from ..utils.validation_helpers import clear_field_styles, freeze_form, freeze_widgets, validate_form
 from ..utils.countries_data import CURRENCIES, COUNTRIES
 
 
@@ -111,6 +111,7 @@ BRIDGE_FIELDS = [
         unit="(m)",
         required=True,
         doc_slug="span",
+        default=0.0,
     ),
     FieldDef(
         "carriageway_width",
@@ -121,6 +122,7 @@ BRIDGE_FIELDS = [
         unit="(m)",
         required=True,
         doc_slug="carriageway-width",
+        default=0.0,
     ),
     FieldDef(
         "num_lanes",
@@ -130,6 +132,7 @@ BRIDGE_FIELDS = [
         options=(0, 20),
         required=True,
         doc_slug="num-lanes",
+        default=0,
     ),
     FieldDef(
         "vehicle_path_direction",
@@ -158,6 +161,7 @@ BRIDGE_FIELDS = [
         unit="(m/s)",
         required=True,
         doc_slug="wind-speed",
+        default=0.0,
     ),
     # ── Life Cycle ───────────────────────────────────────────────────────
     Section("Life Cycle"),
@@ -170,6 +174,7 @@ BRIDGE_FIELDS = [
         unit="(years)",
         required=True,
         doc_slug="design-life",
+        default=0,
     ),
     FieldDef(
         "year_of_construction",
@@ -180,6 +185,7 @@ BRIDGE_FIELDS = [
         options=(1900, 2200),
         required=True,
         doc_slug="year-of-construction",
+        default=date.today().year,
     ),
     # ── Construction Schedule ─────────────────────────────────────────────
     Section("Construction Schedule"),
@@ -191,6 +197,7 @@ BRIDGE_FIELDS = [
         options=(0, 1200),
         unit="(months)",
         doc_slug="duration-construction-months",
+        default=0,
     ),
     FieldDef(
         "working_days_per_month",
@@ -200,6 +207,7 @@ BRIDGE_FIELDS = [
         options=(0, 31),
         unit="(days)",
         doc_slug="working-days-per-month",
+        default=22,
     ),
     FieldDef(
         "days_per_month",
@@ -209,8 +217,35 @@ BRIDGE_FIELDS = [
         options=(0, 31),
         unit="(days)",
         doc_slug="days-per-month",
+        default=30,
     ),
 ]
+
+
+BRIDGE_WARN_RULES = {
+    "span": (None, 5000.0, None, "Span exceeds 5000 m — please verify"),
+    "carriageway_width": (
+        1.5,
+        50.0,
+        "Carriageway width is very small — verify",
+        "Carriageway width exceeds 50 m — please verify",
+    ),
+    "num_lanes": (None, 16, None, "Number of lanes exceeds 16 — please verify"),
+    "wind_speed": (None, 80.0, None, "Wind speed exceeds 80 m/s — please verify"),
+    "design_life": (
+        10,
+        200,
+        "Design life below 10 years — verify",
+        "Design life exceeds 200 years — verify",
+    ),
+    "duration_construction_months": (
+        None,
+        240,
+        None,
+        "Construction duration exceeds 240 months — verify",
+    ),
+    "working_days_per_month": (None, 31, None, "Working days per month exceeds 31"),
+}
 
 
 class BridgeData(ScrollableForm):
@@ -245,24 +280,6 @@ class BridgeData(ScrollableForm):
 
     # ── Suggested values ─────────────────────────────────────────────────
     def load_suggested_values(self):
-        defaults = {
-            "year_of_construction": date.today().year,
-        }
-
-        for key, val in defaults.items():
-            widget = getattr(self, key, None)
-            if widget is None:
-                continue
-            if isinstance(widget, QComboBox):
-                idx = widget.findText(str(val))
-                if idx >= 0:
-                    widget.setCurrentIndex(idx)
-            elif isinstance(widget, (QSpinBox, QDoubleSpinBox)):
-                widget.setValue(val)
-            elif isinstance(widget, QLineEdit):
-                widget.setText(str(val))
-            widget.setStyleSheet("")
-
         self._on_field_changed()
 
         if self.controller and self.controller.engine:
@@ -294,11 +311,44 @@ class BridgeData(ScrollableForm):
             self.controller.engine._log("Bridge: All fields cleared.")
 
     # ── Validation ───────────────────────────────────────────────────────
+    def freeze(self, frozen: bool = True):
+        freeze_form(BRIDGE_FIELDS, self, frozen, skip_keys=self._LOCKED)
+        freeze_widgets(frozen, self.btn_clear_all)
+
     def clear_validation(self):
         clear_field_styles(BRIDGE_FIELDS, self, skip_keys=self._LOCKED)
 
     def validate(self):
-        return validate_form(BRIDGE_FIELDS, self, skip_keys=self._LOCKED)
+        result = validate_form(
+            BRIDGE_FIELDS, self, warn_rules=BRIDGE_WARN_RULES, skip_keys=self._LOCKED
+        )
+        # days_per_month must be 29–31
+        dm = getattr(self, "days_per_month", None)
+        if dm is not None and not (29 <= dm.value() <= 31):
+            result["errors"].append("Days per Month must be between 29 and 31")
+            dm.setStyleSheet("border: 1px solid #dc3545;")
+        # Cross-field: working_days_per_month must not exceed days_per_month
+        wd = getattr(self, "working_days_per_month", None)
+        if (
+            wd is not None
+            and dm is not None
+            and wd.value() > 0
+            and dm.value() > 0
+            and wd.value() > dm.value()
+        ):
+            result["warnings"].append(
+                "Working days per month exceeds days per month — please verify"
+            )
+            wd.setStyleSheet("border: 1px solid orange;")
+        # year_of_construction should be >= current year
+        yoc = getattr(self, "year_of_construction", None)
+        if yoc is not None and yoc.value() < date.today().year:
+            result["warnings"].append(
+                f"Year of construction ({yoc.value()}) is before "
+                f"{date.today().year} — verify this is intentional"
+            )
+            yoc.setStyleSheet("border: 1px solid orange;")
+        return result
 
     def get_data(self) -> dict:
         return {"chunk": "bridge_data", "data": self.get_data_dict()}

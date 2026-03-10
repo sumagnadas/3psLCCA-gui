@@ -12,7 +12,7 @@ from PySide6.QtCore import Qt, Signal
 from ..base_widget import ScrollableForm
 from ..utils.form_builder.form_definitions import FieldDef, Section
 from ..utils.form_builder.form_builder import build_form
-from ..utils.validation_helpers import clear_field_styles, validate_form
+from ..utils.validation_helpers import clear_field_styles, freeze_form, freeze_widgets, validate_form
 
 BASE_DOCS_URL = "https://yourdocs.com/demolition/"
 
@@ -59,6 +59,19 @@ DEMOLITION_FIELDS = [
         options=["Conventional", "Implosion", "Deconstruction"],
     ),
 ]
+
+
+DEMOLITION_WARN_RULES = {
+    "demolition_cost_pct": (0.1, 50.0,
+                            "Demolition cost is 0% — verify if intentional",
+                            "Demolition cost exceeds 50% — please verify"),
+    "demolition_carbon_cost_pct": (0.1, 50.0,
+                                   "Demolition carbon cost is 0% — verify if intentional",
+                                   "Demolition carbon cost exceeds 50% — please verify"),
+    "demolition_duration": (1, 24,
+                            "Demolition duration is 0 months — verify",
+                            "Demolition duration exceeds 24 months — please verify"),
+}
 
 
 class Demolition(ScrollableForm):
@@ -113,8 +126,12 @@ class Demolition(ScrollableForm):
             widget.setStyleSheet("")
         self._on_field_changed()
 
+    def freeze(self, frozen: bool = True):
+        freeze_form(DEMOLITION_FIELDS, self, frozen)
+        freeze_widgets(frozen, self.btn_load_suggested, self.btn_clear_all)
+
     def validate(self):
-        return validate_form(DEMOLITION_FIELDS, self)
+        return validate_form(DEMOLITION_FIELDS, self, warn_rules=DEMOLITION_WARN_RULES)
 
     def clear_validation(self):
         clear_field_styles(DEMOLITION_FIELDS, self)

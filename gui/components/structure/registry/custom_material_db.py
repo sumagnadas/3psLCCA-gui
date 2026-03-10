@@ -56,6 +56,17 @@ class CustomMaterialDB:
                 "CREATE INDEX IF NOT EXISTS idx_db_name "
                 "ON custom_materials(db_name)"
             )
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS custom_units (
+                    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+                    symbol     TEXT    NOT NULL UNIQUE,
+                    name       TEXT,
+                    dimension  TEXT    NOT NULL,
+                    to_si      REAL    NOT NULL,
+                    si_unit    TEXT    NOT NULL,
+                    created_at TEXT    DEFAULT (datetime('now'))
+                )
+            """)
 
     # ── Queries ───────────────────────────────────────────────────────────
 
@@ -180,4 +191,56 @@ class CustomMaterialDB:
             conn.execute(
                 "DELETE FROM custom_materials WHERE db_name=?",
                 (db_name,),
+            )
+
+    # ── Custom Units ──────────────────────────────────────────────────────
+
+    def list_custom_units(self) -> list:
+        """Return all user-defined custom units as dicts."""
+        with self._connect() as conn:
+            rows = conn.execute(
+                "SELECT symbol, name, dimension, to_si, si_unit "
+                "FROM custom_units ORDER BY symbol"
+            ).fetchall()
+        return [
+            {
+                "symbol":    r["symbol"],
+                "name":      r["name"] or "",
+                "dimension": r["dimension"],
+                "to_si":     r["to_si"],
+                "si_unit":   r["si_unit"],
+            }
+            for r in rows
+        ]
+
+    def save_custom_unit(self, unit: dict):
+        """Insert or replace a custom unit (keyed by symbol)."""
+        symbol = (unit.get("symbol") or "").strip()
+        if not symbol:
+            raise ValueError("symbol must not be empty")
+        with self._connect() as conn:
+            conn.execute(
+                """
+                INSERT INTO custom_units (symbol, name, dimension, to_si, si_unit)
+                VALUES (?, ?, ?, ?, ?)
+                ON CONFLICT(symbol) DO UPDATE SET
+                    name      = excluded.name,
+                    dimension = excluded.dimension,
+                    to_si     = excluded.to_si,
+                    si_unit   = excluded.si_unit
+                """,
+                (
+                    symbol,
+                    unit.get("name", ""),
+                    unit.get("dimension", ""),
+                    float(unit.get("to_si", 1.0)),
+                    unit.get("si_unit", ""),
+                ),
+            )
+
+    def delete_custom_unit(self, symbol: str):
+        """Delete a custom unit by symbol."""
+        with self._connect() as conn:
+            conn.execute(
+                "DELETE FROM custom_units WHERE symbol=?", (symbol,)
             )

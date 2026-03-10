@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
 from ..base_widget import ScrollableForm
 from ..utils.form_builder.form_definitions import FieldDef, Section
 from ..utils.form_builder.form_builder import build_form
-from ..utils.validation_helpers import clear_field_styles, validate_form
+from ..utils.validation_helpers import clear_field_styles, freeze_form, freeze_widgets, validate_form
 
 
 BASE_DOCS_URL = "https://yourdocs.com/financial/"
@@ -70,6 +70,21 @@ FINANCIAL_FIELDS = [
         doc_slug="analysis-period",
     )
 ]
+
+FINANCIAL_WARN_RULES = {
+    "discount_rate": (0.0, 30.0,
+                      None,
+                      "Discount rate exceeds 30% — please verify"),
+    "inflation_rate": (0.0, 25.0,
+                       None,
+                       "Inflation rate exceeds 25% — please verify"),
+    "interest_rate": (0.0, 35.0,
+                      None,
+                      "Interest rate exceeds 35% — please verify"),
+    "analysis_period": (1, 500,
+                        "Analysis period is 0 — verify",
+                        "Analysis period exceeds 500 years — please verify"),
+}
 
 SUGGESTED_VALUES = {
     # ── Economic Parameters ───────────────────────────────────────────────
@@ -148,11 +163,15 @@ class FinancialData(ScrollableForm):
 
     # ── Validation ────────────────────────────────────────────────────────────
 
+    def freeze(self, frozen: bool = True):
+        freeze_form(FINANCIAL_FIELDS, self, frozen)
+        freeze_widgets(frozen, self.btn_load_suggested, self.btn_clear_all)
+
     def clear_validation(self):
         clear_field_styles(FINANCIAL_FIELDS, self)
 
     def validate(self):
-        return validate_form(FINANCIAL_FIELDS, self)
+        return validate_form(FINANCIAL_FIELDS, self, warn_rules=FINANCIAL_WARN_RULES)
 
     def get_data(self) -> dict:
         return {"chunk": "financial_data", "data": self.get_data_dict()}

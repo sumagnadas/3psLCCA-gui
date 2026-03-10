@@ -45,6 +45,12 @@ class CarbonEmissionTabView(QWidget):
 
         main_layout.addWidget(self.tab_view)
 
+    def freeze(self, frozen: bool = True):
+        for i in range(self.tab_view.count()):
+            tab = self.tab_view.widget(i)
+            if hasattr(tab, "freeze"):
+                tab.freeze(frozen)
+
     def validate(self) -> dict:
         all_errors = []
         all_warnings = []

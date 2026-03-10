@@ -8,6 +8,7 @@ from PySide6.QtWidgets import (
     QStackedWidget,
 )
 from PySide6.QtGui import QPalette
+from ..utils.validation_helpers import LOCK_TOOLTIP, freeze_widgets
 from .widgets.foundation import FoundationWidget
 from .widgets.super_structure import SuperStructureWidget
 from .widgets.substructure import SubStructureWidget
@@ -147,6 +148,17 @@ class StructureTabView(QWidget):
             self.trash_btn.setText(f"Trash ({total_count})")
         else:
             self.trash_btn.setText("Trash")
+
+    def freeze(self, frozen: bool = True):
+        freeze_widgets(frozen, self.excel_btn, self.trash_btn)
+        for tab in (
+            self.foundation_tab,
+            self.substructure_tab,
+            self.superstructure_tab,
+            self.misc_tab,
+        ):
+            if hasattr(tab, "freeze"):
+                tab.freeze(frozen)
 
     def validate(self) -> dict:
         """

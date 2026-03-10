@@ -11,8 +11,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "All type(manual) (1.5 to 3.0m)",
@@ -22,8 +21,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "All type(manual) (3.0 to 4.5m)",
@@ -33,8 +31,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "All type(manual) (4.5 to 6)",
@@ -44,8 +41,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "All type(manual) (Above 6 m)",
@@ -55,8 +51,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "All type(Mechanical) (0 to 1.5m)",
@@ -66,8 +61,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "All type(Mechanical) (1.5 to 3.0m)",
@@ -77,8 +71,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "All type(Mechanical) (3.0 to 4.5m)",
@@ -88,8 +81,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "All type(Mechanical) (4.5 to 6)",
@@ -99,8 +91,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "All type(Mechanical) (Above 6 m)",
@@ -110,8 +101,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Hard Murrum (0 to 1.5m)",
@@ -121,8 +111,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Hard Murrum (1.5 to 3.0m)",
@@ -132,8 +121,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Hard Murrum (3.0 to 4.5m)",
@@ -143,8 +131,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Hard Murrum (4.5 to 6)",
@@ -154,8 +141,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Hard Murrum (Above 6 m)",
@@ -165,8 +151,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Hard Murrum and Boulders (0 to 1.5m)",
@@ -176,8 +161,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Hard Murrum and Boulders (1.5 to 3.0m)",
@@ -187,8 +171,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Hard Murrum and Boulders (3.0 to 4.5m)",
@@ -198,8 +181,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Hard Murrum and Boulders (4.5 to 6)",
@@ -209,8 +191,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Hard Murrum and Boulders (Above 6 m)",
@@ -220,8 +201,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Soft Rock (0 to 1.5m)",
@@ -231,8 +211,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Soft Rock (1.5 to 3.0m)",
@@ -242,8 +221,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Soft Rock (3.0 to 4.5m)",
@@ -253,8 +231,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Soft Rock (4.5 to 6)",
@@ -264,8 +241,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Soft Rock (Above 6 m)",
@@ -275,8 +251,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Hard Rock (Blasting) (0 to 1.5m)",
@@ -286,8 +261,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Hard Rock (Blasting) (1.5 to 3.0m)",
@@ -297,8 +271,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Hard Rock (Blasting) (3.0 to 4.5m)",
@@ -308,8 +281,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Hard Rock (Blasting) (4.5 to 6)",
@@ -319,8 +291,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Hard Rock (Blasting) (Above 6 m)",
@@ -330,8 +301,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Hard Rock (Controlled Blasting) (0 to 1.5m)",
@@ -341,8 +311,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Hard Rock (Controlled Blasting) (1.5 to 3.0m)",
@@ -352,8 +321,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Hard Rock (Controlled Blasting) (3.0 to 4.5m)",
@@ -363,8 +331,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Hard Rock (Controlled Blasting) (4.5 to 6)",
@@ -374,8 +341,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Hard Rock (Controlled Blasting) (Above 6 m)",
@@ -385,8 +351,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Hard rock (Chiselling and Wedging or Line drilling) (0 to 1.5m)",
@@ -396,8 +361,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Hard rock (Chiselling and Wedging or Line drilling) (1.5 to 3.0m)",
@@ -407,8 +371,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Hard rock (Chiselling and Wedging or Line drilling) (3.0 to 4.5m)",
@@ -418,8 +381,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Hard rock (Chiselling and Wedging or Line drilling) (4.5 to 6)",
@@ -429,8 +391,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Hard rock (Chiselling and Wedging or Line drilling) (Above 6 m)",
@@ -440,8 +401,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Laterite Rock (0 to 1.5m)",
@@ -451,8 +411,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Laterite Rock (1.5 to 3.0m)",
@@ -462,8 +421,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Laterite Rock (3.0 to 4.5m)",
@@ -473,8 +431,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Laterite Rock (4.5 to 6)",
@@ -484,8 +441,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             },
             {
                 "name": "Laterite Rock (Above 6 m)",
@@ -495,8 +451,7 @@
                 "carbon_emission": "not_available",
                 "carbon_emission_units_den": "not_available",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             }
         ]
     },
@@ -512,8 +467,7 @@
                 "carbon_emission": 2.6,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 1000,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (450mm) (0 to 5m)",
@@ -523,8 +477,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (450mm) (5 to 10m)",
@@ -534,8 +487,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (450mm) (10 to 15m)",
@@ -545,8 +497,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (450mm) (15m to 20m)",
@@ -556,8 +507,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (450mm) (Above 20m)",
@@ -567,8 +517,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (475mm) (0 to 5m)",
@@ -578,8 +527,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (475mm) (5 to 10m)",
@@ -589,8 +537,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (475mm) (10 to 15m)",
@@ -600,8 +547,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (475mm) (15m to 20m)",
@@ -611,8 +557,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (475mm) (Above 20m)",
@@ -622,8 +567,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (500mm) (0 to 5m)",
@@ -633,8 +577,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (500mm) (5 to 10m)",
@@ -644,8 +587,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (500mm) (10 to 15m)",
@@ -655,8 +597,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (500mm) (15m to 20m)",
@@ -666,8 +607,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (500mm) (Above 20m)",
@@ -677,8 +617,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (525mm) (0 to 5m)",
@@ -688,8 +627,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (525mm) (5 to 10m)",
@@ -699,8 +637,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (525mm) (10 to 15m)",
@@ -710,8 +647,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (525mm) (15m to 20m)",
@@ -721,8 +657,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (525mm) (Above 20m)",
@@ -732,8 +667,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (550mm) (0 to 5m)",
@@ -743,8 +677,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (550mm) (5 to 10m)",
@@ -754,8 +687,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (550mm) (10 to 15m)",
@@ -765,8 +697,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (550mm) (15m to 20m)",
@@ -776,8 +707,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (550mm) (Above 20m)",
@@ -787,8 +717,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (600mm) (0 to 5m)",
@@ -798,8 +727,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (600mm) (5 to 10m)",
@@ -809,8 +737,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (600mm) (10 to 15m)",
@@ -820,8 +747,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (600mm) (15m to 20m)",
@@ -831,8 +757,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (600mm) (Above 20m)",
@@ -842,8 +767,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (625mm) (0 to 5m)",
@@ -853,8 +777,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (625mm) (5 to 10m)",
@@ -864,8 +787,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (625mm) (10 to 15m)",
@@ -875,8 +797,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (625mm) (15m to 20m)",
@@ -886,8 +807,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (625mm) (Above 20m)",
@@ -897,8 +817,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (650mm) (0 to 5m)",
@@ -908,8 +827,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (650mm) (5 to 10m)",
@@ -919,8 +837,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (650mm) (10 to 15m)",
@@ -930,8 +847,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (650mm) (15m to 20m)",
@@ -941,8 +857,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (650mm) (Above 20m)",
@@ -952,8 +867,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (750mm) (0 to 5m)",
@@ -963,8 +877,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (750mm) (5 to 10m)",
@@ -974,8 +887,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (750mm) (10 to 15m)",
@@ -985,8 +897,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (750mm) (15m to 20m)",
@@ -996,8 +907,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (750mm) (Above 20m)",
@@ -1007,8 +917,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (800mm) (0 to 5m)",
@@ -1018,8 +927,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (800mm) (5 to 10m)",
@@ -1029,8 +937,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (800mm) (10 to 15m)",
@@ -1040,8 +947,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (800mm) (15m to 20m)",
@@ -1051,8 +957,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (800mm) (Above 20m)",
@@ -1062,8 +967,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (825mm) (0 to 5m)",
@@ -1073,8 +977,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (825mm) (5 to 10m)",
@@ -1084,8 +987,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (825mm) (10 to 15m)",
@@ -1095,8 +997,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (825mm) (15m to 20m)",
@@ -1106,8 +1007,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (825mm) (Above 20m)",
@@ -1117,8 +1017,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (900mm) (0 to 5m)",
@@ -1128,8 +1027,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (900mm) (5 to 10m)",
@@ -1139,8 +1037,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (900mm) (10 to 15m)",
@@ -1150,8 +1047,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (900mm) (15m to 20m)",
@@ -1161,8 +1057,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (900mm) (Above 20m)",
@@ -1172,8 +1067,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (975mm) (0 to 5m)",
@@ -1183,8 +1077,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (975mm) (5 to 10m)",
@@ -1194,8 +1087,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (975mm) (10 to 15m)",
@@ -1205,8 +1097,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (975mm) (15m to 20m)",
@@ -1216,8 +1107,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (975mm) (Above 20m)",
@@ -1227,8 +1117,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (1000mm) (0 to 5m)",
@@ -1238,8 +1127,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (1000mm) (5 to 10m)",
@@ -1249,8 +1137,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (1000mm) (10 to 15m)",
@@ -1260,8 +1147,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (1000mm) (15m to 20m)",
@@ -1271,8 +1157,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (1000mm) (Above 20m)",
@@ -1282,8 +1167,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (1050mm) (0 to 5m)",
@@ -1293,8 +1177,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (1050mm) (5 to 10m)",
@@ -1304,8 +1187,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (1050mm) (10 to 15m)",
@@ -1315,8 +1197,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (1050mm) (15m to 20m)",
@@ -1326,8 +1207,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (1050mm) (Above 20m)",
@@ -1337,8 +1217,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (1100mm) (0 to 5m)",
@@ -1348,8 +1227,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (1100mm) (5 to 10m)",
@@ -1359,8 +1237,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (1100mm) (10 to 15m)",
@@ -1370,8 +1247,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (1100mm) (15m to 20m)",
@@ -1381,8 +1257,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (1100mm) (Above 20m)",
@@ -1392,8 +1267,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (1200mm) (0 to 5m)",
@@ -1403,8 +1277,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (1200mm) (5 to 10m)",
@@ -1414,8 +1287,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (1200mm) (10 to 15m)",
@@ -1425,8 +1297,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (1200mm) (15m to 20m)",
@@ -1436,8 +1307,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (1200mm) (Above 20m)",
@@ -1447,8 +1317,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (1500mm) (0 to 5m)",
@@ -1458,8 +1327,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (1500mm) (5 to 10m)",
@@ -1469,8 +1337,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (1500mm) (10 to 15m)",
@@ -1480,8 +1347,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (1500mm) (15m to 20m)",
@@ -1491,8 +1357,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M30) (1500mm) (Above 20m)",
@@ -1502,8 +1367,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (450mm) (0 to 5m)",
@@ -1513,8 +1377,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (450mm) (5 to 10m)",
@@ -1524,8 +1387,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (450mm) (10 to 15m)",
@@ -1535,8 +1397,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (450mm) (15m to 20m)",
@@ -1546,8 +1407,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (450mm) (Above 20m)",
@@ -1557,8 +1417,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (475mm) (0 to 5m)",
@@ -1568,8 +1427,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (475mm) (5 to 10m)",
@@ -1579,8 +1437,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (475mm) (10 to 15m)",
@@ -1590,8 +1447,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (475mm) (15m to 20m)",
@@ -1601,8 +1457,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (475mm) (Above 20m)",
@@ -1612,8 +1467,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (500mm) (0 to 5m)",
@@ -1623,8 +1477,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (500mm) (5 to 10m)",
@@ -1634,8 +1487,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (500mm) (10 to 15m)",
@@ -1645,8 +1497,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (500mm) (15m to 20m)",
@@ -1656,8 +1507,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (500mm) (Above 20m)",
@@ -1667,8 +1517,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (525mm) (0 to 5m)",
@@ -1678,8 +1527,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (525mm) (5 to 10m)",
@@ -1689,8 +1537,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (525mm) (10 to 15m)",
@@ -1700,8 +1547,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (525mm) (15m to 20m)",
@@ -1711,8 +1557,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (525mm) (Above 20m)",
@@ -1722,8 +1567,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (550mm) (0 to 5m)",
@@ -1733,8 +1577,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (550mm) (5 to 10m)",
@@ -1744,8 +1587,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (550mm) (10 to 15m)",
@@ -1755,8 +1597,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (550mm) (15m to 20m)",
@@ -1766,8 +1607,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (550mm) (Above 20m)",
@@ -1777,8 +1617,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (600mm) (0 to 5m)",
@@ -1788,8 +1627,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (600mm) (5 to 10m)",
@@ -1799,8 +1637,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (600mm) (10 to 15m)",
@@ -1810,8 +1647,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (600mm) (15m to 20m)",
@@ -1821,8 +1657,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (600mm) (Above 20m)",
@@ -1832,8 +1667,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (625mm) (0 to 5m)",
@@ -1843,8 +1677,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (625mm) (5 to 10m)",
@@ -1854,8 +1687,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (625mm) (10 to 15m)",
@@ -1865,8 +1697,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (625mm) (15m to 20m)",
@@ -1876,8 +1707,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (625mm) (Above 20m)",
@@ -1887,8 +1717,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (650mm) (0 to 5m)",
@@ -1898,8 +1727,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (650mm) (5 to 10m)",
@@ -1909,8 +1737,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (650mm) (10 to 15m)",
@@ -1920,8 +1747,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (650mm) (15m to 20m)",
@@ -1931,8 +1757,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (650mm) (Above 20m)",
@@ -1942,8 +1767,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (750mm) (0 to 5m)",
@@ -1953,8 +1777,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (750mm) (5 to 10m)",
@@ -1964,8 +1787,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (750mm) (10 to 15m)",
@@ -1975,8 +1797,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (750mm) (15m to 20m)",
@@ -1986,8 +1807,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (750mm) (Above 20m)",
@@ -1997,8 +1817,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (800mm) (0 to 5m)",
@@ -2008,8 +1827,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (800mm) (5 to 10m)",
@@ -2019,8 +1837,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (800mm) (10 to 15m)",
@@ -2030,8 +1847,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (800mm) (15m to 20m)",
@@ -2041,8 +1857,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (800mm) (Above 20m)",
@@ -2052,8 +1867,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (825mm) (0 to 5m)",
@@ -2063,8 +1877,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (825mm) (5 to 10m)",
@@ -2074,8 +1887,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (825mm) (10 to 15m)",
@@ -2085,8 +1897,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (825mm) (15m to 20m)",
@@ -2096,8 +1907,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (825mm) (Above 20m)",
@@ -2107,8 +1917,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (900mm) (0 to 5m)",
@@ -2118,8 +1927,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (900mm) (5 to 10m)",
@@ -2129,8 +1937,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (900mm) (10 to 15m)",
@@ -2140,8 +1947,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (900mm) (15m to 20m)",
@@ -2151,8 +1957,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (900mm) (Above 20m)",
@@ -2162,8 +1967,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (975mm) (0 to 5m)",
@@ -2173,8 +1977,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (975mm) (5 to 10m)",
@@ -2184,8 +1987,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (975mm) (10 to 15m)",
@@ -2195,8 +1997,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (975mm) (15m to 20m)",
@@ -2206,8 +2007,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (975mm) (Above 20m)",
@@ -2217,8 +2017,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (1000mm) (0 to 5m)",
@@ -2228,8 +2027,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (1000mm) (5 to 10m)",
@@ -2239,8 +2037,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (1000mm) (10 to 15m)",
@@ -2250,8 +2047,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (1000mm) (15m to 20m)",
@@ -2261,8 +2057,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (1000mm) (Above 20m)",
@@ -2272,8 +2067,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (1050mm) (0 to 5m)",
@@ -2283,8 +2077,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (1050mm) (5 to 10m)",
@@ -2294,8 +2087,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (1050mm) (10 to 15m)",
@@ -2305,8 +2097,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (1050mm) (15m to 20m)",
@@ -2316,8 +2107,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (1050mm) (Above 20m)",
@@ -2327,8 +2117,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (1100mm) (0 to 5m)",
@@ -2338,8 +2127,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (1100mm) (5 to 10m)",
@@ -2349,8 +2137,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (1100mm) (10 to 15m)",
@@ -2360,8 +2147,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (1100mm) (15m to 20m)",
@@ -2371,8 +2157,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (1100mm) (Above 20m)",
@@ -2382,8 +2167,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (1200mm) (0 to 5m)",
@@ -2393,8 +2177,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (1200mm) (5 to 10m)",
@@ -2404,8 +2187,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (1200mm) (10 to 15m)",
@@ -2415,8 +2197,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (1200mm) (15m to 20m)",
@@ -2426,8 +2207,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (1200mm) (Above 20m)",
@@ -2437,8 +2217,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (1500mm) (0 to 5m)",
@@ -2448,8 +2227,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (1500mm) (5 to 10m)",
@@ -2459,8 +2237,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (1500mm) (10 to 15m)",
@@ -2470,8 +2247,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (1500mm) (15m to 20m)",
@@ -2481,8 +2257,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concreting of bored pile (M35) (1500mm) (Above 20m)",
@@ -2492,8 +2267,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (450mm) (0 to 5m)",
@@ -2503,8 +2277,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (450mm) (5 to 10m)",
@@ -2514,8 +2287,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (450mm) (10 to 15m)",
@@ -2525,8 +2297,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (450mm) (15m to 20m)",
@@ -2536,8 +2307,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (450mm) (Above 20m)",
@@ -2547,8 +2317,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (475mm) (0 to 5m)",
@@ -2558,8 +2327,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (475mm) (5 to 10m)",
@@ -2569,8 +2337,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (475mm) (10 to 15m)",
@@ -2580,8 +2347,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (475mm) (15m to 20m)",
@@ -2591,8 +2357,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (475mm) (Above 20m)",
@@ -2602,8 +2367,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (500mm) (0 to 5m)",
@@ -2613,8 +2377,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (500mm) (5 to 10m)",
@@ -2624,8 +2387,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (500mm) (10 to 15m)",
@@ -2635,8 +2397,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (500mm) (15m to 20m)",
@@ -2646,8 +2407,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (500mm) (Above 20m)",
@@ -2657,8 +2417,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (525mm) (0 to 5m)",
@@ -2668,8 +2427,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (525mm) (5 to 10m)",
@@ -2679,8 +2437,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (525mm) (10 to 15m)",
@@ -2690,8 +2447,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (525mm) (15m to 20m)",
@@ -2701,8 +2457,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (525mm) (Above 20m)",
@@ -2712,8 +2467,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (550mm) (0 to 5m)",
@@ -2723,8 +2477,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (550mm) (5 to 10m)",
@@ -2734,8 +2487,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (550mm) (10 to 15m)",
@@ -2745,8 +2497,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (550mm) (15m to 20m)",
@@ -2756,8 +2507,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (550mm) (Above 20m)",
@@ -2767,8 +2517,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (600mm) (0 to 5m)",
@@ -2778,8 +2527,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (600mm) (5 to 10m)",
@@ -2789,8 +2537,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (600mm) (10 to 15m)",
@@ -2800,8 +2547,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (600mm) (15m to 20m)",
@@ -2811,8 +2557,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (600mm) (Above 20m)",
@@ -2822,8 +2567,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (625mm) (0 to 5m)",
@@ -2833,8 +2577,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (625mm) (5 to 10m)",
@@ -2844,8 +2587,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (625mm) (10 to 15m)",
@@ -2855,8 +2597,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (625mm) (15m to 20m)",
@@ -2866,8 +2607,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (625mm) (Above 20m)",
@@ -2877,8 +2617,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (650mm) (0 to 5m)",
@@ -2888,8 +2627,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (650mm) (5 to 10m)",
@@ -2899,8 +2637,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (650mm) (10 to 15m)",
@@ -2910,8 +2647,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (650mm) (15m to 20m)",
@@ -2921,8 +2657,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (650mm) (Above 20m)",
@@ -2932,8 +2667,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (750mm) (0 to 5m)",
@@ -2943,8 +2677,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (750mm) (5 to 10m)",
@@ -2954,8 +2687,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (750mm) (10 to 15m)",
@@ -2965,8 +2697,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (750mm) (15m to 20m)",
@@ -2976,8 +2707,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (750mm) (Above 20m)",
@@ -2987,8 +2717,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (800mm) (0 to 5m)",
@@ -2998,8 +2727,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (800mm) (5 to 10m)",
@@ -3009,8 +2737,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (800mm) (10 to 15m)",
@@ -3020,8 +2747,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (800mm) (15m to 20m)",
@@ -3031,8 +2757,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (800mm) (Above 20m)",
@@ -3042,8 +2767,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (825mm) (0 to 5m)",
@@ -3053,8 +2777,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (825mm) (5 to 10m)",
@@ -3064,8 +2787,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (825mm) (10 to 15m)",
@@ -3075,8 +2797,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (825mm) (15m to 20m)",
@@ -3086,8 +2807,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (825mm) (Above 20m)",
@@ -3097,8 +2817,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (900mm) (0 to 5m)",
@@ -3108,8 +2827,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (900mm) (5 to 10m)",
@@ -3119,8 +2837,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (900mm) (10 to 15m)",
@@ -3130,8 +2847,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (900mm) (15m to 20m)",
@@ -3141,8 +2857,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (900mm) (Above 20m)",
@@ -3152,8 +2867,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (975mm) (0 to 5m)",
@@ -3163,8 +2877,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (975mm) (5 to 10m)",
@@ -3174,8 +2887,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (975mm) (10 to 15m)",
@@ -3185,8 +2897,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (975mm) (15m to 20m)",
@@ -3196,8 +2907,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (975mm) (Above 20m)",
@@ -3207,8 +2917,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (1000mm) (0 to 5m)",
@@ -3218,8 +2927,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (1000mm) (5 to 10m)",
@@ -3229,8 +2937,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (1000mm) (10 to 15m)",
@@ -3240,8 +2947,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (1000mm) (15m to 20m)",
@@ -3251,8 +2957,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (1000mm) (Above 20m)",
@@ -3262,8 +2967,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (1050mm) (0 to 5m)",
@@ -3273,8 +2977,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (1050mm) (5 to 10m)",
@@ -3284,8 +2987,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (1050mm) (10 to 15m)",
@@ -3295,8 +2997,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (1050mm) (15m to 20m)",
@@ -3306,8 +3007,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (1050mm) (Above 20m)",
@@ -3317,8 +3017,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (1100mm) (0 to 5m)",
@@ -3328,8 +3027,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (1100mm) (5 to 10m)",
@@ -3339,8 +3037,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (1100mm) (10 to 15m)",
@@ -3350,8 +3047,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (1100mm) (15m to 20m)",
@@ -3361,8 +3057,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (1100mm) (Above 20m)",
@@ -3372,8 +3067,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (1200mm) (0 to 5m)",
@@ -3383,8 +3077,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (1200mm) (5 to 10m)",
@@ -3394,8 +3087,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (1200mm) (10 to 15m)",
@@ -3405,8 +3097,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (1200mm) (15m to 20m)",
@@ -3416,8 +3107,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (1200mm) (Above 20m)",
@@ -3427,8 +3117,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (1500mm) (0 to 5m)",
@@ -3438,8 +3127,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (1500mm) (5 to 10m)",
@@ -3449,8 +3137,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (1500mm) (10 to 15m)",
@@ -3460,8 +3147,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (1500mm) (15m to 20m)",
@@ -3471,8 +3157,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Concrete of Bored pile (M40) (1500mm) (Above 20m)",
@@ -3482,8 +3167,7 @@
                 "carbon_emission": 0.11,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2400,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             }
         ]
     },
@@ -3930,8 +3614,7 @@
                 "carbon_emission": 2.5,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 1000,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Forged Steel Rocker Bearing",
@@ -3941,8 +3624,7 @@
                 "carbon_emission": 2.5,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 1000,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Sliding plate bearing with PTFE surface sliding",
@@ -3952,8 +3634,7 @@
                 "carbon_emission": 2.5,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 1000,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "sliding plate bearing with stainless steel plate",
@@ -3963,8 +3644,7 @@
                 "carbon_emission": 2.5,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 1000,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "POT- PTFE bearing",
@@ -3974,8 +3654,7 @@
                 "carbon_emission": 2.5,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 1000,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             }
         ]
     },
@@ -4505,8 +4184,7 @@
                 "carbon_emission": 3.23,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 1.1,
-                "carbon_emission_src": "IFC",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "IFC"
             },
             {
                 "name": "Drainage Spouts (GI Pipe-100 mm)",
@@ -4533,8 +4211,7 @@
                 "carbon_emission": 3.76,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 0.266,
-                "carbon_emission_src": "ICE",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "ICE"
             },
             {
                 "name": "Asphalt wearing course (12mm)",
@@ -4544,8 +4221,7 @@
                 "carbon_emission": 0.162,
                 "carbon_emission_units_den": "kg/m2- mm",
                 "conversion_factor": 12,
-                "carbon_emission_src": "ICE",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "ICE"
             },
             {
                 "name": "Epoxy Paint",
@@ -4555,8 +4231,7 @@
                 "carbon_emission": 3.76,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 0.298,
-                "carbon_emission_src": "ICE",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "ICE"
             },
             {
                 "name": "Yellow and white thermoplastic roadmarking strip (2.5 mm)",
@@ -4566,8 +4241,7 @@
                 "carbon_emission": 2.152,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 2.75,
-                "carbon_emission_src": "ICE",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "ICE"
             },
             {
                 "name": "Anti corrosive paint for reinforcement (CPCC)",
@@ -4577,8 +4251,7 @@
                 "carbon_emission": 3.76,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": 1000,
-                "carbon_emission_src": "ICE",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "ICE"
             },
             {
                 "name": "Strip Seal Expansion Joint (Catering to maximum horizontal movement upto 70mm)",
@@ -4588,8 +4261,7 @@
                 "carbon_emission": 2.547,
                 "carbon_emission_units_den": "kg",
                 "conversion_factor": "not_available",
-                "carbon_emission_src": "not_available",
-                "recycleable": "Non-recyclable"
+                "carbon_emission_src": "not_available"
             }
         ]
     },
