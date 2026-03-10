@@ -7,6 +7,7 @@ Project structure:
   chunks_bak/x.lcca.ebak     — one before that
   manifest.json              — chunk registry + SHA256 hashes
   version.json               — project metadata
+  project_meta.json          — author / editor history (always plain JSON)
   wal.log                    — crash protection, cleared on clean close
   checkpoints/
     manual/                  — user-created checkpoints, last 10
@@ -45,11 +46,12 @@ MIN_ROTATE_AGE = 0.0  # 0 = always rotate on save (set to 30.0 for production)
 # ── Encoding ──────────────────────────────────────────────────────────────────
 
 
-def _encode(data: dict, readable: bool = True) -> bytes:
+def _encode(data: dict, readable: bool = False) -> bytes:
     """
-    Encodes a dict to bytes.
-    readable=True  (default) — plain UTF-8 JSON
-    readable=False           — MAGIC + zlib compressed JSON (binary, unreadable)
+    Pure encoding utility.
+
+    readable=True  — plain UTF-8 JSON
+    readable=False — MAGIC + zlib compressed JSON (binary)
     """
     if readable:
         return json.dumps(data, indent=4).encode("utf-8")
@@ -67,7 +69,10 @@ def _decode(raw: bytes) -> dict:
     Raises ValueError if file is not a valid LCCA or JSON file.
     """
     if raw[:4] == MAGIC:
-        return json.loads(zlib.decompress(raw[4:]).decode("utf-8"))
+        try:
+            return json.loads(zlib.decompress(raw[4:]).decode("utf-8"))
+        except Exception as e:
+            raise ValueError(f"Corrupt LCCA binary data: {e}")
     # Try plain JSON (dev/readable mode)
     try:
         return json.loads(raw.decode("utf-8"))
@@ -101,7 +106,7 @@ class SafeChunkEngine:
     - WAL for crash protection
     - SHA256 integrity check on open
     - Auto-checkpoint on clean close (last 5 kept)
-    - readable=True mode for development (plain JSON output)
+    - readable=True: plain JSON output; readable=False: binary LCCA (default)
     """
 
     VERSION = ENGINE_VER
@@ -114,7 +119,7 @@ class SafeChunkEngine:
         debounce_delay: float = 1.0,
         force_save_delay: float = 2.0,
         base_dir: str = "user_projects",
-        readable: bool = True,
+        readable: bool = False,
     ):
         # ── Identity ──────────────────────────────────────────────────────────
         self.project_id = project_id
@@ -123,7 +128,7 @@ class SafeChunkEngine:
         self.debounce_delay = debounce_delay
         self.force_save_delay = force_save_delay
         self.base_dir_path = Path(base_dir).resolve()
-        self.readable = readable  # dev mode: saves as plain JSON
+        self.readable = readable
 
         # ── Paths ─────────────────────────────────────────────────────────────
         self.project_path = self.base_dir_path / self.project_id
@@ -159,6 +164,41 @@ class SafeChunkEngine:
         self.attach()
 
     # --------------------------------------------------------------------------
+    # ADMIN FILE I/O  (manifest, version, meta — always plain JSON, never encrypted)
+    # --------------------------------------------------------------------------
+
+    def _write_admin(self, path: Path, data: dict) -> None:
+        """Write an administrative file as plain JSON. Never encrypted.
+        Uses atomic tmp -> fsync -> rename to prevent corruption on crash."""
+        tmp = path.with_suffix(".tmp")
+        try:
+            with open(tmp, "w", encoding="utf-8") as f:
+                f.write(json.dumps(data, indent=4))
+                f.flush()
+                os.fsync(f.fileno())
+            tmp.replace(path)
+        except Exception:
+            try:
+                tmp.unlink()
+            except Exception:
+                pass
+            raise
+
+    @staticmethod
+    def _read_admin(path: Path, default: dict = None) -> dict:
+        """Read an administrative file. Returns default ({}) if missing or corrupt.
+        Static so static methods (list_all_projects, get_project_info) can call it too.
+        Sets _corrupted flag on returned dict if file exists but could not be parsed."""
+        if not path.exists():
+            return default if default is not None else {}
+        try:
+            return json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            result = dict(default) if default is not None else {}
+            result["_corrupted"] = True
+            return result
+
+    # --------------------------------------------------------------------------
     # ENVIRONMENT
     # --------------------------------------------------------------------------
 
@@ -178,11 +218,19 @@ class SafeChunkEngine:
           - Stale *.tmp files left by a crashed atomic write
           - Orphaned .bak/.ebak files whose .lcca no longer exists
         """
-        # Stale tmp files
+        # Stale tmp files in chunks dir
         for tmp in self.chunks_path.glob("*.tmp"):
             try:
                 tmp.unlink()
                 self._log(f"GC: Removed stale tmp: {tmp.name}")
+            except Exception:
+                pass
+
+        # Stale tmp files from crashed admin writes (version.json.tmp, manifest.json.tmp)
+        for tmp in self.project_path.glob("*.tmp"):
+            try:
+                tmp.unlink()
+                self._log(f"GC: Removed stale admin tmp: {tmp.name}")
             except Exception:
                 pass
 
@@ -212,7 +260,8 @@ class SafeChunkEngine:
             create_time = 0.0
         self.lock_path.write_text(f"PID: {os.getpid()}\nCREATED: {create_time}")
 
-    def _is_lock_live(self, lock_path: Path) -> bool:
+    @staticmethod
+    def _is_lock_live(lock_path: Path) -> bool:
         """
         Returns True only if the lock belongs to a process that is STILL running
         AND has the same creation time as when the lock was written.
@@ -251,12 +300,27 @@ class SafeChunkEngine:
 
         try:
             # ── Read existing version.json ────────────────────────────────────
-            existing_version = {}
-            if self.version_path.exists():
-                try:
-                    existing_version = json.loads(self.version_path.read_text())
-                except Exception:
-                    pass
+            existing_version = self._read_admin(self.version_path)
+
+            # ── Detect corrupt version.json ───────────────────────────────────
+            if existing_version.pop("_corrupted", False):
+                self._log(
+                    "WARNING: version.json is corrupt and could not be parsed. "
+                    "Treating session as unclean — integrity check will run."
+                )
+                existing_version["clean_close"] = False
+
+            # ── Lock readable mode to what's stored on disk ───────────────────
+            # If project already exists, readable is NEVER allowed to change.
+            # A binary project must always stay binary.
+            if existing_version and "readable" in existing_version:
+                stored_readable = existing_version["readable"]
+                if self.readable != stored_readable:
+                    self._log(
+                        f"WARNING: readable={self.readable} was requested but project "
+                        f"is stored as readable={stored_readable}. Enforcing stored setting."
+                    )
+                    self.readable = stored_readable
 
             # ── Preserve display_name ─────────────────────────────────────────
             saved_name = existing_version.get("display_name", "").strip()
@@ -283,17 +347,20 @@ class SafeChunkEngine:
             if replayed:
                 self._session_dirty = True
 
-            # ── Integrity check (only when last session was clean) ─────────────
+            # ── Integrity check (always — especially critical after a crash) ────
             last_clean = existing_version.get("clean_close", True)
-            if last_clean:
-                damaged = self._verify_chunks()
-                if damaged:
-                    self._log(
-                        f"Integrity: {len(damaged)} chunk(s) failed hash check "
-                        f"{damaged} — restoring from backup."
-                    )
-                    for name in damaged:
-                        self._restore_chunk_from_backup(name)
+            if not last_clean:
+                self._log(
+                    "Last session was unclean — running integrity check after WAL replay."
+                )
+            damaged = self._verify_chunks()
+            if damaged:
+                self._log(
+                    f"Integrity: {len(damaged)} chunk(s) failed hash check "
+                    f"{damaged} — restoring from backup."
+                )
+                for name in damaged:
+                    self._restore_chunk_from_backup(name)
 
             self._engine_active = True
             self._log(
@@ -334,8 +401,9 @@ class SafeChunkEngine:
                 self._force_save_timer.cancel()
                 self._force_save_timer = None
 
-        # ── Update manifest hashes ────────────────────────────────────────────
-        self._update_manifest_hashes()
+        # ── Update manifest hashes (only if data changed) ────────────────────
+        if self._session_dirty:
+            self._update_manifest_hashes()
 
         # ── Auto-checkpoint if content changed since last checkpoint ──────────
         if self._session_dirty and self._checkpoint_needed():
@@ -356,13 +424,7 @@ class SafeChunkEngine:
                 pass
 
         # ── Write clean version.json ──────────────────────────────────────────
-        existing = {}
-        if self.version_path.exists():
-            try:
-                existing = json.loads(self.version_path.read_text())
-            except Exception:
-                pass
-        self._write_version(existing, clean_close=True)
+        self._write_version(self._read_admin(self.version_path), clean_close=True)
 
         # ── Release lock ──────────────────────────────────────────────────────
         if self.lock_path.exists():
@@ -395,7 +457,7 @@ class SafeChunkEngine:
             "updated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
         }
         try:
-            self.version_path.write_text(json.dumps(data, indent=4))
+            self._write_admin(self.version_path, data)
         except Exception as e:
             self._log(f"version.json write failed: {e}")
 
@@ -404,17 +466,19 @@ class SafeChunkEngine:
     # --------------------------------------------------------------------------
 
     def _load_manifest(self) -> dict:
-        if not self.manifest_path.exists():
+        manifest = self._read_admin(self.manifest_path, default={"chunks": {}})
+        if manifest.pop("_corrupted", False):
+            self._log(
+                "WARNING: manifest.json is corrupt and could not be parsed. "
+                "Integrity check will recompute hashes from disk."
+            )
             return {"chunks": {}}
-        try:
-            return json.loads(self.manifest_path.read_text())
-        except Exception:
-            return {"chunks": {}}
+        return manifest
 
     def _save_manifest(self, manifest: dict):
         tmp = self.manifest_path.with_suffix(".tmp")
         try:
-            tmp.write_text(json.dumps(manifest, indent=4))
+            self._write_admin(tmp, manifest)
             tmp.replace(self.manifest_path)
         except Exception as e:
             self._log(f"Manifest save failed: {e}")
@@ -475,7 +539,7 @@ class SafeChunkEngine:
     def _restore_chunk_from_backup(self, chunk_name: str) -> bool:
         """
         Attempts to restore a damaged .lcca from .bak then .ebak.
-        Returns True if a readable backup was found and restored.
+        Returns True if a valid backup was found and restored.
         """
         lcca = self.chunks_path / f"{chunk_name}{LCCA_EXT}"
         bak = self.chunks_bak_path / f"{chunk_name}{BAK_EXT}"
@@ -485,14 +549,14 @@ class SafeChunkEngine:
             if not src.exists():
                 continue
             try:
-                _decode(src.read_bytes())  # verify readable before restoring
+                _decode(src.read_bytes())  # verify before restoring
                 shutil.copy2(src, lcca)
                 self._log(f"Restored {chunk_name} from {label}.")
                 return True
             except Exception as e:
-                self._log(f"{label} unreadable for {chunk_name}: {e}")
+                self._log(f"{label} invalid/corrupt for {chunk_name}: {e}")
 
-        self._log(f"No readable backup found for {chunk_name}.")
+        self._log(f"No valid backup found for {chunk_name}.")
         return False
 
     # --------------------------------------------------------------------------
@@ -705,21 +769,20 @@ class SafeChunkEngine:
     def _write_chunk(self, chunk_name: str, data: dict):
         """
         Atomic write with rolling rotation:
-          .lcca.bak  → .lcca.ebak   (shift back)
-          .lcca      → .lcca.bak    (current becomes previous)
-          new data   → .lcca        (write new current)
-          lcca       → .lcca.bak   (mirror of current, always same as lcca)
+          lcca  → ebak   (previous current pushed back)
+          new   → tmp → lcca  (atomic fsync + rename)
+          lcca  → bak    (mirror of current, always identical to lcca)
 
-        On every save:
+        Result after each save:
           lcca  = current
-          bak   = mirror of current (written together)
-          ebak  = previous current
+          bak   = mirror of current
+          ebak  = previous current (one save behind)
         """
         lcca = self.chunks_path / f"{chunk_name}{LCCA_EXT}"
         bak = self.chunks_bak_path / f"{chunk_name}{BAK_EXT}"
         ebak = self.chunks_bak_path / f"{chunk_name}{EBAK_EXT}"
 
-        encoded = _encode(data, readable=self.readable)
+        encoded = _encode(data, self.readable)
 
         # Skip if content unchanged
         if lcca.exists():
@@ -729,9 +792,15 @@ class SafeChunkEngine:
             except Exception:
                 pass
 
-        # Current lcca → ebak before overwriting
+        # Current lcca → ebak before overwriting (only if valid — never rotate a corrupt file)
         if lcca.exists():
-            shutil.copy2(lcca, ebak)
+            try:
+                _decode(lcca.read_bytes())
+                shutil.copy2(lcca, ebak)
+            except Exception:
+                self._log(
+                    f"WARNING: existing {chunk_name}.lcca is corrupt — skipping rotation to ebak."
+                )
 
         # Atomic write: tmp → fsync → rename
         tmp = lcca.with_suffix(".tmp")
@@ -766,7 +835,7 @@ class SafeChunkEngine:
             with zipfile.ZipFile(last_cps[0], "r") as zf:
                 if "manifest.json" not in zf.namelist():
                     return True
-                old_manifest = json.loads(zf.read("manifest.json"))
+                old_manifest = json.loads(zf.read("manifest.json").decode("utf-8"))
 
             current_manifest = self._load_manifest()
 
@@ -924,8 +993,10 @@ class SafeChunkEngine:
             with self._write_lock:
                 if self._debounce_timer:
                     self._debounce_timer.cancel()
+                    self._debounce_timer = None
                 if self._force_save_timer:
                     self._force_save_timer.cancel()
+                    self._force_save_timer = None
                 self._staged_data.clear()
 
             if staging.exists():
@@ -976,7 +1047,9 @@ class SafeChunkEngine:
                     meta = {}
                     try:
                         with zipfile.ZipFile(zp, "r") as zf:
-                            meta = json.loads(zf.read("checkpoint_meta.json"))
+                            meta = json.loads(
+                                zf.read("checkpoint_meta.json").decode("utf-8")
+                            )
                     except Exception:
                         pass
 
@@ -1024,7 +1097,7 @@ class SafeChunkEngine:
             if path.exists():
                 try:
                     mtime = path.stat().st_mtime
-                    _decode(path.read_bytes())  # verify readable
+                    _decode(path.read_bytes())  # verify decodable
                     options.append(
                         {
                             "label": label,
@@ -1033,7 +1106,7 @@ class SafeChunkEngine:
                             "saved_at": time.strftime(
                                 "%Y-%m-%d %H:%M:%S", time.localtime(mtime)
                             ),
-                            "readable": True,
+                            "readable": self.readable,
                         }
                     )
                 except Exception:
@@ -1062,7 +1135,7 @@ class SafeChunkEngine:
             return False
 
         try:
-            _decode(src.read_bytes())  # verify source is readable
+            _decode(src.read_bytes())  # verify source is decodable
             shutil.copy2(src, lcca)
             # Clear staged data for this chunk so next read gets rolled-back version
             with self._write_lock:
@@ -1082,11 +1155,9 @@ class SafeChunkEngine:
             return False
         self.display_name = new_display_name.strip()
         try:
-            existing = {}
-            if self.version_path.exists():
-                existing = json.loads(self.version_path.read_text())
+            existing = self._read_admin(self.version_path)
             existing["display_name"] = self.display_name
-            self.version_path.write_text(json.dumps(existing, indent=4))
+            self._write_admin(self.version_path, existing)
             self._log(f"Renamed to '{self.display_name}'.")
             return True
         except Exception as e:
@@ -1115,7 +1186,7 @@ class SafeChunkEngine:
         project_id: str = None,
         display_name: str = None,
         base_dir: str = "user_projects",
-        readable: bool = True,
+        readable: bool = False,
         **kwargs,
     ):
         """Creates a new project with a unique folder."""
@@ -1142,29 +1213,21 @@ class SafeChunkEngine:
             return None, f"FAILED_TO_CREATE: {e}"
 
     @classmethod
-    def open(cls, project_id, base_dir="user_projects", readable=True, **kwargs):
+    def open(cls, project_id, base_dir="user_projects", readable=False, **kwargs):
         root = Path(base_dir)
         if not (root / project_id).exists():
             return None, "PROJECT_NOT_FOUND"
 
         lock = root / project_id / ".lock"
-        if lock.exists():
-            # Use a temporary bare instance just to call the helper
-            tmp = object.__new__(cls)
-            tmp.lock_path = lock
-            if not tmp._is_lock_live(lock):
-                try:
-                    lock.unlink()
-                except Exception:
-                    pass
-
-        # Read readable mode from version.json if not explicitly passed
-        vf = root / project_id / "version.json"
-        if vf.exists() and not readable:
+        if lock.exists() and not cls._is_lock_live(lock):
             try:
-                readable = json.loads(vf.read_text()).get("readable", True)
+                lock.unlink()
             except Exception:
                 pass
+
+        # Always read readable mode from version.json to honour the project's stored setting.
+        vf = root / project_id / "version.json"
+        readable = cls._read_admin(vf).get("readable", False)
 
         try:
             instance = cls(
@@ -1210,25 +1273,20 @@ class SafeChunkEngine:
 
             # Lock status
             lock = item / ".lock"
-            if lock.exists():
-                try:
-                    pid = int(lock.read_text().split(":")[1].strip())
-                    if psutil.pid_exists(pid):
-                        info["status"] = "locked"
-                except Exception:
-                    pass
+            if lock.exists() and SafeChunkEngine._is_lock_live(lock):
+                info["status"] = "locked"
 
             # version.json
             vf = item / "version.json"
             if vf.exists():
-                try:
-                    data = json.loads(vf.read_text())
+                data = SafeChunkEngine._read_admin(vf)
+                if data:
                     name = data.get("display_name", "").strip()
                     if name and name != item.name:
                         info["display_name"] = name
                     if not data.get("clean_close", True) and info["status"] == "ok":
                         info["status"] = "crashed"
-                except Exception:
+                else:
                     info["status"] = "corrupted"
 
             # Timestamps
@@ -1275,27 +1333,21 @@ class SafeChunkEngine:
         }
 
         vf = item / "version.json"
-        if vf.exists():
-            try:
-                data = json.loads(vf.read_text())
-                info["display_name"] = data.get("display_name", project_id)
-                info["app_version"] = data.get("app_version")
-                info["engine_version"] = data.get("engine_version")
-                info["clean_close"] = data.get("clean_close", True)
-                info["readable"] = data.get("readable", False)
-                if not info["clean_close"]:
-                    info["status"] = "crashed"
-            except Exception:
-                info["status"] = "corrupted"
+        data = SafeChunkEngine._read_admin(vf)
+        if data:
+            info["display_name"] = data.get("display_name", project_id)
+            info["app_version"] = data.get("app_version")
+            info["engine_version"] = data.get("engine_version")
+            info["clean_close"] = data.get("clean_close", True)
+            info["readable"] = data.get("readable", False)
+            if not info["clean_close"]:
+                info["status"] = "crashed"
+        elif vf.exists():
+            info["status"] = "corrupted"
 
         lock = item / ".lock"
-        if lock.exists():
-            try:
-                pid = int(lock.read_text().split(":")[1].strip())
-                if psutil.pid_exists(pid):
-                    info["status"] = "locked"
-            except Exception:
-                pass
+        if lock.exists() and SafeChunkEngine._is_lock_live(lock):
+            info["status"] = "locked"
 
         chunks_path = item / "chunks"
         if chunks_path.exists():
