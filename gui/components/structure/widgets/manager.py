@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
     QScrollArea,
     QGroupBox,
     QInputDialog,
+    QMessageBox,
 )
 from PySide6.QtCore import Qt, QTimer
 import time
@@ -152,10 +153,28 @@ class StructureManagerWidget(QWidget):
         except Exception:
             return ""
 
+    def _existing_names(self, comp_name) -> set:
+        """Return lowercased active material names for comp_name."""
+        data = self.controller.engine.fetch_chunk(self.chunk_name) or {}
+        return {
+            item.get("values", {}).get("material_name", "").strip().lower()
+            for item in data.get(comp_name, [])
+            if not item.get("state", {}).get("in_trash", False)
+        }
+
     def open_dialog(self, comp_name):
         dialog = MaterialDialog(comp_name, self, country=self._get_project_country())
         if dialog.exec():
-            self.add_material(comp_name, dialog.get_values())
+            values = dialog.get_values()
+            name = values.get("material_name", "").strip()
+            if name.lower() in self._existing_names(comp_name):
+                QMessageBox.warning(
+                    self, "Duplicate Name",
+                    f"A material named \"{name}\" already exists in \"{comp_name}\".\n"
+                    "Please use a different name."
+                )
+                return
+            self.add_material(comp_name, values)
 
     def open_edit_dialog(self, comp_name, table_row_index):
         try:

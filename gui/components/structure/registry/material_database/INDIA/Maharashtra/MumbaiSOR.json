@@ -4219,7 +4219,7 @@
                 "rate": 496,
                 "rate_src": "Maha PWD SOR",
                 "carbon_emission": 0.162,
-                "carbon_emission_units_den": "kg/m2- mm",
+                "carbon_emission_units_den": "m2-mm",
                 "conversion_factor": 12,
                 "carbon_emission_src": "ICE"
             },

@@ -5,6 +5,7 @@ from PySide6.QtWidgets import (
     QScrollArea,
     QGroupBox,
     QSizePolicy,
+    QMessageBox,
 )
 from .base_table import StructureTableWidget
 
@@ -87,6 +88,18 @@ class TrashTabWidget(QWidget):
 
         # Force items to the top
         self.container_layout.addStretch()
+
+    def permanent_delete(self, comp_name, data_index):
+        """Permanently remove an item from the data store."""
+        for chunk_id in self.chunks:
+            data = self.controller.engine.fetch_chunk(chunk_id) or {}
+            if comp_name in data and data_index < len(data[comp_name]):
+                del data[comp_name][data_index]
+                self.controller.engine.stage_update(chunk_name=chunk_id, data=data)
+                main_view = self.window().findChild(QWidget, "StructureTabView")
+                if main_view:
+                    main_view.on_refresh()
+                return
 
     def toggle_trash_status(self, comp_name, data_index, should_trash):
         """

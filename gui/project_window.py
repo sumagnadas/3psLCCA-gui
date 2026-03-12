@@ -392,6 +392,7 @@ class ProjectWindow(QMainWindow):
 
         self.outputs_page = OutputsPage(controller=self.controller)
         self.outputs_page.navigate_requested.connect(self._navigate_to_page)
+        self.outputs_page.calculation_completed.connect(self._on_calculation_done)
 
         self.widget_map = {
             "General Information": GeneralInfo(controller=self.controller),
@@ -489,7 +490,29 @@ class ProjectWindow(QMainWindow):
                 QToolTip.hideText()
         return super().eventFilter(obj, event)
 
+    def _on_calculation_done(self):
+        """Auto-lock the project after a successful calculation."""
+        self.btn_lock.setChecked(True)
+        self._on_lock_toggled(True)
+
     def _on_lock_toggled(self, checked: bool):
+        if not checked and self.outputs_page._has_results:
+            reply = QMessageBox.warning(
+                self,
+                "Unlock Project",
+                "Unlocking will clear the current calculation results.\n\n"
+                "All inputs will become editable again and the output will be reset.\n\n"
+                "Continue?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No,
+            )
+            if reply != QMessageBox.Yes:
+                self.btn_lock.blockSignals(True)
+                self.btn_lock.setChecked(True)
+                self.btn_lock.blockSignals(False)
+                return
+            self.outputs_page.reset_for_edit()
+
         self._frozen = checked
         self.btn_lock.setText("Unlock" if checked else "Lock")
         self._lock_tooltip = (

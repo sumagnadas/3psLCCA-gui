@@ -379,8 +379,47 @@ _SOR_UNIT_ALIASES: dict[str, str] = {
     "t":   "tonne",
 }
 
+# Pretty display symbols for unit codes used in labels and formula previews.
+_UNIT_DISPLAY_SYMS: dict[str, str] = {
+    "m2":   "m²",
+    "m3":   "m³",
+    "sqm":  "m²",
+    "cum":  "m³",
+    "sqft": "sq.ft",
+    "sqyd": "sq.yd",
+}
+
+def _unit_sym(code: str) -> str:
+    """
+    Return the pretty display symbol for a unit code.
+    Handles compound codes like 'm2-mm' → 'm²-mm' by prettifying each
+    dash-separated part individually.
+    """
+    if not code:
+        return "unit"
+
+    # Remove unwanted spaces
+    code = code.replace(" ", "").strip()
+
+    if code in _UNIT_DISPLAY_SYMS:
+        return _UNIT_DISPLAY_SYMS[code]
+
+    # Compound unit — prettify each part separated by '-'
+    parts = code.split("-")
+    if len(parts) > 1:
+        return "-".join(_UNIT_DISPLAY_SYMS.get(p, p) for p in parts)
+
+    return code
+
 
 def _resolve_unit_code(sor_unit: str, combo: "QComboBox") -> int:
+    """
+    Find the combo index for sor_unit.  If no standard match is found and
+    add_if_missing=True (default), the raw unit string is appended as a
+    plain-text fallback item so compound units like 'sqm-mm' are preserved.
+    """
+    if not sor_unit:
+        return -1
     idx = combo.findData(sor_unit)
     if idx >= 0:
         return idx
@@ -393,7 +432,9 @@ def _resolve_unit_code(sor_unit: str, combo: "QComboBox") -> int:
         idx = combo.findData(alias)
         if idx >= 0:
             return idx
-    return -1
+    # Unit not in the standard list — append it so it isn't silently dropped.
+    combo.addItem(_unit_sym(sor_unit), sor_unit)
+    return combo.count() - 1
 
 
 def _registry_dir() -> str:
@@ -638,6 +679,7 @@ class MaterialDialog(QDialog):
         self.recyclability_only = recyclability_only
         self._comp_name = comp_name
         self._sor_item = None
+        self._sor_filled_name = None         # name that triggered the last autofill
         self._is_customized = False
         self._sor_filling = False
         self._is_modified_by_user = False
@@ -731,7 +773,9 @@ class MaterialDialog(QDialog):
         # ── Completer ─────────────────────────────────────────────────────
         self._suggestions = {}
         self._active_completer = None
+        self._ui_ready = False
         self._reload_suggestions()
+        self.name_in.textChanged.connect(self._on_name_search_changed)
         if self.sor_cb:
             self.sor_cb.currentIndexChanged.connect(self._on_sor_changed)
 
@@ -844,7 +888,7 @@ class MaterialDialog(QDialog):
         existing_carbon_unit = v.get("carbon_unit", "")
         if existing_carbon_unit and "/" in existing_carbon_unit:
             saved_denom = existing_carbon_unit.split("/")[-1].strip()
-            didx = self.carbon_denom_cb.findData(saved_denom)
+            didx = _resolve_unit_code(saved_denom, self.carbon_denom_cb)
             if didx >= 0:
                 self.carbon_denom_cb.setCurrentIndex(didx)
         else:
@@ -908,7 +952,7 @@ class MaterialDialog(QDialog):
         recycle_hdr.addWidget(recycle_title)
         recycle_hdr.addStretch()
         self.recycle_chk = QCheckBox("Include")
-        self.recycle_chk.setChecked(s.get("included_in_recyclability", True))
+        self.recycle_chk.setChecked(s.get("included_in_recyclability", False))
         recycle_hdr.addWidget(self.recycle_chk)
         root.addLayout(recycle_hdr)
 
@@ -1089,6 +1133,20 @@ class MaterialDialog(QDialog):
         self.type_in.currentIndexChanged.connect(self._on_field_manually_changed)
 
         self._update_cf()
+        self._ui_ready = True
+
+        # ── Re-apply DB lock when editing a previously SOR-filled material ──
+        # If the saved data came from a SOR suggestion and the user hasn't
+        # overridden it, lock the fields just as _on_suggestion_selected would.
+        if self.is_edit and v.get("_from_sor", False):
+            # Always re-lock SOR fields when opening an edit dialog, regardless
+            # of whether the user previously customized values (_is_customized).
+            # Try to recover the original SOR item so the "Allow editing →
+            # uncheck" restore path works correctly.
+            mat_name = v.get("material_name", "")
+            self._sor_item = self._suggestions.get(mat_name)
+            self._allow_edit_chk.setEnabled(True)
+            self._lock_autofilled_fields(True)
 
     # ── SOR / suggestion helpers ──────────────────────────────────────────
 
@@ -1109,19 +1167,79 @@ class MaterialDialog(QDialog):
         )
 
         if self._suggestions:
-            model = QStringListModel(sorted(self._suggestions.keys()), self)
             if self._active_completer is None:
-                self._active_completer = QCompleter(model, self)
+                self._active_completer = QCompleter(self)
+                self._active_completer.setCompletionMode(QCompleter.UnfilteredPopupCompletion)
                 self._active_completer.setCaseSensitivity(Qt.CaseInsensitive)
-                self._active_completer.setFilterMode(Qt.MatchContains)
                 self._active_completer.setMaxVisibleItems(10)
                 self._active_completer.activated.connect(self._on_suggestion_selected)
                 self.name_in.setCompleter(self._active_completer)
-            else:
-                self._active_completer.setModel(model)
+            # Re-filter with current text whenever suggestions are reloaded
+            self._on_name_search_changed(self.name_in.text())
         else:
             self.name_in.setCompleter(None)
             self._active_completer = None
+
+    def _on_name_search_changed(self, text: str):
+        """
+        Filter completer suggestions using order-independent token matching.
+
+        Also handles autofill: when the text is an exact match of a known
+        suggestion (i.e. the user just selected one from the popup), call
+        _on_suggestion_selected directly instead of relying on the activated
+        signal, whose timing relative to textChanged is not guaranteed.
+        """
+        if not self._suggestions:
+            return
+        q = text.strip()
+        # Exact match → selection just happened; autofill and stop.
+        # Guard with _ui_ready so this doesn't fire during __init__ before
+        # all widgets (unit_in, carbon_em_in, etc.) have been created.
+        if q in self._suggestions:
+            if self._ui_ready:
+                self._on_suggestion_selected(q)
+            return
+        # Name no longer matches the autofilled suggestion → clear stale DB values.
+        if self._ui_ready and self._sor_item is not None and q != self._sor_filled_name:
+            self._reset_sor_state()
+        if self._active_completer is None:
+            return
+        _ensure_registry_on_path()
+        try:
+            from search_engine import AdvancedSearchEngine
+        except ImportError:
+            return
+        if not q:
+            filtered = sorted(self._suggestions.keys())
+        else:
+            filtered = sorted(
+                name for name in self._suggestions
+                if AdvancedSearchEngine.is_match(q, name)
+            )
+        self._active_completer.setModel(QStringListModel(filtered, self))
+        if filtered and q:
+            self._active_completer.complete()
+
+    def _reset_sor_state(self):
+        """Clear DB-autofilled values when the user edits the name away from a suggestion."""
+        self._sor_filling = True
+        try:
+            self.rate_in.clear()
+            self.src_in.clear()
+            self.carbon_em_in.clear()
+            self.conv_factor_in.clear()
+            self.carbon_chk.setEnabled(True)
+        finally:
+            self._sor_filling = False
+        self._sor_item = None
+        self._sor_filled_name = None
+        self._is_customized = False
+        self._lock_autofilled_fields(False)
+        self._allow_edit_chk.blockSignals(True)
+        self._allow_edit_chk.setChecked(False)
+        self._allow_edit_chk.blockSignals(False)
+        self._allow_edit_chk.setEnabled(False)
+        self._update_cf()
 
     def _populate_type_filter(self, preselect: str = None):
         db_keys = None
@@ -1160,6 +1278,7 @@ class MaterialDialog(QDialog):
         self._reload_suggestions()
 
     def _lock_autofilled_fields(self, lock: bool):
+        # qty_in is always freely editable; everything else is DB-filled.
         self.unit_in.setEnabled(not lock)
         self.rate_in.setReadOnly(lock)
         self.src_in.setReadOnly(lock)
@@ -1213,12 +1332,10 @@ class MaterialDialog(QDialog):
                     self.carbon_chk.setEnabled(carbon_available)
 
                     cf = item.get('conversion_factor', 'not_available')
-                    self.conv_factor_in.setText(str(cf) if cf not in ('not_available', '', None) else '')
+                    self.conv_factor_in.setText(str(cf) if cf not in ('not_available', '', None, 0, 0.0) else '')
 
-                    recycleable = item.get('recycleable', '')
-                    self.recycle_chk.setChecked(
-                        bool(recycleable) and recycleable.lower() != 'non-recyclable'
-                    )
+                    self.recycle_chk.setChecked(False)
+                    self.recycle_chk.setEnabled(True)
                 finally:
                     self._sor_filling = False
                 self._is_customized = False
@@ -1281,17 +1398,20 @@ class MaterialDialog(QDialog):
         self._sor_filling = True
         try:
             unit = item.get('unit', '')
-            if unit:
+            unit_filled = bool(unit)
+            if unit_filled:
                 idx = _resolve_unit_code(unit, self.unit_in)
                 if idx >= 0:
                     self.unit_in.setCurrentIndex(idx)
 
             rate = item.get('rate', '')
-            if rate not in ('', 'not_available', None):
+            rate_filled = rate not in ('', 'not_available', None)
+            if rate_filled:
                 self.rate_in.setText(str(rate))
 
             src = item.get('rate_src', '')
-            if src not in ('', 'not_available', None):
+            src_filled = src not in ('', 'not_available', None)
+            if src_filled:
                 self.src_in.setText(str(src))
 
             carbon = item.get('carbon_emission', 'not_available')
@@ -1313,16 +1433,16 @@ class MaterialDialog(QDialog):
             self.carbon_chk.setEnabled(carbon_available)
 
             cf = item.get('conversion_factor', 'not_available')
-            if cf not in ('not_available', '', None):
+            if cf not in ('not_available', '', None, 0, 0.0):
                 self.conv_factor_in.setText(str(cf))
-
-            recycleable = item.get('recycleable', '')
-            if recycleable and recycleable.lower() != 'non-recyclable':
-                self.recycle_chk.setChecked(True)
             else:
-                self.recycle_chk.setChecked(False)
+                self.conv_factor_in.setText('')
+
+            self.recycle_chk.setChecked(False)
+            self.recycle_chk.setEnabled(True)
 
             self._sor_item = item
+            self._sor_filled_name = name
             self._is_customized = False
 
         finally:
@@ -1342,8 +1462,6 @@ class MaterialDialog(QDialog):
     def _build_full_unit_model(self) -> QStandardItemModel:
         model = QStandardItemModel()
 
-        _display = {"m2": "m²", "m3": "m³", "sqm": "sqm", "sqft": "sq.ft", "sqyd": "sq.yd", "cum": "cum"}
-
         for dim, units in _CONSTRUCTION_UNITS.units.items():
             sep = QStandardItem(f"── {dim} ──")
             sep.setFlags(Qt.ItemFlag(0))
@@ -1351,8 +1469,8 @@ class MaterialDialog(QDialog):
             for code, info in units.items():
                 si_val = UNIT_TO_SI.get(code)
                 si_unit_code = SI_BASE_UNITS.get(dim, "")
-                sym = _display.get(code, info["name"].split(",")[0].strip())
-                si_sym = _display.get(si_unit_code, si_unit_code)
+                sym = _unit_sym(code) if code in _UNIT_DISPLAY_SYMS else info["name"].split(",")[0].strip()
+                si_sym = _unit_sym(si_unit_code)
                 short_name = info["name"].split(",")[-1].strip()
                 item = QStandardItem(f"{sym} — {short_name}")
                 item.setData(code, Qt.UserRole)
@@ -1484,7 +1602,8 @@ class MaterialDialog(QDialog):
     def _update_cf(self):
         mat_code = self.unit_in.currentData() or ""
         denom_code = self.carbon_denom_cb.currentData() or ""
-        mat_sym = mat_code or "unit"
+        mat_sym = _unit_sym(mat_code)
+        denom_sym = _unit_sym(denom_code)
 
         mat_si, mat_dim = self._get_unit_info(mat_code)
         denom_si, denom_dim = self._get_unit_info(denom_code)
@@ -1497,12 +1616,12 @@ class MaterialDialog(QDialog):
             self.conv_factor_in.setText(f"{suggested:g}")
             self.cf_row_widget.setVisible(True)
             self.cf_prefix_lbl.setText(f"1 {mat_sym} =")
-            self.cf_suffix_lbl.setText(denom_code or "unit")
+            self.cf_suffix_lbl.setText(denom_sym)
             self.cf_status_lbl.setText("(suggested — you can change this)")
         else:
             self.cf_row_widget.setVisible(True)
             self.cf_prefix_lbl.setText(f"1 {mat_sym} =")
-            self.cf_suffix_lbl.setText(denom_code or "unit")
+            self.cf_suffix_lbl.setText(denom_sym)
             if mat_dim and denom_dim:
                 self.cf_status_lbl.setText(f"e.g. density for {mat_dim} → {denom_dim}")
             else:
@@ -1518,20 +1637,21 @@ class MaterialDialog(QDialog):
             ef = float(self.carbon_em_in.text() or 0)
             cf = float(self.conv_factor_in.text() or 0)
 
-            mat_code = self.unit_in.currentData()
-            mat_sym = mat_code or "unit"
+            mat_code = self.unit_in.currentData() or ""
+            mat_sym = _unit_sym(mat_code)
             denom_code = self.carbon_denom_cb.currentData() or ""
+            denom_sym = _unit_sym(denom_code)
 
             if qty > 0 and ef > 0 and cf > 0:
                 total = qty * cf * ef
                 if cf == 1.0:
                     self.formula_lbl.setText(
-                        f"{qty:g} {mat_sym}  ×  {ef:g} kgCO₂e/{denom_code}"
+                        f"{qty:g} {mat_sym}  ×  {ef:g} kgCO₂e/{denom_sym}"
                         f"  =  {total:,.3f} kgCO₂e"
                     )
                 else:
                     self.formula_lbl.setText(
-                        f"{qty:g} {mat_sym}  ×  {cf:g}  ×  {ef:g} kgCO₂e/{denom_code}"
+                        f"{qty:g} {mat_sym}  ×  {cf:g}  ×  {ef:g} kgCO₂e/{denom_sym}"
                         f"  =  {total:,.3f} kgCO₂e"
                     )
                 self.formula_lbl.setVisible(True)
@@ -1623,11 +1743,6 @@ class MaterialDialog(QDialog):
         if unit_to_si is None:
             unit_to_si = 1.0
 
-        recycle_pct = (
-            float(self.recycling_perc_in.text() or 0)
-            if self.recycle_chk.isChecked()
-            else 0.0
-        )
         denom_code = self.carbon_denom_cb.currentData() or ""
 
         return {
@@ -1637,24 +1752,12 @@ class MaterialDialog(QDialog):
             "unit_to_si": unit_to_si,
             "rate": float(self.rate_in.text() or 0),
             "rate_source": self.src_in.text().strip(),
-            "carbon_emission": (
-                float(self.carbon_em_in.text() or 0)
-                if self.carbon_chk.isChecked()
-                else 0.0
-            ),
+            "carbon_emission": float(self.carbon_em_in.text() or 0),
             "carbon_unit": f"kgCO₂e/{denom_code}",
-            "conversion_factor": (
-                float(self.conv_factor_in.text() or 1)
-                if self.carbon_chk.isChecked()
-                else 1.0
-            ),
-            "scrap_rate": (
-                float(self.scrap_in.text() or 0)
-                if self.recycle_chk.isChecked()
-                else 0.0
-            ),
-            "post_demolition_recovery_percentage": recycle_pct,
-            "is_recyclable": recycle_pct > 0,
+            "conversion_factor": float(self.conv_factor_in.text() or 0),
+            "scrap_rate": float(self.scrap_in.text() or 0),
+            "post_demolition_recovery_percentage": float(self.recycling_perc_in.text() or 0),
+            "is_recyclable": self.recycle_chk.isChecked() and bool(self.recycling_perc_in.text()),
             "grade": self.grade_in.text().strip(),
             "type": self.type_in.currentText().strip(),
             "_included_in_carbon_emission": self.carbon_chk.isChecked(),

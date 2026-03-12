@@ -46,14 +46,47 @@ class AdvancedSearchEngine:
         return normalized.split() if normalized else []
 
     @staticmethod
+    def _token_matches(tok: str, item: str) -> bool:
+        """
+        Check if a single query token matches within the item text.
+
+        Normalizes both inputs internally, so callers need not pre-process.
+
+        Handles two cases:
+          1. Direct substring:  "m35"   in "concrete 500 mm m35"   → True
+          2. Concatenated unit: "500mm" → split to ["500", "mm"],
+             both substrings present in "concrete 500 mm m35"       → True
+        """
+        tok  = AdvancedSearchEngine.normalize(tok)
+        item = AdvancedSearchEngine.normalize(item)
+        # Fast path – direct substring
+        if tok in item:
+            return True
+        # Split on digit↔letter boundaries (e.g. "500mm" → ["500","mm"],
+        # "m35" → ["m","35"]) and require every part to be present.
+        parts = re.findall(r'[a-z]+|\d+', tok)
+        if len(parts) > 1:
+            return all(p in item for p in parts)
+        return False
+
+    @staticmethod
     def is_match(query: str, item_name: str) -> bool:
         """
         True if every query token appears somewhere in the item name.
-        Order-independent, partial-word aware.
+        Order-independent, partial-word and concatenated-unit aware.
+
+        Examples that all return True
+        ─────────────────────────────
+        query "m35 500 mm"  →  item "Concrete 500 mm (m35)"
+        query "500mm m35"   →  item "Concrete 500 mm (m35)"
+        query "concrete m35"→  item "Concrete 500 mm (m35)"
         """
         tokens          = AdvancedSearchEngine.tokenize(query)
         normalized_item = AdvancedSearchEngine.normalize(item_name)
-        return all(tok in normalized_item for tok in tokens)
+        return all(
+            AdvancedSearchEngine._token_matches(tok, normalized_item)
+            for tok in tokens
+        )
 
 
 # ─────────────────────────────────────────────────────────────────────────────

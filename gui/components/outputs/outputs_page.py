@@ -23,10 +23,12 @@ CHUNK = "outputs_data"
 class OutputsPage(ScrollableForm):
 
     navigate_requested = Signal(str)
+    calculation_completed = Signal()   # emitted after a successful calculation
 
     def __init__(self, controller=None):
         super().__init__(controller=controller, chunk_name=CHUNK)
         self._pages = {}
+        self._has_results = False      # True while calculation results are displayed
         self._build_ui()
 
     def _build_ui(self):
@@ -227,20 +229,28 @@ class OutputsPage(ScrollableForm):
 
         # ── Chart ──────────────────────────────────────────────────────────
         try:
-            from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
-            from .lcc_plot import create_lcc_figure
-
-            fig = create_lcc_figure(results)
-            canvas = FigureCanvasQTAgg(fig)
-            canvas.setMinimumHeight(480)
-            self._status_layout.addWidget(canvas)
+            from .lcc_plot import LCCChartWidget
+            chart = LCCChartWidget(results)
+            self._status_layout.addWidget(chart)
         except Exception as e:
             err = QLabel(f"Chart error: {e}")
             err.setStyleSheet("color: gray; font-style: italic;")
             self._status_layout.addWidget(err)
 
         self._status_layout.addStretch()
-    
+
+        self._has_results = True
+        self.calculation_completed.emit()
+
+    def reset_for_edit(self):
+        """Clear results and return to idle state so inputs can be edited."""
+        self._has_results = False
+        self._show_idle()
+        self._save_state("idle", {})
+
+    def freeze(self, frozen: bool):
+        self.btn_calculate.setEnabled(not frozen)
+
     #==========Prepare-Mapping-for-Core==============================================
     
     def _prepare_life_cycle_construction_cost(self, data: dict):

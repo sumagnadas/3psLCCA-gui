@@ -4,6 +4,9 @@ from PySide6.QtWidgets import (
     QPushButton,
     QHeaderView,
     QSizePolicy,
+    QWidget,
+    QHBoxLayout,
+    QMessageBox,
 )
 from PySide6.QtCore import Qt, QSize
 
@@ -30,7 +33,7 @@ class StructureTableWidget(QTableWidget):
         self.setColumnWidth(2, 65)  # Qty
         self.setColumnWidth(3, 110)  # Source
         self.setColumnWidth(4, 90)  # Total
-        self.setColumnWidth(5, 70)  # Action
+        self.setColumnWidth(5, 140)  # Actions
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
@@ -45,6 +48,16 @@ class StructureTableWidget(QTableWidget):
             self.cellDoubleClicked.connect(self._on_cell_double_clicked)
 
         self.update_height()
+
+    def _confirm_permanent_delete(self, original_index):
+        reply = QMessageBox.warning(
+            self, "Permanent Delete",
+            "This will permanently remove the item. This cannot be undone.\n\nContinue?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
+        if reply == QMessageBox.Yes:
+            self.manager.permanent_delete(self.component_name, original_index)
 
     def _on_cell_double_clicked(self, row, column):
         """Pass the visual row index to the manager to find the data and open the edit dialog."""
@@ -107,28 +120,52 @@ class StructureTableWidget(QTableWidget):
         total_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
         self.setItem(row, 4, total_item)
 
-        # 5. Action Button (Trash or Restore)
-        btn_text = "Restore" if self.is_trash_view else "Trash"
-        action_btn = QPushButton(btn_text)
-        action_btn.setFocusPolicy(Qt.NoFocus)
+        # 5. Actions (Edit + Trash / Restore)
+        actions_widget = QWidget()
+        actions_layout = QHBoxLayout(actions_widget)
+        actions_layout.setContentsMargins(2, 2, 2, 2)
+        actions_layout.setSpacing(4)
 
-        # Logic: toggle the state['in_trash'] flag via the manager
-        action_btn.clicked.connect(
+        if not self.is_trash_view:
+            edit_btn = QPushButton("Edit")
+            edit_btn.setFocusPolicy(Qt.NoFocus)
+            edit_btn.clicked.connect(
+                lambda checked=False, r=row: self.manager.open_edit_dialog(
+                    self.component_name, r
+                )
+            )
+            actions_layout.addWidget(edit_btn)
+
+        trash_btn = QPushButton("Restore" if self.is_trash_view else "Trash")
+        trash_btn.setFocusPolicy(Qt.NoFocus)
+        trash_btn.clicked.connect(
             lambda checked=False, idx=original_index: self.manager.toggle_trash_status(
                 self.component_name, idx, not self.is_trash_view
             )
         )
-        self.setCellWidget(row, 5, action_btn)
+        actions_layout.addWidget(trash_btn)
+
+        if self.is_trash_view:
+            delete_btn = QPushButton("Delete")
+            delete_btn.setFocusPolicy(Qt.NoFocus)
+            delete_btn.setStyleSheet("color: #c0392b;")
+            delete_btn.clicked.connect(
+                lambda checked=False, idx=original_index: self._confirm_permanent_delete(idx)
+            )
+            actions_layout.addWidget(delete_btn)
+
+        self.setCellWidget(row, 5, actions_widget)
 
         self.blockSignals(False)
         self.update_height()
 
     def freeze(self, frozen: bool = True):
-        """Disable/enable the Trash button in every row."""
+        """Disable/enable action buttons in every row."""
         for row in range(self.rowCount()):
-            btn = self.cellWidget(row, 5)
-            if btn:
-                btn.setEnabled(not frozen)
+            container = self.cellWidget(row, 5)
+            if container:
+                for btn in container.findChildren(QPushButton):
+                    btn.setEnabled(not frozen)
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
@@ -141,8 +178,8 @@ class StructureTableWidget(QTableWidget):
             1: max(min_w, int(total * 0.12)),  # Rate
             2: max(min_w, int(total * 0.10)),  # Qty
             3: max(min_w, int(total * 0.16)),  # Source
-            4: max(min_w, int(total * 0.14)),  # Total
-            5: max(min_w, int(total * 0.10)),  # Action
+            4: max(min_w, int(total * 0.12)),  # Total
+            5: max(min_w, int(total * 0.18)),  # Actions
         }
 
         for col, width in widths.items():
