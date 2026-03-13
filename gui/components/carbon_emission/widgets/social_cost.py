@@ -327,7 +327,10 @@ class SocialCost(ScrollableForm):
         cur = self._project_currency or "USD"
         if base == 0:
             self._ricke_result_lbl.setText(
-                "<i>Scenario combination not found in Ricke et al. table.</i>"
+                "<span style='color:red;'><b>Invalid combination</b> — this SSP/RCP pair "
+                "does not exist in the Ricke et al. table. "
+                "Valid pairs: SSP1+RCP2.6, SSP1+RCP4.5, SSP2+RCP4.5, "
+                "SSP2+RCP6.0, SSP3+RCP8.5, SSP5+RCP8.5.</span>"
             )
             self._set_result(
                 0.0,
@@ -543,22 +546,42 @@ class SocialCost(ScrollableForm):
 
     def validate(self) -> dict:
         data = self.collect_data()
+        errors = []
         warnings = []
-        scc = data.get("result", {}).get("cost_of_carbon_local", 0.0)
-        if scc == 0.0:
-            mode = data.get("source", "")
-            if _MODE_RICKE in mode:
-                warnings.append(
-                    "Social Cost of Carbon is 0 — the selected SSP/RCP combination "
-                    "may not exist in the Ricke et al. table."
+        mode = data.get("source", "")
+
+        if _MODE_RICKE in mode:
+            ssp = data.get("ricke", {}).get("ssp", "")
+            rcp = data.get("ricke", {}).get("rcp", "")
+            if (ssp, rcp) not in _RICKE_SCC_TABLE:
+                errors.append(
+                    f"Invalid SSP/RCP combination: '{ssp}' + '{rcp}' does not exist "
+                    f"in the Ricke et al. table. "
+                    f"Valid pairs: "
+                    + ", ".join(f"{s} + {r}" for s, r in _RICKE_SCC_TABLE)
+                    + "."
                 )
-            elif _MODE_CUSTOM in mode:
+            elif data.get("ricke", {}).get("usd_to_local_rate", 0.0) == 0.0:
                 warnings.append(
-                    "Social Cost of Carbon is 0 — enter a custom SCC value."
+                    "USD Conversion Rate is 0 — the effective SCC will be 0."
                 )
-            else:
-                warnings.append("Social Cost of Carbon is 0.")
-        return {"errors": [], "warnings": warnings}
+        elif _MODE_NITI in mode:
+            cur = data.get("niti", {}).get("currency", "INR")
+            if cur != "INR" and data.get("niti", {}).get("inr_to_local_rate", 0.0) == 0.0:
+                warnings.append(
+                    "INR Conversion Rate is 0 — the effective SCC will be 0."
+                )
+        else:
+            scc = data.get("result", {}).get("cost_of_carbon_local", 0.0)
+            if scc == 0.0:
+                if _MODE_CUSTOM in mode:
+                    warnings.append(
+                        "Social Cost of Carbon is 0 — enter a custom SCC value."
+                    )
+                else:
+                    warnings.append("Social Cost of Carbon is 0.")
+
+        return {"errors": errors, "warnings": warnings}
 
     def freeze(self, frozen: bool = True):
         self.btn_clear.setEnabled(not frozen)
@@ -569,11 +592,9 @@ class SocialCost(ScrollableForm):
         self.ssp_scenario.setEnabled(not frozen)
         self.rcp_scenario.setEnabled(not frozen)
 
-    def get_data(self) -> dict:
-        return {"chunk": CHUNK, "data": self.collect_data()}
-
     def clear_all(self):
         self._suppress_signals = True
+        self.source.setCurrentIndex(0)
         self.inr_to_local_rate.setValue(1.0)
         self.usd_to_local_rate.setValue(1.0)
         self.ssp_scenario.setCurrentIndex(0)
@@ -582,6 +603,6 @@ class SocialCost(ScrollableForm):
         self._suppress_signals = False
         self._on_mode_changed()
         self._on_field_changed()
-    
+
     def get_data(self) -> dict:
         return {"chunk": CHUNK, "data": self.get_data_dict()}

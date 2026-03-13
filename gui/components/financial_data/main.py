@@ -27,6 +27,7 @@ FINANCIAL_FIELDS = [
         unit="(%)",
         required=True,
         doc_slug="discount-rate",
+        default=0.0,
     ),
     FieldDef(
         "inflation_rate",
@@ -37,6 +38,7 @@ FINANCIAL_FIELDS = [
         unit="(%)",
         required=True,
         doc_slug="inflation-rate",
+        default=0.0,
     ),
     FieldDef(
         "interest_rate",
@@ -47,6 +49,7 @@ FINANCIAL_FIELDS = [
         unit="(%)",
         required=True,
         doc_slug="interest-rate",
+        default=0.0,
     ),
     FieldDef(
         "investment_ratio",
@@ -57,6 +60,7 @@ FINANCIAL_FIELDS = [
         options=(0.0, 1.0, 4),
         required=True,
         doc_slug="investment-ratio",
+        default=0.0,
     ),
     Section("Analysis"),
     FieldDef(
@@ -65,9 +69,10 @@ FINANCIAL_FIELDS = [
         "Total time horizon used for life cycle financial evaluation.",
         "int",
         options=(0, 999),
-        unit="(years)",
         required=True,
+        unit="(years)",
         doc_slug="analysis-period",
+        default=0,
     )
 ]
 
@@ -81,8 +86,8 @@ FINANCIAL_WARN_RULES = {
     "interest_rate": (0.0, 35.0,
                       None,
                       "Interest rate exceeds 35% — please verify"),
-    "analysis_period": (1, 500,
-                        "Analysis period is 0 — verify",
+    "analysis_period": (None, 500,
+                        None,
                         "Analysis period exceeds 500 years — please verify"),
 }
 

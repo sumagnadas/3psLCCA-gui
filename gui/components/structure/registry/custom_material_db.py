@@ -10,7 +10,10 @@ import sqlite3
 import datetime
 from pathlib import Path
 
-_DB_PATH = Path(__file__).parent / "custom_materials.db"
+# Resolve to <project_root>/data/user.db regardless of where this file lives.
+# __file__ is  gui/components/structure/registry/custom_material_db.py
+# .parents[4] → registry(0) → structure(1) → components(2) → gui(3) → root(4)
+_DB_PATH = Path(__file__).parents[4] / "data" / "user.db"
 CUSTOM_PREFIX = "custom::"
 
 

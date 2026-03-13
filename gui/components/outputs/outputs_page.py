@@ -3,11 +3,13 @@ gui/components/outputs/outputs_page.py
 """
 
 from PySide6.QtWidgets import (
+    QApplication,
     QGroupBox,
     QHBoxLayout,
     QLabel,
     QPushButton,
     QSizePolicy,
+    QTextEdit,
     QVBoxLayout,
     QWidget,
 )
@@ -186,22 +188,65 @@ class OutputsPage(ScrollableForm):
             self._show_calculation_success(results)
 
         except Exception as e:
-            self._show_calculation_error(e)
+            import traceback
+            tb = traceback.format_exc()
+            print(f"[CALCULATION ERROR] {type(e).__name__}: {e}\n{tb}")
+            self._show_calculation_error(e, tb)
 
-    def _show_calculation_error(self, error: Exception):
+    def _show_calculation_error(self, error: Exception, tb: str = ""):
         self._clear_status()
         banner = QGroupBox()
         banner.setStyleSheet("QGroupBox { border: 2px solid #dc3545; padding: 8px; }")
         layout = QVBoxLayout(banner)
 
-        title = QLabel("🛑  Calculation Error")
+        # ── Short summary ──────────────────────────────────────────────────
+        title = QLabel(f"🛑  {type(error).__name__}")
         title.setStyleSheet("color: #b02a37; font-weight: bold; font-size: 13px;")
         layout.addWidget(title)
 
-        msg = QLabel(str(error))
+        # Show only the first line of the error message
+        first_line = str(error).splitlines()[0] if str(error) else str(error)
+        msg = QLabel(first_line)
         msg.setWordWrap(True)
-        msg.setStyleSheet("color: #b02a37; font-family: monospace;")
+        msg.setStyleSheet("color: #b02a37;")
         layout.addWidget(msg)
+
+        if tb:
+            # ── Toggle + copy row ──────────────────────────────────────────
+            btn_row = QHBoxLayout()
+
+            toggle_btn = QPushButton("▸  Show full traceback")
+            toggle_btn.setFlat(True)
+            toggle_btn.setCursor(Qt.PointingHandCursor)
+            toggle_btn.setStyleSheet("text-align: left; color: #555; padding: 2px 0;")
+            btn_row.addWidget(toggle_btn)
+            btn_row.addStretch()
+
+            copy_btn = QPushButton("Copy to clipboard")
+            copy_btn.setFixedWidth(130)
+            copy_btn.clicked.connect(
+                lambda: QApplication.clipboard().setText(tb.strip())
+            )
+            btn_row.addWidget(copy_btn)
+            layout.addLayout(btn_row)
+
+            # ── Traceback box (hidden by default) ─────────────────────────
+            tb_box = QTextEdit()
+            tb_box.setReadOnly(True)
+            tb_box.setPlainText(tb.strip())
+            tb_box.setStyleSheet("font-family: monospace; font-size: 11px;")
+            tb_box.setFixedHeight(200)
+            tb_box.setVisible(False)
+            layout.addWidget(tb_box)
+
+            def _toggle():
+                visible = not tb_box.isVisible()
+                tb_box.setVisible(visible)
+                toggle_btn.setText(
+                    "▾  Hide full traceback" if visible else "▸  Show full traceback"
+                )
+
+            toggle_btn.clicked.connect(_toggle)
 
         self._status_layout.addWidget(banner)
         self._status_layout.addStretch()
@@ -590,7 +635,9 @@ class OutputsPage(ScrollableForm):
 
         layout.addWidget(h_row)
         for msg in issues:
-            layout.addWidget(QLabel(f"{icon} {msg}"))
+            lbl = QLabel(f"{icon} {msg}")
+            lbl.setWordWrap(True)
+            layout.addWidget(lbl)
         return card
 
     # ── Persistence ───────────────────────────────────────────────────────────

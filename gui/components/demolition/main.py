@@ -32,6 +32,7 @@ DEMOLITION_FIELDS = [
         (0.0, 100.0, 1),
         unit="(%)",
         required=True,
+        default=0.0,
     ),
     FieldDef(
         "demolition_carbon_cost_pct",
@@ -41,6 +42,7 @@ DEMOLITION_FIELDS = [
         (0.0, 100.0, 1),
         unit="(%)",
         required=True,
+        default=0.0,
     ),
     FieldDef(
         "demolition_duration",
@@ -50,6 +52,7 @@ DEMOLITION_FIELDS = [
         (0, 60),
         unit="(mo)",
         required=True,
+        default=0,
     ),
     FieldDef(
         "demolition_method",

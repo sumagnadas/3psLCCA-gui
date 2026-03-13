@@ -191,13 +191,22 @@ def _create_figure(values, labels, stage_info, text_color, bg_color):
                 color=text_color)
 
     # Y limits and bar value labels
-    ylim_top = max(max(values) * 1.3, 1.0)
-    ylim_bot = min(min(values) * 1.3, -0.5)
+    max_val = max(values)
+    min_val = min(values)
+    ylim_top = max(max_val * 1.3 if max_val > 0 else max_val * 0.7, 1.0)
+    ylim_bot = min(min_val * 1.3 if min_val < 0 else 0.0, -0.5)
     ax.set_ylim(ylim_bot, ylim_top)
+
+    # Offset is proportional to total range; when positive bars dominate,
+    # the offset can push negative labels below ylim_bot — extend it if needed.
+    offset = (ylim_top - ylim_bot) * 0.02
+    if min_val < 0 and (min_val - offset) < ylim_bot:
+        ylim_bot = (min_val - offset) * 1.05
+        ax.set_ylim(ylim_bot, ylim_top)
 
     for bar, val in zip(bars, values):
         lbl = sci_label(val) if abs(val) < 0.1 else f"{val:.2f}"
-        y_pos = val + ylim_top * 0.02 if val >= 0 else val - ylim_top * 0.05
+        y_pos = val + offset if val >= 0 else val - offset
         ax.text(
             bar.get_x() + bar.get_width() / 2, y_pos, lbl,
             ha="center", va="bottom" if val >= 0 else "top",

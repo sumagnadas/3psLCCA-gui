@@ -364,6 +364,7 @@ class _VehicleTrafficTable(QTableWidget):
                 pwr = QDoubleSpinBox()
                 pwr.setRange(0.0, 999.9)
                 pwr.setDecimals(2)
+                pwr.setValue(7.0)
                 pwr.setButtonSymbols(QDoubleSpinBox.NoButtons)
                 pwr.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
                 pwr.valueChanged.connect(self.on_change)
@@ -413,7 +414,7 @@ class _VehicleTrafficTable(QTableWidget):
             self._vpd[key].setValue(int(v.get("vehicles_per_day", 0)))
             self._acc[key].setValue(float(v.get("accident_percentage", 0.0)))
             if key in _HAS_PWR:
-                self._pwr[key].setValue(float(v.get("pwr", 0.0)))
+                self._pwr[key].setValue(float(v.get("pwr", 7.0)))
         self.blockSignals(False)
 
 

@@ -17,7 +17,12 @@ from PySide6.QtWidgets import (
 from ..base_widget import ScrollableForm
 from ..utils.form_builder.form_definitions import FieldDef, Section
 from ..utils.form_builder.form_builder import build_form, _IMG_PREVIEWS_ATTR
-from ..utils.validation_helpers import clear_field_styles, freeze_form, freeze_widgets, validate_form
+from ..utils.validation_helpers import (
+    clear_field_styles,
+    freeze_form,
+    freeze_widgets,
+    validate_form,
+)
 from ..utils.countries_data import CURRENCIES, COUNTRIES
 
 
@@ -32,7 +37,6 @@ BRIDGE_FIELDS = [
         "Name of Bridge",
         "The official or commonly used name identifying the bridge.",
         "text",
-        # required=True,
         doc_slug="bridge-name",
     ),
     FieldDef(
@@ -40,7 +44,6 @@ BRIDGE_FIELDS = [
         "Owner",
         "Name of the owner, client, or responsible agency for this bridge.",
         "text",
-        # required=True,
         doc_slug="user-agency",
     ),
     # ── Location ─────────────────────────────────────────────────────────
@@ -99,7 +102,6 @@ BRIDGE_FIELDS = [
             "Slab",
             "Other",
         ],
-        # required=True,
         doc_slug="bridge-type",
     ),
     FieldDef(
@@ -109,7 +111,6 @@ BRIDGE_FIELDS = [
         "float",
         options=(0.0, 99999.0, 2),
         unit="(m)",
-        # required=True,
         doc_slug="span",
         default=0.0,
     ),
@@ -120,7 +121,6 @@ BRIDGE_FIELDS = [
         "float",
         options=(0.0, 9999.0, 2),
         unit="(m)",
-        # required=True,
         doc_slug="carriageway-width",
         default=0.0,
     ),
@@ -129,8 +129,7 @@ BRIDGE_FIELDS = [
         "Number of Lanes",
         "Total number of traffic lanes on the bridge deck.",
         "int",
-        options=(0, 20),
-        required=True,
+        options=(0, 50),
         doc_slug="num-lanes",
         default=0,
     ),
@@ -140,7 +139,6 @@ BRIDGE_FIELDS = [
         "Indicates whether the road allows one-way or two-way traffic.",
         "combo",
         options=["One Way", "Two Way"],
-        # required=True,
         doc_slug="vehicle-path-direction",
     ),
     FieldDef(
@@ -149,7 +147,6 @@ BRIDGE_FIELDS = [
         "Indicates whether a dedicated pedestrian footpath is provided.",
         "combo",
         options=["Yes", "No"],
-        # required=True,
         doc_slug="footpath",
     ),
     FieldDef(
@@ -159,7 +156,6 @@ BRIDGE_FIELDS = [
         "float",
         options=(0.0, 999.0, 2),
         unit="(m/s)",
-        # required=True,
         doc_slug="wind-speed",
         default=0.0,
     ),
@@ -195,6 +191,7 @@ BRIDGE_FIELDS = [
         "Construction duration expressed in months.",
         "int",
         options=(0, 1200),
+        required=True,
         unit="(months)",
         doc_slug="duration-construction-months",
         default=0,

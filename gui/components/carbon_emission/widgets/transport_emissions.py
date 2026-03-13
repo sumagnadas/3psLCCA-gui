@@ -86,7 +86,9 @@ def calc_vehicle_emission(entry: dict, mat_index: dict) -> tuple:
     r = entry.get("route", {})
     uuids = entry.get("materials", [])
 
-    eff_pay = float(v.get("effective_payload", 0) or 0)
+    cap = float(v.get("capacity", 0) or 0)
+    gross_wt = float(v.get("gross_weight", 0) or 0)
+    empty_wt = float(v.get("empty_weight", max(0.0, gross_wt - cap)) or 0)
     dist = float(r.get("distance_km", 0) or 0)
     ef = float(v.get("emission_factor", 0) or 0)
 
@@ -94,8 +96,8 @@ def calc_vehicle_emission(entry: dict, mat_index: dict) -> tuple:
     material_results = []
     warnings = []
 
-    if eff_pay <= 0:
-        warnings.append("Effective payload is zero — check vehicle data.")
+    if cap <= 0:
+        warnings.append("Payload capacity is zero — check vehicle data.")
         return 0.0, [], warnings
 
     if dist <= 0:
@@ -146,10 +148,11 @@ def calc_vehicle_emission(entry: dict, mat_index: dict) -> tuple:
         # Use kg_factor from transport entry (not structure conv factor)
         qty_kg = qty * kg_factor
         qty_t = qty_kg / 1000.0
-        trips = math.ceil(qty_t / eff_pay) if eff_pay > 0 else 0
+        trips = math.ceil(qty_t / cap) if cap > 0 else 0
 
-        # ×2 for return trip (empty return)
-        emission = eff_pay * trips * dist * 2 * ef
+        # Loaded trip: gross_weight × dist × trips × EF
+        # Empty return: empty_weight × dist × trips × EF
+        emission = (gross_wt + empty_wt) * trips * dist * ef
 
         warns = []
         if qty <= 0:
@@ -214,9 +217,11 @@ class VehicleCard(QGroupBox):
     ):
         v = entry.get("vehicle", {})
         r = entry.get("route", {})
+        origin = r.get("origin", "").strip()
+        origin_part = f"{origin}  |  " if origin else ""
         title = (
             f"{v.get('name', 'Vehicle')}  —  "
-            f"{r.get('origin', '?')} → {r.get('destination', '?')}  |  "
+            f"{origin_part}"
             f"{r.get('distance_km', 0)} km  |  "
             f"{total_emission:,.2f} kgCO₂e"
         )
@@ -227,12 +232,13 @@ class VehicleCard(QGroupBox):
 
         # Vehicle specs row
         specs_row = QHBoxLayout()
+        gross = v.get('gross_weight', 0)
+        cap = v.get('capacity', 0)
+        empty = v.get('empty_weight', max(0.0, gross - cap))
         specs = [
-            f"Capacity: {v.get('capacity', 0)}t",
-            f"Empty Wt: {v.get('empty_weight', 0)}t",
-            f"Payload: {v.get('payload', 0)}t",
-            f"Loading: {v.get('loading_pct', 100)}%",
-            f"Eff. Payload: {v.get('effective_payload', 0):.2f}t",
+            f"Capacity: {cap}t",
+            f"Gross Wt (loaded): {gross}t",
+            f"Empty Wt: {empty:.2f}t",
             f"EF: {v.get('emission_factor', 0)} kgCO₂e/t-km",
         ]
         for spec in specs:
@@ -257,7 +263,7 @@ class VehicleCard(QGroupBox):
 
         # Buttons
         btn_row = QHBoxLayout()
-        edit_btn = QPushButton("Edit")
+        edit_btn = QPushButton("Edit Delivery")
         trash_btn = QPushButton("Remove")
         edit_btn.clicked.connect(on_edit)
         trash_btn.clicked.connect(on_trash)
@@ -426,7 +432,7 @@ class TransportEmissions(QWidget):
 
         # ── Add Vehicle Button ────────────────────────────────────────────
         add_row = QHBoxLayout()
-        self.add_btn = QPushButton("+ Add Vehicle")
+        self.add_btn = QPushButton("+ Add Delivery")
         self.add_btn.setMinimumHeight(32)
         self.add_btn.clicked.connect(self._open_add_dialog)
         add_row.addWidget(self.add_btn)
@@ -538,11 +544,37 @@ class TransportEmissions(QWidget):
                     assigned.add(m)  # fallback for plain uuid strings
         return assigned
 
+    def _write_back_kg_factors(self, entry: dict):
+        """
+        Persist kg_factor for non-mass materials back into each material's
+        values dict (transport_kg_factor key) so the next delivery dialog
+        pre-fills the factor automatically.
+        """
+        for m in entry.get("materials", []):
+            if not isinstance(m, dict):
+                continue
+            uid = m.get("uuid")
+            kf  = m.get("kg_factor", 0.0)
+            if not uid or not kf:
+                continue
+            for chunk_id, _ in STRUCTURE_CHUNKS:
+                chunk_data = self.controller.engine.fetch_chunk(chunk_id) or {}
+                changed = False
+                for comp_items in chunk_data.values():
+                    for item in comp_items:
+                        if item.get("id") == uid:
+                            item.setdefault("values", {})["transport_kg_factor"] = kf
+                            changed = True
+                if changed:
+                    self.controller.engine.stage_update(chunk_name=chunk_id, data=chunk_data)
+                    break
+
     def _open_add_dialog(self):
         assigned = self._get_assigned_uuids()
         dialog = TransportDialog(self.controller, assigned, parent=self)
         if dialog.exec():
             entry = dialog.get_vehicle_entry()
+            self._write_back_kg_factors(entry)
             data = self.controller.engine.fetch_chunk("transport_data") or {}
             data.setdefault("vehicles", []).append(entry)
             self.controller.engine.stage_update(chunk_name="transport_data", data=data)
@@ -560,6 +592,7 @@ class TransportEmissions(QWidget):
         dialog = TransportDialog(self.controller, assigned, data=entry, parent=self)
         if dialog.exec():
             updated = dialog.get_vehicle_entry()
+            self._write_back_kg_factors(updated)
             vehicles = [updated if v.get("id") == entry_id else v for v in vehicles]
             data["vehicles"] = vehicles
             self.controller.engine.stage_update(chunk_name="transport_data", data=data)
@@ -569,8 +602,8 @@ class TransportEmissions(QWidget):
     def _trash_vehicle(self, entry_id: str):
         confirm = QMessageBox.question(
             self,
-            "Remove Vehicle",
-            "Remove this vehicle entry? Materials will be available for reassignment.",
+            "Remove Delivery",
+            "Remove this delivery entry? Materials will be available for reassignment.",
             QMessageBox.Yes | QMessageBox.No,
         )
         if confirm != QMessageBox.Yes:
@@ -581,7 +614,7 @@ class TransportEmissions(QWidget):
         for v in vehicles:
             if v.get("id") == entry_id:
                 v.setdefault("state", {})["in_trash"] = True
-                v["meta"]["modified_on"] = datetime.datetime.now().isoformat()
+                v.setdefault("meta", {})["updated_at"] = datetime.datetime.now().isoformat()
                 break
 
         data["vehicles"] = vehicles

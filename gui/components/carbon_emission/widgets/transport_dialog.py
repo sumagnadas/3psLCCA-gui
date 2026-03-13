@@ -3,45 +3,35 @@ import uuid
 import datetime
 
 from PySide6.QtWidgets import (
-    QDialog,
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QGridLayout,
-    QPushButton,
-    QLabel,
-    QLineEdit,
-    QDoubleSpinBox,
-    QComboBox,
-    QTableWidget,
-    QTableWidgetItem,
-    QHeaderView,
-    QFrame,
-    QMessageBox,
-    QCheckBox,
-    QScrollArea,
-    QSizePolicy,
-    QStackedWidget,
-    QAbstractItemView,
+    QDialog, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
+    QPushButton, QLabel, QLineEdit, QDoubleSpinBox, QTableWidget,
+    QTableWidgetItem, QHeaderView, QFrame, QMessageBox, QCheckBox,
+    QScrollArea, QSizePolicy, QAbstractItemView, QSplitter,
 )
-from PySide6.QtCore import Qt, QSize
-from PySide6.QtGui import QColor, QFont, QDoubleValidator
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QColor, QDoubleValidator, QFont
 
 from ...utils.definitions import STRUCTURE_CHUNKS, UNIT_DIMENSION
 
 # ---------------------------------------------------------------------------
-# Constants & Styling
+# Vehicle class data
+# (full_name, cap_range_label, typical_tare_t, suggested_ef, default_capacity_t)
 # ---------------------------------------------------------------------------
 
-# Row background states
-BG_INVALID = "#fff1f0"  # Light Red (Error)
-BG_SUSPICIOUS = "#fffbe6"  # Light Yellow (Warning)
-BG_DISABLED = "#f5f5f5"  # Gray (Assigned)
-BG_READY = "#f6ffed"  # Light Green (Valid)
+_CLASSES = [
+    ("Light Duty Vehicle (<4.5T)", "< 4.5 t",  1.5,  1.2,  2.5),
+    ("HDV Small (4.5–9T)",         "4.5–9 t",  2.5,  0.7,  7.0),
+    ("HDV Medium (9–12T)",         "9–12 t",   4.0,  0.55, 10.5),
+    ("HDV Large (>12T)",           "> 12 t",   10.5, 0.19, 24.5),
+]
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
+# Short display labels for the class buttons
+_BTN_LABELS = [
+    ("Light Duty", "< 4.5 t", "EF 1.2"),
+    ("HDV Small",  "4.5–9 t", "EF 0.7"),
+    ("HDV Medium", "9–12 t",  "EF 0.55"),
+    ("HDV Large",  "> 12 t",  "EF 0.19"),
+]
 
 
 def _divider() -> QFrame:
@@ -51,767 +41,714 @@ def _divider() -> QFrame:
     return f
 
 
-def _section_label(text: str) -> QLabel:
-    lbl = QLabel(text.upper())
-    return lbl
-
-
 # ---------------------------------------------------------------------------
-# Step 1 — Vehicle + Route
-# ---------------------------------------------------------------------------
-
-
-class VehicleRouteStep(QWidget):
-    def __init__(self, controller, parent=None):
-        super().__init__(parent)
-        self.controller = controller
-
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(5, 5, 5, 5)
-        layout.setSpacing(15)
-        layout.setAlignment(Qt.AlignTop)
-
-        # ── Template Selection ──────────────────────────────────────────
-        layout.addWidget(_section_label("Vehicle Template"))
-
-        template_layout = QHBoxLayout()
-        self.dropdown = QComboBox()
-        self.dropdown.setMinimumHeight(35)
-        self.dropdown.addItem("-- Select a Preset Template --", userData=None)
-        
-
-        # 1. Load Default Presets
-        try:
-            # First try to get from controller engine if available
-            presets = getattr(self.controller, "DEFAULT_VEHICLES", {})
-            # Fallback to a local import simulation if controller doesn't have it
-            # Replace the try/except preset block with:
-            try:
-                from ...utils.definitions import DEFAULT_VEHICLES
-
-                presets = DEFAULT_VEHICLES
-            except ImportError as e:
-                # print(f"[TransportDialog] Could not load DEFAULT_VEHICLES: {e}")
-                presets = {}
-
-                presets = DEFAULT_VEHICLES
-        except Exception:
-            presets = {}
-
-        for name, specs in presets.items():
-            self.dropdown.addItem(name, userData=specs)
-
-        # 2. Load Custom Vehicles
-        custom_vehicles = self._fetch_custom()
-        if custom_vehicles:
-            self.dropdown.addItem("── Custom Vehicles ──", userData=None)
-            for v in custom_vehicles:
-                self.dropdown.addItem(v.get("name", "Unnamed Custom"), userData=v)
-
-        self.dropdown.currentIndexChanged.connect(self._on_template_selected)
-        template_layout.addWidget(self.dropdown)
-        layout.addLayout(template_layout)
-
-        layout.addWidget(_divider())
-
-        # ── Vehicle Details Grid ──────────────────────────────────────────
-        layout.addWidget(_section_label("Vehicle Specifications"))
-
-        v_grid = QGridLayout()
-        v_grid.setSpacing(12)
-
-        self.name_in = self._create_labeled_input(v_grid, "Vehicle Name *", 0, 0)
-        self.payload_lbl = self._create_labeled_readonly(
-            v_grid, "Available Payload (t)", 0, 1
-        )
-
-        self.capacity_in = self._create_labeled_spin(
-            v_grid, "Gross Capacity of Vehicle (t) *", 0, 1000, 2, 1, 0
-        )
-        self.loading_in = self._create_labeled_spin(
-            v_grid, "Target Loading (%) *", 0, 100, 1, 1, 1, default=100
-        )
-
-        self.empty_wt_in = self._create_labeled_spin(
-            v_grid, "Empty Weight of Vehicle (t) *", 0, 1000, 2, 2, 0
-        )
-        self.eff_pay_lbl = self._create_labeled_readonly(
-            v_grid, "Effective Payload (t)", 2, 1
-        )
-
-        self.ef_in = self._create_labeled_spin(
-            v_grid, "Emission Factor (kgCO₂e/t-km) *", 0, 10, 6, 3, 0, default=0.055
-        )
-
-        layout.addLayout(v_grid)
-
-        self.save_custom_chk = QCheckBox("Save as custom vehicle for this project")
-        # self.save_custom_chk.setStyleSheet("font-size: 12px; color: #262626;")
-        layout.addWidget(self.save_custom_chk)
-
-        layout.addWidget(_divider())
-
-        # ── Route Details Grid ──────────────────────────────────────────
-        layout.addWidget(_section_label("Route Information"))
-
-        r_grid = QGridLayout()
-        r_grid.setSpacing(12)
-
-        self.origin_in = self._create_labeled_input(r_grid, "Origin Location", 0, 0)
-        self.dest_in = self._create_labeled_input(r_grid, "Destination Location", 0, 1)
-        self.dist_in = self._create_labeled_spin(
-            r_grid, "Total Distance (km) *", 0, 100000, 1, 1, 0
-        )
-
-        layout.addLayout(r_grid)
-
-        # Connections
-        self.capacity_in.valueChanged.connect(self._recalculate)
-        self.empty_wt_in.valueChanged.connect(self._recalculate)
-        self.loading_in.valueChanged.connect(self._recalculate)
-
-    def _fetch_custom(self) -> list:
-        """Fetches custom vehicles stored in the project state."""
-        try:
-            data = self.controller.engine.fetch_chunk("project_vehicles") or {}
-            return data.get("custom", [])
-        except Exception:
-            return []
-
-    def _create_labeled_input(self, grid, label, row, col) -> QLineEdit:
-        container = QWidget()
-        l = QVBoxLayout(container)
-        l.setContentsMargins(0, 0, 0, 0)
-        l.setSpacing(4)
-        lbl = QLabel(label)
-        # lbl.setStyleSheet("font-weight: 600; color: #262626; font-size: 12px;")
-        le = QLineEdit()
-        le.setMinimumHeight(32)
-        l.addWidget(lbl)
-        l.addWidget(le)
-        grid.addWidget(container, row, col)
-        return le
-
-    def _create_labeled_spin(
-        self, grid, label, mn, mx, dec, row, col, default=0.0
-    ) -> QDoubleSpinBox:
-        container = QWidget()
-        l = QVBoxLayout(container)
-        l.setContentsMargins(0, 0, 0, 0)
-        l.setSpacing(4)
-        lbl = QLabel(label)
-        # lbl.setStyleSheet("font-weight: 600; color: #262626; font-size: 12px;")
-        sb = QDoubleSpinBox()
-        sb.setRange(mn, mx)
-        sb.setDecimals(dec)
-        sb.setValue(default)
-        sb.setMinimumHeight(32)
-        l.addWidget(lbl)
-        l.addWidget(sb)
-        grid.addWidget(container, row, col)
-        return sb
-
-    def _create_labeled_readonly(self, grid, label, row, col) -> QLabel:
-        container = QWidget()
-        l = QVBoxLayout(container)
-        l.setContentsMargins(0, 0, 0, 0)
-        l.setSpacing(4)
-        lbl = QLabel(label)
-        # lbl.setStyleSheet("font-weight: 600; color: #8c8c8c; font-size: 11px;")
-        val = QLabel("—")
-        val.setMinimumHeight(32)
-        # val.setStyleSheet(
-        #     "background: #f5f5f5; border: 1px solid #d9d9d9; border-radius: 4px; padding-left: 8px; font-weight: 700;"
-        # )
-        l.addWidget(lbl)
-        l.addWidget(val)
-        grid.addWidget(container, row, col)
-        return val
-
-    def _on_template_selected(self, index):
-        specs = self.dropdown.itemData(index)
-        if not specs:
-            return
-        self.name_in.setText(specs.get("name", ""))
-        self.capacity_in.setValue(specs.get("capacity", 0))
-        self.empty_wt_in.setValue(specs.get("empty_weight", 0))
-        self.ef_in.setValue(specs.get("emission_factor", 0))
-        self._recalculate()
-
-    def _recalculate(self):
-        cap = self.capacity_in.value()
-        empty = self.empty_wt_in.value()
-        loading = self.loading_in.value()
-
-        payload = max(0.0, cap - empty)
-        eff = payload * (loading / 100)
-
-        self.payload_lbl.setText(f"{payload:,.2f} t")
-        self.eff_pay_lbl.setText(f"{eff:,.2f} t")
-
-        if empty >= cap and cap > 0:
-            self.payload_lbl.setStyleSheet("background: #fff1f0; color: #000000;")
-        else:
-            self.payload_lbl.setStyleSheet("")
-
-    def validate(self) -> bool:
-        """UX-Driven Hard Blocker Checks"""
-        if not self.name_in.text().strip():
-            QMessageBox.critical(self, "Error", "Vehicle Name is required.")
-            return False
-
-        cap = self.capacity_in.value()
-        empty = self.empty_wt_in.value()
-        dist = self.dist_in.value()
-
-        if empty <= 0:
-            QMessageBox.critical(self, "Error", "Empty Weight must be greater than 0.")
-            return False
-
-        if cap <= empty:
-            QMessageBox.critical(
-                self, "Error", "Total Capacity must be greater than Empty Weight."
-            )
-            return False
-
-        if dist <= 0:
-            QMessageBox.critical(
-                self,
-                "Error",
-                "Distance must be greater than 0 km to calculate emissions.",
-            )
-            return False
-
-        return True
-
-    def get_data(self) -> dict:
-        cap = self.capacity_in.value()
-        empty = self.empty_wt_in.value()
-        loading = self.loading_in.value()
-        payload = cap - empty
-        return {
-            "vehicle": {
-                "name": self.name_in.text().strip(),
-                "capacity": cap,
-                "empty_weight": empty,
-                "payload": payload,
-                "loading_pct": loading,
-                "effective_payload": payload * (loading / 100),
-                "emission_factor": self.ef_in.value(),
-                "is_custom": self.save_custom_chk.isChecked(),
-            },
-            "route": {
-                "origin": self.origin_in.text().strip(),
-                "destination": self.dest_in.text().strip(),
-                "distance_km": self.dist_in.value(),
-            },
-        }
-
-
-# ---------------------------------------------------------------------------
-# Step 2 — Material Selection
-# ---------------------------------------------------------------------------
-
-
-class MaterialSelectionStep(QWidget):
-    HEADERS = [
-        "",
-        "Category",
-        "Material",
-        "Qty",
-        "Unit",
-        "kg / unit",
-        "Qty (kg)",
-        "Status",
-    ]
-
-    def __init__(
-        self, controller, assigned_uuids: set, saved_kg_factors: dict, parent=None
-    ):
-        super().__init__(parent)
-        self.controller = controller
-        self.assigned_uuids = assigned_uuids
-        self.saved_kg_factors = saved_kg_factors
-        self._rows_metadata = []
-
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 5, 0, 0)
-        layout.setSpacing(10)
-
-        layout.addWidget(_section_label("Assign Materials to Vehicle"))
-
-        # Legend / Summary Area
-        info_bar = QHBoxLayout()
-
-        self.counter_lbl = QLabel("Total Selected Load: 0.00 t / 0.00 t")
-
-        info_bar.addWidget(self.counter_lbl)
-        info_bar.addStretch()
-
-        for color, text in [
-            (BG_INVALID, "Error"),
-            (BG_SUSPICIOUS, "Warning"),
-            (BG_DISABLED, "Assigned"),
-        ]:
-            dot = QLabel()
-            dot.setFixedSize(12, 12)
-            # dot.setStyleSheet(
-            #     f"background: {color}; border: 1px solid #d9d9d9; border-radius: 2px;"
-            # )
-            lbl = QLabel(text)
-            # lbl.setStyleSheet("font-size: 11px; color: #8c8c8c;")
-            info_bar.addWidget(dot)
-            info_bar.addWidget(lbl)
-            info_bar.addSpacing(10)
-
-        layout.addLayout(info_bar)
-
-        # Table Setup
-        self.table = QTableWidget()
-        self.table.setColumnCount(len(self.HEADERS))
-        self.table.setHorizontalHeaderLabels(self.HEADERS)
-        self.table.setAlternatingRowColors(True)
-        self.table.setShowGrid(False)
-        self.table.setSortingEnabled(True)
-        self.table.setSelectionMode(QAbstractItemView.NoSelection)
-        self.table.verticalHeader().setVisible(False)
-        self.table.verticalHeader().setDefaultSectionSize(40)
-
-        # High Contrast Styling
-        # self.table.setStyleSheet(
-        #     """
-        #     QTableWidget { border: 1px solid #d9d9d9; }
-        #     """
-        # )
-
-        h = self.table.horizontalHeader()
-        h.setSectionResizeMode(QHeaderView.Fixed)
-        self.table.setColumnWidth(0, 40)  # Checkbox
-        h.setSectionResizeMode(1, QHeaderView.ResizeToContents)  # Category
-        h.setSectionResizeMode(2, QHeaderView.Stretch)  # Material
-        h.setSectionResizeMode(4, QHeaderView.ResizeToContents)  # Unit
-        self.table.setColumnWidth(5, 100)  # Factor
-        h.setSectionResizeMode(6, QHeaderView.ResizeToContents)  # Total kg
-        h.setSectionResizeMode(7, QHeaderView.Stretch)  # Status
-        self.table.setColumnHidden(6, True)
-
-
-        layout.addWidget(self.table)
-        self._populate()
-
-    def _item(self, text="", align=None) -> QTableWidgetItem:
-        it = QTableWidgetItem(text)
-        it.setFlags(Qt.ItemIsEnabled)
-        if align:
-            it.setTextAlignment(align)
-        return it
-
-    def _populate(self):
-        self.table.setSortingEnabled(False)
-        self.table.setRowCount(0)
-        self._rows_metadata = []
-
-        for chunk_id, category in STRUCTURE_CHUNKS:
-            data = self.controller.engine.fetch_chunk(chunk_id) or {}
-            for comp_name, items in data.items():
-                for item in items:
-                    if item.get("state", {}).get("in_trash", False):
-                        continue
-
-                    mat_uuid = item.get("id", "")
-                    v = item.get("values", {})
-                    unit = v.get("unit", "")
-                    qty = float(v.get("quantity", 0) or 0)
-                    stored_usi = v.get("unit_to_si")
-                    dimension = UNIT_DIMENSION.get(unit.lower())
-                    is_mass = dimension == "Mass"
-
-                    if mat_uuid in self.saved_kg_factors:
-                        # Editing existing entry — use saved value
-                        kg_factor = self.saved_kg_factors[mat_uuid]
-                        factor_known = True
-                    elif is_mass and stored_usi is not None:
-                        # Mass units: unit_to_si IS the kg conversion (SI base for mass = kg)
-                        kg_factor = float(stored_usi)
-                        factor_known = True
-                    else:
-                        # Volume / Area / Length / Count / unknown:
-                        # user must supply density (kg per unit) — cannot auto-calculate
-                        kg_factor = 0.0
-                        factor_known = False
-
-                    # Warn only when a non-mass editable factor is typed as 1.0
-                    is_suspicious = (
-                        not is_mass
-                        and factor_known
-                        and abs(kg_factor - 1.0) < 1e-6
-                    )
-                    is_assigned = mat_uuid in self.assigned_uuids
-
-                    row = self.table.rowCount()
-                    self.table.insertRow(row)
-
-                    # Col 0: Checkbox
-                    chk_w = QWidget()
-                    chk_l = QHBoxLayout(chk_w)
-                    chk = QCheckBox()
-                    chk.setChecked(
-                        mat_uuid in self.saved_kg_factors and not is_assigned
-                    )
-                    chk.setEnabled(not is_assigned)
-                    chk.stateChanged.connect(self.update_weight_counter)
-                    chk_l.addWidget(chk)
-                    chk_l.setAlignment(Qt.AlignCenter)
-                    chk_l.setContentsMargins(0, 0, 0, 0)
-
-                    sort_chk = self._item()
-                    sort_chk.setData(Qt.UserRole, 1 if chk.isChecked() else 0)
-                    self.table.setItem(row, 0, sort_chk)
-                    self.table.setCellWidget(row, 0, chk_w)
-
-                    # Col 1: Category
-                    self.table.setItem(row, 1, self._item(category))
-
-                    # Col 2: Material Name
-                    mat_item = self._item(v.get("material_name", ""))
-                    font = mat_item.font()
-                    font.setBold(True)
-                    mat_item.setFont(font)
-                    self.table.setItem(row, 2, mat_item)
-
-                    # Col 3: Qty
-                    qty_item = self._item(
-                        f"{qty:,.2f} {unit}", Qt.AlignRight | Qt.AlignVCenter
-                    )
-                    qty_item.setData(Qt.UserRole, qty)
-                    self.table.setItem(row, 3, qty_item)
-
-                    # Col 4: Unit — use Unicode symbols
-                    _unit_display = {"m2": "m²", "m3": "m³", "sqft": "sq.ft", "sqyd": "sq.yd"}
-                    self.table.setItem(row, 4, self._item(_unit_display.get(unit.lower(), unit)))
-
-                    # Col 5: kg/unit — read-only for mass units, editable for others
-                    if factor_known and is_mass:
-                        # Auto-calculated from unit definition — lock it
-                        factor_display = f"{kg_factor:g}" if kg_factor > 0 else ""
-                        factor_item = self._item(factor_display, Qt.AlignRight | Qt.AlignVCenter)
-                        factor_item.setData(Qt.UserRole, kg_factor)
-                        self.table.setItem(row, 5, factor_item)
-                    else:
-                        # Non-mass unit: user must supply density (kg per unit of material)
-                        saved_val = self.saved_kg_factors.get(mat_uuid, 0.0)
-                        init_text = "" if saved_val <= 0 else f"{saved_val:g}"
-                        ph = "kg per unit (e.g. 2400 for concrete m³)"
-                        kg_edit = QLineEdit(init_text)
-                        kg_edit.setPlaceholderText(ph)
-                        kg_edit.setValidator(QDoubleValidator(0, 1e9, 4))
-                        kg_edit.setMinimumHeight(28)
-                        kg_edit.textChanged.connect(
-                            lambda t, r=row, q=qty: self._on_factor_changed(t, r, q)
-                        )
-                        factor_sort = self._item()
-                        factor_sort.setData(Qt.UserRole, saved_val)
-                        self.table.setItem(row, 5, factor_sort)
-                        self.table.setCellWidget(row, 5, kg_edit)
-
-                    # Col 6: Total (kg)
-                    tot_item = self._item(
-                        f"{qty * kg_factor:,.0f} kg", Qt.AlignRight | Qt.AlignVCenter
-                    )
-                    tot_item.setData(Qt.UserRole, qty * kg_factor)
-                    self.table.setItem(row, 6, tot_item)
-
-                    # Col 7: Status
-                    self.table.setItem(row, 7, self._item("", Qt.AlignCenter))
-
-                    self._rows_metadata.append({
-                        "uuid": mat_uuid, "unit": unit, "qty": qty,
-                        "unit_to_si": stored_usi,
-                        "chunk_id": chunk_id, "comp_name": comp_name,
-                    })
-
-                    # Row color state
-                    if is_assigned:
-                        self.table.item(row, 6).setText("Locked")
-                    else:
-                        self._update_row_status(row, kg_factor, is_suspicious)
-
-        self.table.setSortingEnabled(True)
-        self.update_weight_counter()
-
-    def _on_factor_changed(self, text, row, qty):
-        try:
-            val = float(text or 0)
-            self.table.item(row, 6).setData(Qt.UserRole, qty * val)
-            self.table.item(row, 5).setData(Qt.UserRole, val)
-            meta = self._rows_metadata[row]
-            unit = meta["unit"]
-            is_mass = UNIT_DIMENSION.get(unit.lower()) == "Mass"
-            is_sus = not is_mass and abs(val - 1.0) < 1e-6
-            self._update_row_status(row, val, is_sus)
-            self.update_weight_counter()
-        except Exception:
-            pass
-
-    def _update_row_status(self, row, factor, is_sus):
-        if factor <= 0:
-            self.table.item(row, 7).setText("❌ Missing Factor")
-        elif is_sus:
-            self.table.item(row, 7).setText("⚠️ Check Factor")
-        else:
-            self.table.item(row, 7).setText("✓ Ready")
-
-    def update_weight_counter(self):
-        total_kg = 0.0
-        for row in range(self.table.rowCount()):
-            chk_w = self.table.cellWidget(row, 0)
-            if not chk_w:
-                continue
-            chk = chk_w.findChild(QCheckBox)
-            if chk and chk.isChecked():
-                total_kg += self.table.item(row, 6).data(Qt.UserRole) or 0.0
-
-        total_t = total_kg / 1000.0
-
-        # Pull capacity from Step 1
-        parent_dialog = self.window()
-        if hasattr(parent_dialog, "step1"):
-            capacity = parent_dialog.step1.get_data()["vehicle"]["payload"]
-        else:
-            capacity = 0.0
-
-        self.counter_lbl.setText(
-            f"Total Selected Load: {total_t:,.2f} t / {capacity:,.2f} t Capacity"
-        )
-        if total_t > capacity and capacity > 0:
-            self.counter_lbl.setStyleSheet("color: #ff0000;")
-        else:
-            self.counter_lbl.setStyleSheet("")
-
-    def validate(self) -> bool:
-        selected = self.get_selected_materials()
-        if not selected:
-            QMessageBox.critical(
-                self, "Selection Error", "Please select at least one material."
-            )
-            return False
-
-        # Check for 0 factors in selected items
-        for m in selected:
-            if m["kg_factor"] <= 0:
-                QMessageBox.critical(
-                    self,
-                    "Factor Error",
-                    "Selected materials must have a kg factor > 0.",
-                )
-                return False
-
-        # Warning for 1:1 factors
-        has_warnings = False
-        for m in selected:
-            meta = next(
-                (r for r in self._rows_metadata if r["uuid"] == m["uuid"]), None
-            )
-            if not meta:
-                continue
-            is_mass = UNIT_DIMENSION.get(meta["unit"].lower()) == "Mass"
-            if not is_mass and abs(m["kg_factor"] - 1.0) < 1e-6:
-                has_warnings = True
-                break
-
-        if has_warnings:
-            res = QMessageBox.warning(
-                self,
-                "Verify Data",
-                "One or more materials use a 1:1 mass factor (1 unit = 1kg). Continue anyway?",
-                QMessageBox.Yes | QMessageBox.No,
-            )
-            if res == QMessageBox.No:
-                return False
-
-        return True
-
-    def get_selected_materials(self) -> list:
-        results = []
-        for row in range(self.table.rowCount()):
-            chk_w = self.table.cellWidget(row, 0)
-            if not chk_w:
-                continue
-            chk = chk_w.findChild(QCheckBox)
-            if chk and chk.isChecked():
-                kg_edit = self.table.cellWidget(row, 5)
-                if kg_edit:
-                    factor = float(kg_edit.text() or 0)
-                else:
-                    factor = self.table.item(row, 5).data(Qt.UserRole) or 0.0
-                results.append(
-                    {"uuid": self._rows_metadata[row]["uuid"], "kg_factor": factor}
-                )
-        return results
-
-
-# ---------------------------------------------------------------------------
-# Main Dialog
+# Single-page Transport Dialog
 # ---------------------------------------------------------------------------
 
 
 class TransportDialog(QDialog):
-    def __init__(self, controller, assigned_uuids: set, data: dict = None, parent=None):
+    """
+    Single-page dialog for adding / editing a transport delivery entry.
+
+    Layout
+    ──────
+    Top bar   : Source/Supplier  +  Distance
+    Class row : 4 clickable vehicle class cards
+    Advanced  : collapsible capacity / gross weight / EF overrides
+    ── divider ──
+    Main area : left = material picker  |  right = live delivery summary
+    Footer    : Save / Cancel
+    """
+
+    def __init__(self, controller, assigned_uuids: set,
+                 data: dict = None, parent=None):
         super().__init__(parent)
-        self.controller = controller
-        self.assigned_uuids = assigned_uuids
-        self.is_edit = data is not None
-        self.existing_data = data or {}
+        self.controller      = controller
+        self.assigned_uuids  = assigned_uuids
+        self.is_edit         = data is not None
+        self.existing_data   = data or {}
 
-        self.setWindowTitle(
-            "Transport Log Editor" if self.is_edit else "Add Transport Log"
-        )
-        self.setMinimumSize(850, 650)
+        self._selected_cls   = 0        # default Light Duty Vehicle
+        self._rows_metadata  = []
+        self._hide_assigned  = False
+        self._ef_override    = False    # True when user manually edits EF
 
-        # Standard flags to ensure close button is available and context help is hidden
+        self.setWindowTitle("Edit Delivery" if self.is_edit else "Add Delivery")
+        self.setMinimumSize(1020, 700)
         self.setWindowFlags(Qt.Dialog | Qt.WindowCloseButtonHint)
 
         outer = QVBoxLayout(self)
-        outer.setContentsMargins(15, 15, 15, 15)
+        outer.setContentsMargins(16, 16, 16, 12)
         outer.setSpacing(10)
 
-        # Header / Step Indicator
-        self.step_lbl = QLabel("Step 1: Vehicle & Route Details")
-        self.step_lbl.setStyleSheet(
-            "font-weight: bold; font-size: 16px;"
-        )
-        outer.addWidget(self.step_lbl)
+        self._build_top_bar(outer)
+        self._build_class_cards(outer)
+        self._build_advanced(outer)
         outer.addWidget(_divider())
+        self._build_main_area(outer)   # splitter: materials | summary
+        self._build_footer(outer)
 
-        # Scrollable Stack
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setFrameShape(QFrame.NoFrame)
-        scroll.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-
-        self.stack = QStackedWidget()
-        saved_kg = (
-            {m["uuid"]: m["kg_factor"] for m in self.existing_data.get("materials", [])}
-            if self.is_edit
-            else {}
-        )
-
-        self.step1 = VehicleRouteStep(controller)
-        self.step2 = MaterialSelectionStep(controller, assigned_uuids, saved_kg)
-
-        self.stack.addWidget(self.step1)
-        self.stack.addWidget(self.step2)
+        # Populate material table BEFORE loading existing data
+        self._populate_materials()
 
         if self.is_edit:
             self._load_existing()
+        else:
+            self._select_class(0)      # Light Duty Vehicle default
 
-        scroll.setWidget(self.stack)
-        outer.addWidget(scroll)
+    # ── Top bar ───────────────────────────────────────────────────────
 
-        outer.addWidget(_divider())
+    def _build_top_bar(self, layout):
+        row = QHBoxLayout()
+        row.setSpacing(16)
 
-        # Navigation Bar
-        btn_bar = QHBoxLayout()
-        self.back_btn = QPushButton("← Previous Step")
-        self.back_btn.setMinimumHeight(35)
-        self.back_btn.setVisible(False)
-        self.back_btn.clicked.connect(self._go_back)
+        source_w = QWidget()
+        sl = QVBoxLayout(source_w)
+        sl.setContentsMargins(0, 0, 0, 0); sl.setSpacing(3)
+        sl.addWidget(QLabel("Source / Supplier"))
+        self.source_in = QLineEdit()
+        self.source_in.setPlaceholderText("e.g. Mumbai Batching Plant")
+        self.source_in.setMinimumHeight(34)
+        sl.addWidget(self.source_in)
+        row.addWidget(source_w, 3)
 
-        self.next_btn = QPushButton("Continue to Materials →")
-        self.next_btn.setMinimumHeight(40)
+        dist_w = QWidget()
+        dl = QVBoxLayout(dist_w)
+        dl.setContentsMargins(0, 0, 0, 0); dl.setSpacing(3)
+        dl.addWidget(QLabel("One-Way Distance (km) *"))
+        self.dist_in = QDoubleSpinBox()
+        self.dist_in.setRange(0, 100_000)
+        self.dist_in.setDecimals(1)
+        self.dist_in.setMinimumHeight(34)
+        self.dist_in.valueChanged.connect(self._update_summary)
+        dl.addWidget(self.dist_in)
+        row.addWidget(dist_w, 1)
 
-        self.next_btn.clicked.connect(self._go_next)
+        layout.addLayout(row)
 
-        self.finish_btn = QPushButton("Save Transport Entry")
-        self.finish_btn.setMinimumHeight(40)
+    # ── Vehicle class cards ───────────────────────────────────────────
 
-        self.finish_btn.setVisible(False)
-        self.finish_btn.clicked.connect(self._finish)
+    def _build_class_cards(self, layout):
+        hdr = QLabel("Vehicle Type")
+        hdr.setStyleSheet("font-weight: bold;")
+        layout.addWidget(hdr)
 
-        self.cancel_btn = QPushButton("Cancel")
-        self.cancel_btn.setMinimumHeight(35)
-        self.cancel_btn.clicked.connect(self.reject)
+        cards_row = QHBoxLayout()
+        cards_row.setSpacing(8)
+        self._class_btns = []
 
-        btn_bar.addWidget(self.back_btn)
-        btn_bar.addStretch()
-        btn_bar.addWidget(self.cancel_btn)
-        btn_bar.addWidget(self.next_btn)
-        btn_bar.addWidget(self.finish_btn)
-        outer.addLayout(btn_bar)
+        for i, (line1, line2, line3) in enumerate(_BTN_LABELS):
+            btn = QPushButton(f"{line1}\n{line2}\n{line3}")
+            btn.setCheckable(True)
+            btn.setMinimumHeight(64)
+            btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+            btn.clicked.connect(lambda _checked, idx=i: self._select_class(idx))
+            cards_row.addWidget(btn)
+            self._class_btns.append(btn)
 
-    def _go_next(self):
-        if not self.step1.validate():
+        layout.addLayout(cards_row)
+
+    # ── Advanced overrides (collapsible) ──────────────────────────────
+
+    def _build_advanced(self, layout):
+        self._adv_toggle = QPushButton("▸  Override capacity / gross weight / EF")
+        self._adv_toggle.setFlat(True)
+        self._adv_toggle.setCursor(Qt.PointingHandCursor)
+        self._adv_toggle.setStyleSheet("text-align: left; padding: 2px 0;")
+        self._adv_toggle.clicked.connect(self._toggle_advanced)
+        layout.addWidget(self._adv_toggle)
+
+        self._adv_widget = QWidget()
+        self._adv_widget.setVisible(False)
+        ag = QGridLayout(self._adv_widget)
+        ag.setContentsMargins(0, 4, 0, 0)
+        ag.setSpacing(12)
+        ag.setColumnStretch(0, 1)
+        ag.setColumnStretch(1, 1)
+        ag.setColumnStretch(2, 1)
+
+        def _spin_field(label, mn, mx, dec):
+            w = QWidget(); l = QVBoxLayout(w)
+            l.setContentsMargins(0, 0, 0, 0); l.setSpacing(3)
+            l.addWidget(QLabel(label))
+            sb = QDoubleSpinBox()
+            sb.setRange(mn, mx); sb.setDecimals(dec); sb.setMinimumHeight(32)
+            l.addWidget(sb)
+            return w, sb
+
+        w, self.capacity_in = _spin_field("Payload Capacity (t)", 0.01, 1000, 2)
+        ag.addWidget(w, 0, 0)
+        self.capacity_in.valueChanged.connect(self._on_capacity_changed)
+
+        w, self.gross_in = _spin_field("Gross Weight — Loaded (t)", 0.01, 2000, 2)
+        ag.addWidget(w, 0, 1)
+        self.gross_in.valueChanged.connect(self._update_summary)
+
+        w, self.ef_in = _spin_field("Emission Factor (kgCO₂e/t-km)", 0, 10, 4)
+        ag.addWidget(w, 0, 2)
+        self.ef_in.valueChanged.connect(self._on_ef_user_changed)
+
+        self.empty_derived_lbl = QLabel("Empty vehicle weight: — t")
+        self.empty_derived_lbl.setStyleSheet("color: gray; font-size: 11px;")
+        ag.addWidget(self.empty_derived_lbl, 1, 0, 1, 3)
+
+        layout.addWidget(self._adv_widget)
+
+    def _toggle_advanced(self):
+        vis = not self._adv_widget.isVisible()
+        self._adv_widget.setVisible(vis)
+        self._adv_toggle.setText(
+            "▾  Override capacity / gross weight / EF" if vis
+            else "▸  Override capacity / gross weight / EF"
+        )
+
+    # ── Main area: materials (left) + summary (right) ─────────────────
+
+    def _build_main_area(self, layout):
+        splitter = QSplitter(Qt.Horizontal)
+        splitter.setChildrenCollapsible(False)
+
+        # ── Left: material picker ─────────────────────────────────────
+        left = QWidget()
+        ll = QVBoxLayout(left)
+        ll.setContentsMargins(0, 0, 8, 0)
+        ll.setSpacing(6)
+
+        mat_hdr = QHBoxLayout()
+        mat_title = QLabel("Materials")
+        mat_title.setStyleSheet("font-weight: bold;")
+        mat_hdr.addWidget(mat_title)
+        mat_hdr.addStretch()
+        self.hide_assigned_chk = QCheckBox("Hide assigned")
+        self.hide_assigned_chk.toggled.connect(self._on_hide_assigned)
+        mat_hdr.addWidget(self.hide_assigned_chk)
+        ll.addLayout(mat_hdr)
+
+        self.search_in = QLineEdit()
+        self.search_in.setPlaceholderText("🔍  Search materials...")
+        self.search_in.setMinimumHeight(32)
+        self.search_in.textChanged.connect(self._on_search)
+        ll.addWidget(self.search_in)
+
+        self.mat_table = QTableWidget()
+        self.mat_table.setColumnCount(6)
+        self.mat_table.setHorizontalHeaderLabels(
+            ["", "Material", "Category", "Unit", "Qty (kg)", "kg / unit"]
+        )
+        self.mat_table.verticalHeader().setVisible(False)
+        self.mat_table.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.mat_table.setSelectionMode(QAbstractItemView.NoSelection)
+        self.mat_table.setAlternatingRowColors(True)
+        self.mat_table.setShowGrid(False)
+        self.mat_table.verticalHeader().setDefaultSectionSize(34)
+
+        h = self.mat_table.horizontalHeader()
+        self.mat_table.setColumnWidth(0, 36)
+        h.setSectionResizeMode(1, QHeaderView.Stretch)
+        h.setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        h.setSectionResizeMode(3, QHeaderView.ResizeToContents)
+        h.setSectionResizeMode(4, QHeaderView.ResizeToContents)
+        self.mat_table.setColumnWidth(5, 120)
+        ll.addWidget(self.mat_table)
+
+        self.mat_count_lbl = QLabel("")
+        self.mat_count_lbl.setStyleSheet("color: gray; font-size: 11px;")
+        ll.addWidget(self.mat_count_lbl)
+
+        splitter.addWidget(left)
+
+        # ── Right: live summary ───────────────────────────────────────
+        right = QWidget()
+        right.setMinimumWidth(230)
+        right.setMaximumWidth(290)
+        rl = QVBoxLayout(right)
+        rl.setContentsMargins(12, 0, 0, 0)
+        rl.setSpacing(6)
+
+        sum_title = QLabel("Delivery Summary")
+        sum_title.setStyleSheet("font-weight: bold;")
+        rl.addWidget(sum_title)
+        rl.addWidget(_divider())
+
+        def _row(label):
+            rw = QHBoxLayout(); rw.setSpacing(4)
+            lbl = QLabel(label)
+            lbl.setStyleSheet("color: gray; font-size: 11px;")
+            val = QLabel("—")
+            val.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+            rw.addWidget(lbl); rw.addStretch(); rw.addWidget(val)
+            return rw, val
+
+        r, self._s_class  = _row("Vehicle class");   rl.addLayout(r)
+        r, self._s_dist   = _row("Distance");         rl.addLayout(r)
+        r, self._s_cap    = _row("Capacity");         rl.addLayout(r)
+        rl.addWidget(_divider())
+        r, self._s_mats   = _row("Materials");        rl.addLayout(r)
+        r, self._s_load   = _row("Total load");       rl.addLayout(r)
+        r, self._s_trips  = _row("Trips");            rl.addLayout(r)
+        rl.addWidget(_divider())
+
+        rl.addWidget(QLabel("Est. Emission"))
+
+        self._s_emission = QLabel("—")
+        font = QFont(); font.setPointSize(18); font.setBold(True)
+        self._s_emission.setFont(font)
+        self._s_emission.setAlignment(Qt.AlignRight)
+        self._s_emission.setWordWrap(True)
+        rl.addWidget(self._s_emission)
+
+        self._s_breakdown = QLabel("")
+        self._s_breakdown.setStyleSheet("color: gray; font-size: 10px;")
+        self._s_breakdown.setAlignment(Qt.AlignRight)
+        self._s_breakdown.setWordWrap(True)
+        rl.addWidget(self._s_breakdown)
+
+        rl.addStretch()
+        splitter.addWidget(right)
+        splitter.setSizes([700, 260])
+        layout.addWidget(splitter, 1)
+
+    # ── Footer ────────────────────────────────────────────────────────
+
+    def _build_footer(self, layout):
+        layout.addWidget(_divider())
+        row = QHBoxLayout()
+
+        row.addStretch()
+
+        cancel = QPushButton("Cancel")
+        cancel.setMinimumHeight(36); cancel.setFixedWidth(100)
+        cancel.clicked.connect(self.reject)
+
+        self.save_btn = QPushButton("Save Delivery")
+        self.save_btn.setMinimumHeight(36); self.save_btn.setFixedWidth(140)
+        self.save_btn.clicked.connect(self._on_save)
+
+        row.addWidget(cancel)
+        row.addWidget(self.save_btn)
+        layout.addLayout(row)
+
+    # ── Class selection ───────────────────────────────────────────────
+
+    def _select_class(self, idx: int):
+        self._selected_cls = idx
+        _, _, tare, ef, cap = _CLASSES[idx]
+
+        for i, btn in enumerate(self._class_btns):
+            btn.setChecked(i == idx)
+
+        self._ef_override = False
+        for w in (self.capacity_in, self.gross_in, self.ef_in):
+            w.blockSignals(True)
+        self.capacity_in.setValue(cap)
+        self.gross_in.setMinimum(cap)
+        self.gross_in.setValue(round(cap + tare, 2))
+        self.ef_in.setValue(ef)
+        for w in (self.capacity_in, self.gross_in, self.ef_in):
+            w.blockSignals(False)
+
+        self._refresh_empty_label()
+        self._update_summary()
+
+    def _on_capacity_changed(self):
+        cap = self.capacity_in.value()
+        self.gross_in.setMinimum(cap)
+        self._refresh_empty_label()
+        self._update_summary()
+
+    def _on_ef_user_changed(self):
+        self._ef_override = True
+        self._update_summary()
+
+    def _refresh_empty_label(self):
+        gross = self.gross_in.value()
+        cap   = self.capacity_in.value()
+        empty = max(0.0, gross - cap)
+        self.empty_derived_lbl.setText(
+            f"Empty vehicle weight (derived): {empty:.2f} t   "
+            f"(Gross {gross:.2f} t − Capacity {cap:.2f} t)"
+        )
+
+    # ── Material table ────────────────────────────────────────────────
+
+    def _populate_materials(self):
+        self.mat_table.setRowCount(0)
+        self._rows_metadata = []
+
+        saved_kg = (
+            {m["uuid"]: m["kg_factor"]
+             for m in self.existing_data.get("materials", [])}
+            if self.is_edit else {}
+        )
+
+        for chunk_id, category in STRUCTURE_CHUNKS:
+            chunk_data = self.controller.engine.fetch_chunk(chunk_id) or {}
+            for _comp, items in chunk_data.items():
+                for item in items:
+                    if item.get("state", {}).get("in_trash", False):
+                        continue
+
+                    mat_uuid   = item.get("id", "")
+                    v          = item.get("values", {})
+                    unit       = v.get("unit", "")
+                    qty        = float(v.get("quantity", 0) or 0)
+                    stored_usi = v.get("unit_to_si")
+                    is_mass    = UNIT_DIMENSION.get(unit.lower()) == "Mass"
+                    is_assigned = mat_uuid in self.assigned_uuids
+
+                    if mat_uuid in saved_kg:
+                        kg_factor = saved_kg[mat_uuid]
+                    elif is_mass and stored_usi is not None:
+                        kg_factor = float(stored_usi)
+                    elif v.get("transport_kg_factor"):
+                        kg_factor = float(v["transport_kg_factor"])
+                    else:
+                        kg_factor = 0.0
+
+                    qty_kg = qty * kg_factor
+
+                    row = self.mat_table.rowCount()
+                    self.mat_table.insertRow(row)
+
+                    # Col 0 — checkbox (assigned materials get no checkbox)
+                    if is_assigned:
+                        self.mat_table.setItem(row, 0, QTableWidgetItem())
+                    else:
+                        chk_w = QWidget()
+                        cl = QHBoxLayout(chk_w)
+                        cl.setContentsMargins(0, 0, 0, 0)
+                        cl.setAlignment(Qt.AlignCenter)
+                        chk = QCheckBox()
+                        chk.setChecked(mat_uuid in saved_kg)
+                        chk.stateChanged.connect(self._update_summary)
+                        cl.addWidget(chk)
+                        self.mat_table.setItem(row, 0, QTableWidgetItem())
+                        self.mat_table.setCellWidget(row, 0, chk_w)
+
+                    _no_interact = Qt.ItemIsEnabled  # read-only flag shorthand
+
+                    # Col 1 — material name
+                    name_val = v.get("material_name", "")
+                    ni = QTableWidgetItem(name_val)
+                    if is_assigned:
+                        ni.setForeground(QColor("#aaaaaa"))
+                        ni.setFlags(_no_interact)
+                        ni.setToolTip("Already assigned to another vehicle")
+                    else:
+                        f = ni.font(); f.setBold(True); ni.setFont(f)
+                    self.mat_table.setItem(row, 1, ni)
+
+                    # Col 2 — category
+                    ci = QTableWidgetItem(category)
+                    if is_assigned:
+                        ci.setForeground(QColor("#aaaaaa"))
+                        ci.setFlags(_no_interact)
+                    self.mat_table.setItem(row, 2, ci)
+
+                    # Col 3 — unit
+                    ui = QTableWidgetItem(unit if unit else "—")
+                    ui.setTextAlignment(Qt.AlignCenter)
+                    ui.setFlags(_no_interact)
+                    if is_assigned:
+                        ui.setForeground(QColor("#aaaaaa"))
+                    self.mat_table.setItem(row, 3, ui)
+
+                    # Col 4 — qty in kg
+                    qi = QTableWidgetItem(f"{qty_kg:,.0f}" if qty_kg > 0 else "—")
+                    qi.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+                    qi.setData(Qt.UserRole, qty_kg)
+                    qi.setFlags(_no_interact)
+                    if is_assigned:
+                        qi.setForeground(QColor("#aaaaaa"))
+                    self.mat_table.setItem(row, 4, qi)
+
+                    # Col 5 — kg / unit
+                    if is_assigned:
+                        ai = QTableWidgetItem("—")
+                        ai.setTextAlignment(Qt.AlignCenter)
+                        ai.setForeground(QColor("#aaaaaa"))
+                        ai.setFlags(_no_interact)
+                        self.mat_table.setItem(row, 5, ai)
+                    elif is_mass:
+                        fi = QTableWidgetItem(f"{kg_factor:g}" if kg_factor > 0 else "")
+                        fi.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+                        fi.setData(Qt.UserRole, kg_factor)
+                        fi.setFlags(_no_interact)
+                        fi.setToolTip("Auto-calculated from unit definition")
+                        self.mat_table.setItem(row, 5, fi)
+                    else:
+                        saved_val = saved_kg.get(mat_uuid, 0.0)
+                        edit = QLineEdit("" if saved_val <= 0 else f"{saved_val:g}")
+                        edit.setPlaceholderText("kg per unit")
+                        edit.setValidator(QDoubleValidator(0, 1e9, 4))
+                        edit.textChanged.connect(
+                            lambda t, r=row, q=qty: self._on_factor_changed(t, r, q)
+                        )
+                        sort_item = QTableWidgetItem()
+                        sort_item.setData(Qt.UserRole, saved_val)
+                        self.mat_table.setItem(row, 5, sort_item)
+                        self.mat_table.setCellWidget(row, 5, edit)
+
+                    self._rows_metadata.append({
+                        "uuid":          mat_uuid,
+                        "material_name": name_val,
+                        "category":      category,
+                        "unit":          unit,
+                        "qty":           qty,
+                        "kg_factor":     kg_factor,
+                        "qty_kg":        qty_kg,
+                        "is_assigned":   is_assigned,
+                    })
+
+        # Sorting is intentionally disabled: cell widgets (QLineEdit) capture
+        # the row index at insertion time, so physical row reordering would
+        # cause _on_factor_changed to update the wrong row.  Search filtering
+        # (which only hides rows without reordering) is sufficient for navigation.
+        self.mat_table.setSortingEnabled(False)
+        self._refresh_mat_count()
+
+    def _on_factor_changed(self, text: str, row: int, qty: float):
+        try:
+            val    = float(text or 0)
+            qty_kg = qty * val
+            self._rows_metadata[row]["kg_factor"] = val
+            self._rows_metadata[row]["qty_kg"]    = qty_kg
+            item = self.mat_table.item(row, 4)
+            if item:
+                item.setText(f"{qty_kg:,.0f}" if qty_kg > 0 else "—")
+                item.setData(Qt.UserRole, qty_kg)
+            sort = self.mat_table.item(row, 5)
+            if sort:
+                sort.setData(Qt.UserRole, val)
+            self._update_summary()
+        except Exception:
+            pass
+
+    def _on_search(self, text: str):
+        text = text.lower().strip()
+        for row in range(self.mat_table.rowCount()):
+            meta = self._rows_metadata[row]
+            match = (
+                text in meta["material_name"].lower()
+                or text in meta["category"].lower()
+            )
+            hidden = not match
+            if not hidden and self._hide_assigned and meta["is_assigned"]:
+                hidden = True
+            self.mat_table.setRowHidden(row, hidden)
+        self._refresh_mat_count()
+
+    def _on_hide_assigned(self, checked: bool):
+        self._hide_assigned = checked
+        self._on_search(self.search_in.text())
+
+    def _refresh_mat_count(self):
+        visible = sum(
+            1 for r in range(self.mat_table.rowCount())
+            if not self.mat_table.isRowHidden(r)
+        )
+        total = self.mat_table.rowCount()
+        self.mat_count_lbl.setText(f"Showing {visible} of {total} materials")
+
+    # ── Live summary ──────────────────────────────────────────────────
+
+    def _update_summary(self):
+        cap   = self.capacity_in.value()
+        gross = self.gross_in.value()
+        empty = max(0.0, gross - cap)
+        dist  = self.dist_in.value()
+        ef    = self.ef_in.value()
+
+        total_kg      = 0.0
+        selected_count = 0
+
+        for row in range(self.mat_table.rowCount()):
+            chk_w = self.mat_table.cellWidget(row, 0)
+            if not chk_w:
+                continue
+            chk = chk_w.findChild(QCheckBox)
+            if chk and chk.isChecked():
+                qty_kg = (self.mat_table.item(row, 4).data(Qt.UserRole) or 0.0)
+                total_kg += qty_kg
+                selected_count += 1
+
+        total_t  = total_kg / 1000.0
+        trips    = math.ceil(total_t / cap) if cap > 0 and total_t > 0 else 0
+        loaded   = gross * trips * dist * ef
+        ret      = empty * trips * dist * ef
+        emission = loaded + ret
+
+        cls_name = _CLASSES[self._selected_cls][0]
+
+        self._s_class.setText(cls_name)
+        self._s_dist.setText(f"{dist:.1f} km" if dist > 0 else "—")
+        self._s_cap.setText(f"{cap:.2f} t")
+        self._s_mats.setText(str(selected_count) if selected_count else "—")
+        self._s_load.setText(f"{total_kg:,.0f} kg" if total_kg > 0 else "—")
+
+        if trips > 0:
+            overload = total_t > cap
+            self._s_trips.setText(str(trips))
+            self._s_trips.setStyleSheet(
+                "color: #cf1322; font-weight: bold;" if overload else ""
+            )
+        else:
+            self._s_trips.setText("—")
+            self._s_trips.setStyleSheet("")
+
+        if emission > 0:
+            self._s_emission.setText(f"{emission:,.1f} kgCO₂e")
+            self._s_breakdown.setText(
+                f"Loaded {loaded:,.1f}  +  Return {ret:,.1f}"
+            )
+        else:
+            self._s_emission.setText("—")
+            self._s_breakdown.setText(
+                "Select materials and enter distance" if dist == 0 or selected_count == 0
+                else ""
+            )
+
+        self._refresh_empty_label()
+
+    # ── Validation & save ─────────────────────────────────────────────
+
+    def _on_save(self):
+        if self.dist_in.value() <= 0:
+            QMessageBox.critical(self, "Error",
+                "Distance must be greater than 0 km.")
             return
-        self.stack.setCurrentIndex(1)
-        self.step_lbl.setText("Step 2: Cargo & Material Assignment")
-        self.next_btn.setVisible(False)
-        self.finish_btn.setVisible(True)
-        self.back_btn.setVisible(True)
-        self.step2.update_weight_counter()  # Refresh capacity link
 
-    def _load_existing(self):
-        d = self.existing_data
-        v = d.get("vehicle", {})
-        r = d.get("route", {})
-
-        # Step 1 — Vehicle
-        self.step1.name_in.setText(v.get("name", ""))
-        self.step1.capacity_in.setValue(v.get("capacity", 0))
-        self.step1.empty_wt_in.setValue(v.get("empty_weight", 0))
-        self.step1.loading_in.setValue(v.get("loading_pct", 100))
-        self.step1.ef_in.setValue(v.get("emission_factor", 0.055))
-
-        # Step 1 — Route
-        self.step1.origin_in.setText(r.get("origin", ""))
-        self.step1.dest_in.setText(r.get("destination", ""))
-        self.step1.dist_in.setValue(r.get("distance_km", 0))
-
-        # Trigger recalculate so payload labels update
-        self.step1._recalculate()
-
-    def _go_back(self):
-        self.stack.setCurrentIndex(0)
-        self.step_lbl.setText("Step 1: Vehicle & Route Details")
-        self.next_btn.setVisible(True)
-        self.finish_btn.setVisible(False)
-        self.back_btn.setVisible(False)
-
-    def _finish(self):
-        if not self.step2.validate():
+        selected = self._get_selected()
+        if not selected:
+            QMessageBox.critical(self, "Error",
+                "Select at least one material.")
             return
+
+        missing = [m["name"] for m in selected if m["kg_factor"] <= 0]
+        if missing:
+            QMessageBox.critical(self, "Missing kg/unit Factor",
+                "These materials need a kg/unit factor:\n• "
+                + "\n• ".join(missing))
+            return
+
         self.accept()
 
-    def get_vehicle_entry(self) -> dict:
-        step1_data = self.step1.get_data()
-        materials = self.step2.get_selected_materials()
+    def _get_selected(self) -> list:
+        result = []
+        for row in range(self.mat_table.rowCount()):
+            chk_w = self.mat_table.cellWidget(row, 0)
+            if not chk_w:
+                continue
+            chk = chk_w.findChild(QCheckBox)
+            if not (chk and chk.isChecked()):
+                continue
 
-        vehicle = step1_data["vehicle"]
-        route = step1_data["route"]
+            meta  = self._rows_metadata[row]
+            edit  = self.mat_table.cellWidget(row, 5)
+            if isinstance(edit, QLineEdit):
+                try:
+                    kg_factor = float(edit.text() or 0)
+                except ValueError:
+                    kg_factor = 0.0
+            else:
+                kg_factor = (self.mat_table.item(row, 5).data(Qt.UserRole) or 0.0)
+
+            result.append({
+                "uuid":      meta["uuid"],
+                "kg_factor": kg_factor,
+                "name":      meta["material_name"],
+            })
+        return result
+
+    # ── Load existing entry ───────────────────────────────────────────
+
+    def _load_existing(self):
+        d  = self.existing_data
+        v  = d.get("vehicle", {})
+        r  = d.get("route", {})
+
+        self.source_in.setText(r.get("origin", ""))
+        self.dist_in.setValue(r.get("distance_km", 0))
+
+        # Resolve class index from saved vehicle_class name
+        saved_cls = v.get("vehicle_class", "")
+        idx = next(
+            (i for i, c in enumerate(_CLASSES) if c[0] == saved_cls),
+            3   # fallback HDV Large
+        )
+        self._selected_cls = idx
+        for i, btn in enumerate(self._class_btns):
+            btn.setChecked(i == idx)
+
+        # Load override values (block signals → single update at end)
+        for w in (self.capacity_in, self.gross_in, self.ef_in):
+            w.blockSignals(True)
+        cap = v.get("capacity", _CLASSES[idx][4])
+        self.capacity_in.setValue(cap)
+        self.gross_in.setMinimum(cap)
+        self.gross_in.setValue(v.get("gross_weight", cap + _CLASSES[idx][2]))
+        self.ef_in.setValue(v.get("emission_factor", _CLASSES[idx][3]))
+        for w in (self.capacity_in, self.gross_in, self.ef_in):
+            w.blockSignals(False)
+
+        # If advanced values differ from class defaults, open the section
+        cap_def = _CLASSES[idx][4]
+        ef_def  = _CLASSES[idx][3]
+        if (abs(cap - cap_def) > 0.01
+                or abs(v.get("emission_factor", ef_def) - ef_def) > 1e-4):
+            self._toggle_advanced()
+
+        self._refresh_empty_label()
+        self._update_summary()
+
+    # ── Build entry dict ──────────────────────────────────────────────
+
+    def get_vehicle_entry(self) -> dict:
+        materials = self._get_selected()
+        cap   = self.capacity_in.value()
+        gross = self.gross_in.value()
+        empty = max(0.0, gross - cap)
+        dist  = self.dist_in.value()
+        ef    = self.ef_in.value()
+        cls   = _CLASSES[self._selected_cls][0]
 
         total_kg = sum(
-            m["kg_factor"]
-            * next(
-                (r["qty"] for r in self.step2._rows_metadata if r["uuid"] == m["uuid"]),
+            m["kg_factor"] * next(
+                (r["qty"] for r in self._rows_metadata if r["uuid"] == m["uuid"]),
                 0.0,
             )
             for m in materials
         )
-        total_t = total_kg / 1000.0
-        distance = route["distance_km"]
-        ef = vehicle["emission_factor"]
-        emissions = total_t * distance * ef
+        total_t  = total_kg / 1000.0
+        trips    = math.ceil(total_t / cap) if cap > 0 and total_t > 0 else 0
+        emission = (gross + empty) * trips * dist * ef
 
         return {
             "id": self.existing_data.get("id", str(uuid.uuid4())),
-            "vehicle": vehicle,
-            "route": route,
-            "materials": materials,
-            "summary": {
-                "total_cargo_kg": total_kg,
-                "total_cargo_t": total_t,
-                "distance_km": distance,
+            "vehicle": {
+                "name":            cls,
+                "capacity":        cap,
+                "gross_weight":    gross,
+                "empty_weight":    empty,
                 "emission_factor": ef,
-                "total_emissions_kgco2e": emissions,
+                "vehicle_class":   cls,
+            },
+            "route": {
+                "origin":      self.source_in.text().strip(),
+                "destination": "Site",
+                "distance_km": dist,
+            },
+            "materials": [
+                {"uuid": m["uuid"], "kg_factor": m["kg_factor"]}
+                for m in materials
+            ],
+            "summary": {
+                "total_cargo_kg":         total_kg,
+                "total_cargo_t":          total_t,
+                "trips":                  trips,
+                "distance_km":            dist,
+                "emission_factor":        ef,
+                "total_emissions_kgco2e": emission,
             },
             "meta": {
                 "created_at": self.existing_data.get("meta", {}).get(
@@ -819,4 +756,5 @@ class TransportDialog(QDialog):
                 ),
                 "updated_at": datetime.datetime.now().isoformat(),
             },
+            "state": self.existing_data.get("state", {}),
         }

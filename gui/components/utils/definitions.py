@@ -163,40 +163,33 @@ STRUCTURE_CHUNKS = [
 ]
 
 
+# Vehicle presets — EF values from IPCC AR5 (WGIII, 2014) / matching CSV source.
+# gross_weight = fully loaded vehicle weight (vehicle tare + full payload).
+# capacity     = net payload capacity (cargo only).
+# empty_weight is derived at runtime: gross_weight - capacity.
 DEFAULT_VEHICLES = {
-    "Small Truck (5T)": {
-        "name": "Small Truck (5T)",
-        "capacity": 5.0,
-        "empty_weight": 2.0,
-        "payload": 3.0,
-        "emission_factor": 0.062,
+    "Light Duty Vehicle (<4.5T)": {
+        "name": "Light Duty Vehicle (<4.5T)",
+        "capacity": 2.5,
+        "gross_weight": 3.5,
+        "emission_factor": 1.2,
     },
-    "Medium Truck (10T)": {
-        "name": "Medium Truck (10T)",
-        "capacity": 10.0,
-        "empty_weight": 4.0,
-        "payload": 6.0,
-        "emission_factor": 0.055,
+    "HDV Small (4.5–9T)": {
+        "name": "HDV Small (4.5–9T)",
+        "capacity": 7.0,
+        "gross_weight": 9.5,
+        "emission_factor": 0.7,
     },
-    "Large Truck (20T)": {
-        "name": "Large Truck (20T)",
-        "capacity": 20.0,
-        "empty_weight": 6.5,
-        "payload": 13.5,
-        "emission_factor": 0.048,
+    "HDV Medium (9–12T)": {
+        "name": "HDV Medium (9–12T)",
+        "capacity": 10.5,
+        "gross_weight": 14.0,
+        "emission_factor": 0.55,
     },
-    "Trailer (40T)": {
-        "name": "Trailer (40T)",
-        "capacity": 40.0,
-        "empty_weight": 12.0,
-        "payload": 28.0,
-        "emission_factor": 0.038,
-    },
-    "Mini Truck (2T)": {
-        "name": "Mini Truck (2T)",
-        "capacity": 2.0,
-        "empty_weight": 1.0,
-        "payload": 1.0,
-        "emission_factor": 0.071,
+    "HDV Large (>12T)": {
+        "name": "HDV Large (>12T)",
+        "capacity": 24.5,
+        "gross_weight": 35.0,
+        "emission_factor": 0.19,
     },
 }
