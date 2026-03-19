@@ -210,18 +210,32 @@ class CheckpointManagerDialog(QDialog):
             raw_date = cp.get("date", "")
             try:
                 from datetime import datetime
-                dt = datetime.strptime(raw_date, "%Y%m%d_%H%M%S")
-                formatted_date = dt.strftime("%Y-%m-%d  %H:%M:%S")
+                # Timestamp is stored as YYYYmmdd_HHMMSS_mmm — strip milliseconds
+                ts = raw_date.rsplit("_", 1)[0] if raw_date.count("_") == 2 else raw_date
+                dt = datetime.strptime(ts, "%Y%m%d_%H%M%S")
+                formatted_date = dt.strftime("%d %b %Y, %I:%M %p")
             except Exception:
                 formatted_date = raw_date
 
+            _ro = Qt.ItemIsEnabled | Qt.ItemIsSelectable
+
             label_item = QTableWidgetItem(cp.get("label", ""))
             label_item.setFont(QFont("", -1, QFont.Bold))
+            label_item.setFlags(_ro)
+
+            date_item = QTableWidgetItem(formatted_date)
+            date_item.setFlags(_ro)
+
+            notes_item = QTableWidgetItem(cp.get("notes", ""))
+            notes_item.setFlags(_ro)
+
+            file_item = QTableWidgetItem(cp.get("filename", ""))
+            file_item.setFlags(_ro)
 
             self.table.setItem(row, 0, label_item)
-            self.table.setItem(row, 1, QTableWidgetItem(formatted_date))
-            self.table.setItem(row, 2, QTableWidgetItem(cp.get("notes", "")))
-            self.table.setItem(row, 3, QTableWidgetItem(cp.get("filename", "")))
+            self.table.setItem(row, 1, date_item)
+            self.table.setItem(row, 2, notes_item)
+            self.table.setItem(row, 3, file_item)
 
         if not checkpoints:
             self.table.setRowCount(1)

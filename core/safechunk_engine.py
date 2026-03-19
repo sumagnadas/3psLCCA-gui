@@ -74,9 +74,15 @@ def _decode(raw: bytes) -> dict:
             return json.loads(zlib.decompress(raw[4:]).decode("utf-8"))
         except Exception as e:
             raise ValueError(f"Corrupt LCCA binary data: {e}")
-    # Try plain JSON (dev/readable mode)
+    # Only attempt plain JSON if the content is valid UTF-8 text.
+    # This prevents a defective binary file (with corrupted MAGIC) from being
+    # silently misinterpreted as a readable-mode JSON file.
     try:
-        return json.loads(raw.decode("utf-8"))
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError:
+        raise ValueError("Not a valid LCCA file: binary data with no LCCA magic.")
+    try:
+        return json.loads(text)
     except Exception:
         raise ValueError("Not a valid LCCA file.")
 
@@ -376,6 +382,22 @@ class SafeChunkEngine:
                     if not self._restore_chunk_from_backup(name):
                         unrecovered.append(name)
                 if unrecovered:
+                    # Write an empty chunk file for each unrecoverable chunk so
+                    # that future reads return {} silently instead of re-firing
+                    # the "missing" error on every subsequent open.  The manifest
+                    # entry is also removed so the integrity check won't flag it.
+                    _m = self._load_manifest()
+                    _c = _m.get("chunks", {})
+                    for name in unrecovered:
+                        try:
+                            lcca_path = self.chunks_path / f"{name}{LCCA_EXT}"
+                            lcca_path.write_bytes(_encode({}, self.readable))
+                            self._log(f"Wrote empty placeholder for lost chunk '{name}'.")
+                        except Exception as _e:
+                            self._log(f"Could not write placeholder for '{name}': {_e}")
+                        _c.pop(name, None)
+                    _m["chunks"] = _c
+                    self._save_manifest(_m)
                     self._handle_error(
                         f"Could not restore {len(unrecovered)} chunk(s) — "
                         f"no valid backup found: {unrecovered}. "
@@ -385,6 +407,16 @@ class SafeChunkEngine:
             # ── Blob integrity check ───────────────────────────────────────────
             damaged_blobs = self._verify_blobs()
             if damaged_blobs:
+                # Remove damaged blobs from manifest immediately so the same
+                # error does not re-fire on every subsequent open.
+                _bm = self._load_blob_manifest()
+                _bl = _bm.get("blobs", {})
+                for name in damaged_blobs:
+                    _bl.pop(name, None)
+                _bm["blobs"] = _bl
+                self._write_admin(self.blob_manifest_path, _bm)
+                # Mark dirty so _update_blob_manifest_hashes runs on detach.
+                self._session_dirty = True
                 self._handle_error(
                     f"{len(damaged_blobs)} blob(s) are missing or corrupt: "
                     f"{damaged_blobs}. These files need to be re-uploaded."
@@ -526,6 +558,16 @@ class SafeChunkEngine:
         """
         manifest = self._load_manifest()
         chunks = manifest.get("chunks", {})
+
+        # Prune entries for files that no longer exist so they don't
+        # trigger repeated "missing" errors on future opens.
+        existing = {
+            lcca.name[: -len(LCCA_EXT)]
+            for lcca in self.chunks_path.glob(f"*{LCCA_EXT}")
+        }
+        for stale in [k for k in list(chunks) if k not in existing]:
+            del chunks[stale]
+            self._log(f"Manifest: removed stale entry for missing chunk '{stale}'.")
 
         for lcca in self.chunks_path.glob(f"*{LCCA_EXT}"):
             chunk_name = lcca.name[: -len(LCCA_EXT)]
@@ -763,10 +805,16 @@ class SafeChunkEngine:
             except Exception as e:
                 self._log(f"Read failed {chunk_name}{label}: {e}. Trying next.")
 
-        self._handle_error(
-            f"All copies of '{chunk_name}' are missing or unreadable "
-            f"(.lcca, .bak, .ebak). Returning empty dict — data is lost."
-        )
+        # All copies are gone. Write an empty placeholder so this message
+        # never fires again for the same chunk on future opens.
+        try:
+            lcca.write_bytes(_encode({}, self.readable))
+            self._log(
+                f"All copies of '{chunk_name}' were missing — "
+                f"wrote empty placeholder. Data for this chunk is lost."
+            )
+        except Exception as _e:
+            self._log(f"Could not write placeholder for '{chunk_name}': {_e}")
         return {}
 
     @requires_active
@@ -1363,6 +1411,15 @@ class SafeChunkEngine:
         """Recomputes SHA256 of every .blob file and writes blob_manifest.json."""
         manifest = self._load_blob_manifest()
         blobs = manifest.get("blobs", {})
+
+        # Prune entries for blobs no longer on disk.
+        existing = {
+            f.name[: -len(BLOB_EXT)]
+            for f in self.blobs_path.glob(f"*{BLOB_EXT}")
+        }
+        for stale in [k for k in list(blobs) if k not in existing]:
+            del blobs[stale]
+            self._log(f"Blob manifest: removed stale entry for missing blob '{stale}'.")
 
         for blob_file in self.blobs_path.glob(f"*{BLOB_EXT}"):
             blob_name = blob_file.name[: -len(BLOB_EXT)]
