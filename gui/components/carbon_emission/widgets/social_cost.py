@@ -13,6 +13,7 @@ from ...base_widget import ScrollableForm
 from ...utils.form_builder.form_definitions import FieldDef, Section
 from ...utils.form_builder.form_builder import build_form
 from ...utils.display_format import fmt, DECIMAL_PLACES
+from ...utils.validation_helpers import freeze_form, freeze_widgets
 
 # ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -585,13 +586,12 @@ class SocialCost(ScrollableForm):
         return {"errors": errors, "warnings": warnings}
 
     def freeze(self, frozen: bool = True):
-        self.btn_clear.setEnabled(not frozen)
-        self.source.setEnabled(not frozen)
-        self.inr_to_local_rate.setEnabled(not frozen)
-        self.usd_to_local_rate.setEnabled(not frozen)
-        self.scc_value.setEnabled(not frozen)
-        self.ssp_scenario.setEnabled(not frozen)
-        self.rcp_scenario.setEnabled(not frozen)
+        freeze_widgets(frozen, self.btn_clear)
+        freeze_form(
+            HEADER_FIELDS + NITI_FIELDS + RICKE_FIELDS + CUSTOM_FIELDS,
+            self,
+            frozen,
+        )
 
     def clear_all(self):
         self._suppress_signals = True

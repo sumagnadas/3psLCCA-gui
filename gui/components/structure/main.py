@@ -42,6 +42,8 @@ class _ExcelParseWorker(QThread):
 
 
 class StructureTabView(QWidget):
+    tab_changed = Signal(str)  # emits the tab name when user clicks a tab
+
     def __init__(self, controller=None):
         super().__init__()
         self.setObjectName("StructureTabView")  # For identification in Manager
@@ -102,6 +104,7 @@ class StructureTabView(QWidget):
         # --- CONNECTIONS ---
         self.excel_btn.clicked.connect(self._open_excel_import)
         self.trash_btn.clicked.connect(self.toggle_trash_view)
+        self.tab_view.currentChanged.connect(self._on_tab_changed)
 
     def on_refresh(self):
         """Refreshes all active tabs and updates the global trash count."""
@@ -355,6 +358,10 @@ class StructureTabView(QWidget):
                 "grand_total": grand_total,
             },
         }
+
+    def _on_tab_changed(self, index: int):
+        name = self.tab_view.tabText(index)
+        self.tab_changed.emit(name)
 
     def select_tab(self, name: str):
         """External helper to switch tabs (e.g., from a Sidebar)."""

@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QTabWidget
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QPalette
 from gui.components.carbon_emission.widgets.material_emissions import MaterialEmissions
 from gui.components.carbon_emission.widgets.transport_emissions import (
@@ -13,6 +13,8 @@ from gui.components.carbon_emission.widgets.social_cost import SocialCost
 
 
 class CarbonEmissionTabView(QWidget):
+    tab_changed = Signal(str)  # emits the tab name when user clicks a tab
+
     def __init__(self, controller=None):
         super().__init__()
 
@@ -44,6 +46,7 @@ class CarbonEmissionTabView(QWidget):
         self.tab_view.addTab(SocialCost(controller=controller), "Social Cost of Carbon")
 
         main_layout.addWidget(self.tab_view)
+        self.tab_view.currentChanged.connect(self._on_tab_changed)
 
     def freeze(self, frozen: bool = True):
         for i in range(self.tab_view.count()):
@@ -80,6 +83,9 @@ class CarbonEmissionTabView(QWidget):
                 result = tab.get_data()
                 data[result["chunk"]] = result["data"]
         return {"chunk": "carbon_emission_data", "data": data}
+
+    def _on_tab_changed(self, index: int):
+        self.tab_changed.emit(self.tab_view.tabText(index))
 
     def select_tab(self, name):
         tabs = [

@@ -20,6 +20,7 @@ from ...utils.unit_resolver import analyze_conversion_sympy
 from ...utils.definitions import UNIT_DISPLAY
 from ...utils.display_format import fmt, fmt_comma
 from ...utils.icons import make_icon, make_icon_btn
+from ...utils.validation_helpers import freeze_widgets
 
 
 def _fmt_unit(code: str) -> str:
@@ -528,7 +529,7 @@ class MaterialEmissions(QWidget):
             excl_btn.clicked.connect(
                 lambda _, ci=chunk_id, cn=comp_name, i=idx: self._toggle_inclusion(ci, cn, i, False)
             )
-            excl_btn.setEnabled(not self._frozen)
+            freeze_widgets(self._frozen, edit_btn, excl_btn)
             t.setCellWidget(row, 9, self._btn_container(edit_btn, excl_btn))
 
         t.update_height()
@@ -562,6 +563,7 @@ class MaterialEmissions(QWidget):
             edit_btn.clicked.connect(
                 lambda _, ci=chunk_id, cn=comp_name, i=idx, it=item: self._open_emission_edit(ci, cn, i, it)
             )
+            freeze_widgets(self._frozen, edit_btn)
 
             if reason in ["Missing Data", "Suspicious Data"]:
                 t.set_row_style(
@@ -573,7 +575,7 @@ class MaterialEmissions(QWidget):
                 incl_btn.clicked.connect(
                     lambda _, ci=chunk_id, cn=comp_name, i=idx: self._toggle_inclusion(ci, cn, i, True)
                 )
-                incl_btn.setEnabled(not self._frozen)
+                freeze_widgets(self._frozen, incl_btn)
                 t.setCellWidget(row, 8, self._btn_container(edit_btn, incl_btn))
         t.update_height()
         t.setUpdatesEnabled(True)

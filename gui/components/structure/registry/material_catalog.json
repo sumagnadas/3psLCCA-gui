@@ -122,9 +122,9 @@
       "Record[0] (sheetName='Foundation', type='Excavation') \u203a Item[89] ('Marshy Soil (Mechanical) Small (Above 6)'): carbon_emission is 'not_available'."
     ],
     "file_meta": {
-      "size_bytes": 175621,
-      "last_modified": "2026-03-19T08:07:36.960831",
-      "md5": "02abad95351147693d6083c7043c8d1b"
+      "size_bytes": 189523,
+      "last_modified": "2026-03-21T03:44:11.209138",
+      "md5": "4e9ed2b2619ecf07746ee7992b6d0fe4"
     }
   },
   "INDIA/Maharashtra/Mumbai-2023": {
@@ -206,13 +206,13 @@
       "Record[0] (sheetName='Foundation', type='Excavation') \u203a Item[44] ('Laterite Rock (Above 6 m)'): carbon_emission is 'not_available'."
     ],
     "file_meta": {
-      "size_bytes": 175834,
-      "last_modified": "2026-03-19T08:07:57.379273",
-      "md5": "8cb5d439648961f483d947dca7fd0970"
+      "size_bytes": 185247,
+      "last_modified": "2026-03-21T03:44:27.541730",
+      "md5": "72a9ac0cda04b678043d9e23e702d525"
     }
   },
   "_meta": {
-    "built_at": "2026-03-20T15:49:06.892145",
+    "built_at": "2026-03-21T03:44:28.832800",
     "root": "material_database",
     "total_files": 2,
     "ok": 2,

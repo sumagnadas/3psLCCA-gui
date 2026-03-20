@@ -94,24 +94,25 @@ CID_FIELDS: set[str] = {
     "Component",
 }
 
-# Internal canonical keys (lowercased) used throughout the rest of the code
-# Maps CID field name → internal key
+# All keys are lowercase — lookup uses field_part.lower() for case-insensitive matching.
+# Required columns: name, unit, rate.  All others (including id) are optional.
 CID_TO_INTERNAL: dict[str, str] = {
-    "ID": "id",
-    "Name": "name",
-    "Quantity": "quantity",
-    "Unit": "unit",
-    "Rate": "rate",
-    "Rate_Src": "rate_src",
-    "Carbon_Emission_Factor": "carbon_emission",
-    "Carbon_Emission_units": "carbon_emission_units_den",
-    "Conversion_Factor": "conversion_factor",
-    "Carbon_Emission_Src": "carbon_emission_src",
-    "Scrap_Rate": "scrap_rate",
-    "Recovery_Pct": "recovery_pct",
-    "Grade": "grade",
-    "Type": "type",
-    "Component": "component",
+    "id": "id",  # optional
+    "name": "name",
+    "quantity": "quantity",
+    "unit": "unit",
+    "rate": "rate",
+    "rate_src": "rate_src",
+    "carbon_emission_factor": "carbon_emission",
+    "carbon_emission_units": "carbon_emission_units_den",
+    "carbon_emission_units_den": "carbon_emission_units_den",
+    "conversion_factor": "conversion_factor",
+    "carbon_emission_src": "carbon_emission_src",
+    "scrap_rate": "scrap_rate",
+    "recovery_pct": "recovery_pct",
+    "grade": "grade",
+    "type": "type",
+    "component": "component",
 }
 
 REQUIRED_FIELDS = {"name", "unit", "rate"}
@@ -170,16 +171,14 @@ def _normalise_header(h: str) -> str:
 def _parse_cid_header(raw: str) -> str | None:
     """
     Return the internal key if raw header is a valid CID# column, else None.
-    Prefix match is case-insensitive; field name must match exactly.
+    Entire header is lowercased before matching — case-insensitive throughout.
     e.g. "CID#Name" → "name",  "cid#rate" → "rate",  "Name" → None
     """
-    stripped = str(raw).strip()
-    if not stripped.lower().startswith(CID_PREFIX):
+    stripped = str(raw).strip().lower()
+    if not stripped.startswith(CID_PREFIX):
         return None
-    field_part = stripped[len(CID_PREFIX) :]  # preserve original casing
-    if field_part in CID_TO_INTERNAL:
-        return CID_TO_INTERNAL[field_part]
-    return None  # prefix present but field name doesn't match exactly
+    field_part = stripped[len(CID_PREFIX):]
+    return CID_TO_INTERNAL.get(field_part)
 
 
 def _build_column_map(

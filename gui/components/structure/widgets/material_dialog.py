@@ -695,7 +695,7 @@ class MaterialDialog(QDialog):
 
     def __init__(self, comp_name: str, parent=None, data: dict = None,
                  emissions_only: bool = False, recyclability_only: bool = False,
-                 country: str = None):
+                 country: str = None, sor_db_key: str = None):
         super().__init__(parent)
         self.is_edit = data is not None
         self.emissions_only = emissions_only
@@ -749,32 +749,25 @@ class MaterialDialog(QDialog):
         scroll.setWidget(inner)
         outer.addWidget(scroll)
 
-        # ── SOR selector ──────────────────────────────────────────────────
-        self._sor_options = (
-            _list_sor_options(country)
-            if not (emissions_only or recyclability_only)
-            else []
-        )
+        # SOR database is selected project-wide (General Info → Project Settings).
         self.sor_cb = None
-        if self._sor_options:
-            sor_row = QHBoxLayout()
-            sor_row.setContentsMargins(0, 0, 0, 0)
-            sor_row.setSpacing(8)
-            sor_lbl = QLabel("Suggestions from:")
-            sor_lbl.setStyleSheet("font-size: 11px; color: #555;")
-            sor_row.addWidget(sor_lbl)
-            self.sor_cb = QComboBox()
-            self.sor_cb.setMinimumHeight(26)
-            self.sor_cb.wheelEvent = lambda event: event.ignore()
-            for opt in self._sor_options:
-                self.sor_cb.addItem(opt["label"], opt["db_key"])
-            self.sor_cb.addItem("— No suggestions —", self._NO_SUGGESTIONS_CODE)
-            sor_row.addWidget(self.sor_cb, stretch=1)
-            root.addLayout(sor_row)
+        self._sor_db_key = (sor_db_key or "").strip()
+
+        # ── Active SOR info label ─────────────────────────────────────────
+        if not (emissions_only or recyclability_only):
+            sor_info_row = QHBoxLayout()
+            sor_info_row.setContentsMargins(0, 0, 0, 0)
+            sor_info_row.setSpacing(4)
+            sor_info_row.addWidget(QLabel("Suggestions from:"))
+            _sor_val = self._sor_db_key if self._sor_db_key else "— not set (configure in Project Settings)"
+            sor_val_lbl = QLabel(_sor_val)
+            sor_val_lbl.setStyleSheet("font-size: 11px; color: #555; font-style: italic;")
+            sor_info_row.addWidget(sor_val_lbl, stretch=1)
+            root.addLayout(sor_info_row)
 
         # ── Sub-category filter ───────────────────────────────────────────
         self.type_filter_cb = None
-        if self._sor_options:
+        if self._sor_db_key and not (emissions_only or recyclability_only):
             sub_row = QHBoxLayout()
             sub_row.setContentsMargins(0, 0, 0, 0)
             sub_row.setSpacing(8)
@@ -1193,11 +1186,13 @@ class MaterialDialog(QDialog):
     # ── SOR / suggestion helpers ──────────────────────────────────────────
 
     def _reload_suggestions(self):
-        db_keys = None
-        if self.sor_cb:
-            key = self.sor_cb.currentData()
-            if key:
-                db_keys = [key]
+        if not self._sor_db_key or self._sor_db_key == self._NO_SUGGESTIONS_CODE:
+            self._suggestions = {}
+            self.name_in.setCompleter(None)
+            self._active_completer = None
+            return
+
+        db_keys = [self._sor_db_key]
 
         if self.type_filter_cb is not None:
             type_filter = self.type_filter_cb.currentData()
@@ -1287,10 +1282,8 @@ class MaterialDialog(QDialog):
 
     def _populate_type_filter(self, preselect: str = None):
         db_keys = None
-        if self.sor_cb:
-            key = self.sor_cb.currentData()
-            if key:
-                db_keys = [key]
+        if self._sor_db_key and self._sor_db_key != self._NO_SUGGESTIONS_CODE:
+            db_keys = [self._sor_db_key]
 
         types = _list_sor_types(db_keys=db_keys)
 
@@ -1569,9 +1562,7 @@ class MaterialDialog(QDialog):
 
             # Snapshot original DB values (written once; never overwritten on re-open)
             if not self._db_original:
-                _db_key = item.get("db_key", "") or (
-                    self.sor_cb.currentData() if self.sor_cb else ""
-                )
+                _db_key = item.get("db_key", "") or self._sor_db_key
                 self._db_original = {
                     "unit":                      item.get("unit", ""),
                     "rate":                      item.get("rate", ""),
@@ -1654,14 +1645,8 @@ class MaterialDialog(QDialog):
         return cb
 
     def _get_unit_info(self, code: str):
-        si_val = UNIT_TO_SI.get(code)
-        dim = UNIT_DIMENSION.get(code)
-        if si_val is None:
-            cu = next((c for c in get_custom_units() if c["symbol"] == code), None)
-            if cu:
-                si_val = cu["to_si"]
-                dim = cu["dimension"]
-        return si_val, dim
+        from ...utils.unit_resolver import get_unit_info as _get_unit_info
+        return _get_unit_info(code)
 
     _DB_NA = frozenset({"not_available", "", None})
 

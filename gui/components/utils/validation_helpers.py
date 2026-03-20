@@ -43,8 +43,11 @@ Each layer only runs on fields that passed the previous layer:
     required=any,   value present, out of range → warning
 """
 
-from PySide6.QtCore import QEvent, QObject, QPoint, QRect, QTimer
+from PySide6.QtCore import QEvent, QObject, QPoint, QRect, Qt, QTimer
+from PySide6.QtGui import QCursor
 from PySide6.QtWidgets import (
+    QApplication,
+    QAbstractButton,
     QAbstractSpinBox,
     QComboBox,
     QLineEdit,
@@ -218,11 +221,14 @@ class _LockEventFilter(QObject):
         QEvent.Type.MouseButtonDblClick,
         QEvent.Type.Wheel,
         QEvent.Type.KeyPress,
+        QEvent.Type.Enter,
+        QEvent.Type.Leave,
     }
     _TOOLTIP_TRIGGER = {
         QEvent.Type.MouseButtonPress,
         QEvent.Type.MouseButtonDblClick,
         QEvent.Type.KeyPress,
+        QEvent.Type.Enter,
     }
     _TOOLTIP_MS  = 1200  # how long the tooltip stays visible
     _THROTTLE_MS = 1200  # min gap between successive shows
@@ -248,7 +254,7 @@ class _LockEventFilter(QObject):
             return
         w = self.target_widget
         pos = w.mapToGlobal(QPoint(w.width() // 2, w.height() + 4))
-        QToolTip.showText(pos, "Project is locked — click here to unlock",
+        QToolTip.showText(pos, "This project is locked.\nClick here to unlock and enable editing.",
                           None, QRect(), self._TOOLTIP_MS)
         self._throttle.start(self._THROTTLE_MS)
 
@@ -268,6 +274,16 @@ class _LockEventFilter(QObject):
         ):
             # Debounce: rapid clicks restart the timer, collapsing into one show.
             self._show_timer.start()
+
+        # Enter: set override cursor so Qt's internal IBeam/Arrow can't override it.
+        if event.type() == QEvent.Type.Enter:
+            QApplication.setOverrideCursor(QCursor(Qt.CursorShape.ForbiddenCursor))
+            return super().eventFilter(obj, event)
+
+        # Leave: restore cursor.
+        if event.type() == QEvent.Type.Leave:
+            QApplication.restoreOverrideCursor()
+            return super().eventFilter(obj, event)
 
         return True  # consume — prevent any accidental change
 
@@ -333,9 +349,9 @@ def freeze_form(
 def freeze_widgets(frozen: bool, *widgets) -> None:
     """Freeze/unfreeze arbitrary non-FieldDef widgets (buttons, tables, etc.).
 
-    When frozen: disables the widget AND installs the lock event filter so
-    the tooltip fires immediately if the user somehow interacts with it.
-    When unfrozen: re-enables and removes the filter.
+    Buttons (QAbstractButton) stay enabled when frozen so mouse events reach
+    the event filter, which consumes the click and shows the lock tooltip.
+    All other widgets are disabled as before.
 
         def freeze(self, frozen: bool = True):
             freeze_form(MY_FIELDS, self, frozen)
@@ -344,10 +360,20 @@ def freeze_widgets(frozen: bool, *widgets) -> None:
     for w in widgets:
         if w is None:
             continue
-        w.setEnabled(not frozen)
         if frozen:
             w.setToolTip(LOCK_TOOLTIP)
             w.installEventFilter(_lock_filter)
+            if isinstance(w, QAbstractButton):
+                # Keep enabled — disabled buttons don't receive mouse events
+                # so the filter can't show the tooltip. Use a forbidden cursor
+                # as the visual "locked" cue instead.
+                w.setCursor(QCursor(Qt.CursorShape.ForbiddenCursor))
+            else:
+                w.setEnabled(False)
         else:
             w.setToolTip("")
             w.removeEventFilter(_lock_filter)
+            if isinstance(w, QAbstractButton):
+                w.unsetCursor()
+            else:
+                w.setEnabled(True)

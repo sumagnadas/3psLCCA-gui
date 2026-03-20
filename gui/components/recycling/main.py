@@ -20,6 +20,7 @@ import datetime
 from ..utils.definitions import UNIT_DISPLAY
 from ..utils.display_format import fmt, fmt_comma
 from ..utils.icons import make_icon, make_icon_btn
+from ..utils.validation_helpers import freeze_widgets
 
 
 # ---------------------------------------------------------------------------
@@ -281,6 +282,7 @@ class Recycling(QWidget):
         self.setObjectName("RecyclingWidget")
 
         self._details_visible = False
+        self._frozen = False
 
         outer_layout = QVBoxLayout(self)
         outer_layout.setContentsMargins(0, 0, 0, 0)
@@ -455,6 +457,7 @@ class Recycling(QWidget):
             excl_btn.clicked.connect(
                 lambda _, ci=chunk_id, cn=comp_name, i=idx: self._toggle_inclusion(ci, cn, i, False)
             )
+            freeze_widgets(self._frozen, edit_btn, excl_btn)
             t.setCellWidget(row, 9, self._btn_container(edit_btn, excl_btn))
 
         t.update_height()
@@ -491,6 +494,7 @@ class Recycling(QWidget):
             edit_btn.clicked.connect(
                 lambda _, ci=chunk_id, cn=comp_name, i=idx, it=item: self._open_recyclability_edit(ci, cn, i, it)
             )
+            freeze_widgets(self._frozen, edit_btn)
 
             if reason == "Missing Data":
                 t.setCellWidget(row, 8, self._btn_container(edit_btn))
@@ -500,6 +504,7 @@ class Recycling(QWidget):
                 incl_btn.clicked.connect(
                     lambda _, ci=chunk_id, cn=comp_name, i=idx: self._toggle_inclusion(ci, cn, i, True)
                 )
+                freeze_widgets(self._frozen, incl_btn)
                 t.setCellWidget(row, 8, self._btn_container(edit_btn, incl_btn))
 
         t.update_height()
@@ -634,6 +639,7 @@ class Recycling(QWidget):
         }
 
     def freeze(self, frozen: bool = True):
+        self._frozen = frozen
         self.included_table.setEnabled(not frozen)
         self.excluded_table.setEnabled(not frozen)
 

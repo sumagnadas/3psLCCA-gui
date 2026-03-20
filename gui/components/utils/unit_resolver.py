@@ -85,35 +85,99 @@ def get_unit_info(
 ) -> tuple[float | None, str | None]:
     """Return (to_si, dimension) for *code*.
 
-    Resolution order:
-      1. Canonical UNIT_TO_SI / UNIT_DIMENSION registry.
-      2. Global custom-units cache (loaded from DB), then the explicit
-         *custom_units* list if provided (kept for backward compatibility).
-      3. _UNIT_ALIASES fallback (then re-tries 1 & 2).
-
+    Handles simple, alias, and compound unit expressions.
     Returns (None, None) when the unit is completely unknown.
+
+    Cases handled (in order):
+      1. Empty / None                   → (None, None)
+      2. Direct canonical registry hit  → UNIT_TO_SI / UNIT_DIMENSION
+      3. Custom unit lookup             → global cache or caller-supplied list
+      4. Alias normalisation            → e.g. sqm→m2, M.T.→tonne
+      5. CO₂e label stripped            → kgCO₂e/kgCO2e → kg
+      6. Power notation                 → m^2, kg^1  (base ** exp)
+      7. Ratio (slash-separated)        → kg/mm, kgCO₂e/sqm, kg-mm/m-m^2
+      8. Product (dash-separated)       → sqm-mm, kg-mm, m-m2-kg
     """
+    # ── Case 1: empty ─────────────────────────────────────────────────────────
     if not code:
         return None, None
 
+    # Normalize whitespace and repeated dashes so compound units are robust.
+    # Step 1: strip outer whitespace.
+    # Step 2: remove spaces around operators / and ^ (e.g. "kg / mm" → "kg/mm").
+    # Step 3: replace remaining spaces with dash (e.g. "sqm mm" → "sqm-mm").
+    # Step 4: collapse repeated dashes (e.g. "sqm - mm" → "sqm--mm" → "sqm-mm").
     code = code.strip()
+    for _op in ("/", "^"):
+        code = _op.join(p.strip() for p in code.split(_op))
+    code = code.replace(" ", "-")
+    while "--" in code:
+        code = code.replace("--", "-")
 
-    # 1. Direct hit in canonical registry
+    # ── Case 2: direct canonical registry ─────────────────────────────────────
     si_val = UNIT_TO_SI.get(code)
     dim = UNIT_DIMENSION.get(code)
     if si_val is not None:
         return si_val, dim
 
-    # 2. Global cache first, then any explicit list passed by caller
+    # ── Case 3: custom units (global cache + caller-supplied list) ─────────────
     for source in (_custom_units_cache, custom_units or []):
         cu = next((c for c in source if c.get("symbol") == code), None)
         if cu:
             return float(cu.get("to_si", 1.0)), cu.get("dimension")
 
-    # 3. Alias lookup — lowercase for robustness
+    # ── Case 4: alias normalisation (sqm→m2, Sqm.→m2, M.T.→tonne, …) ─────────
     alias = _UNIT_ALIASES.get(code.lower())
     if alias and alias != code:
         return get_unit_info(alias, custom_units)
+
+    # ── Case 5: CO₂e label stripped (kgCO₂e → kg, tCO2e → tonne) ─────────────
+    for suffix in ("CO₂e", "CO2e"):
+        if code.endswith(suffix):
+            return get_unit_info(code[: -len(suffix)], custom_units)
+
+    # ── Case 6: power notation (m^2, kg^1) — no slash or dash ─────────────────
+    if "^" in code and "/" not in code and "-" not in code:
+        base, _, exp_str = code.partition("^")
+        try:
+            exp = float(exp_str)
+            si, dim = get_unit_info(base.strip(), custom_units)
+            if si is not None:
+                return si ** exp, dim
+        except (ValueError, TypeError):
+            pass
+
+    # ── Case 7: ratio — split on first "/" ─────────────────────────────────────
+    # Numerator and denominator may themselves be products or power expressions.
+    # e.g.  kg/mm  →  1.0 / 0.001 = 1000   (dim "Mass/Length")
+    #       kg-mm/m-m^2  →  (1.0*0.001) / (1.0*1.0) = 0.001
+    if "/" in code:
+        num_str, _, den_str = code.partition("/")
+        num_si, num_dim = get_unit_info(num_str.strip(), custom_units)
+        den_si, den_dim = get_unit_info(den_str.strip(), custom_units)
+        if num_si is not None and den_si is not None:
+            combined_dim = (
+                f"{num_dim}/{den_dim}" if num_dim and den_dim else None
+            )
+            return num_si / den_si, combined_dim
+        return None, None
+
+    # ── Case 8: product — dash-separated parts ─────────────────────────────────
+    # Each part is resolved independently (may itself be a power expression).
+    # e.g.  sqm-mm  →  1.0 * 0.001 = 0.001   (dim "Area*Length")
+    #       kg-mm-m →  1.0 * 0.001 * 1.0 = 0.001
+    if "-" in code:
+        parts = [p.strip() for p in code.split("-") if p.strip()]
+        total_si = 1.0
+        dims: list[str] = []
+        for part in parts:
+            si, dim = get_unit_info(part, custom_units)
+            if si is None:
+                return None, None
+            total_si *= si
+            if dim and dim not in dims:
+                dims.append(dim)
+        return total_si, "*".join(dims) if dims else None
 
     return None, None
 

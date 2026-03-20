@@ -24,6 +24,7 @@ from PySide6.QtGui import QColor
 from ...utils.definitions import STRUCTURE_CHUNKS, UNIT_DIMENSION
 from ...utils.display_format import fmt, fmt_comma
 from ...utils.icons import make_icon, make_icon_btn
+from ...utils.validation_helpers import freeze_widgets
 
 
 # ---------------------------------------------------------------------------
@@ -269,8 +270,7 @@ class VehicleCard(QGroupBox):
         trash_btn = make_icon_btn("trash", "Remove", size=32, icon_color="#e74c3c", hover_color="192, 57, 43")
         edit_btn.clicked.connect(on_edit)
         trash_btn.clicked.connect(on_trash)
-        edit_btn.setEnabled(not frozen)
-        trash_btn.setEnabled(not frozen)
+        freeze_widgets(frozen, edit_btn, trash_btn)
         btn_row.addStretch()
         btn_row.addWidget(edit_btn)
         btn_row.addWidget(trash_btn)
@@ -733,7 +733,7 @@ class TransportEmissions(QWidget):
 
     def freeze(self, frozen: bool = True):
         self._frozen = frozen
-        self.add_btn.setEnabled(not frozen)
+        freeze_widgets(frozen, self.add_btn)
         self.on_refresh()  # rebuild cards with updated button states
 
     def showEvent(self, event):

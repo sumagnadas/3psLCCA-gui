@@ -441,14 +441,14 @@ class ProjectWindow(QMainWindow):
         top_bar_layout.addWidget(self.btn_calculate)
 
         self._frozen = False
-        self._lock_tooltip = "Lock project to prevent editing"
-        self.btn_lock = make_icon_btn("lock-open", tooltip="Lock project to prevent editing", size=32)
+        self._lock_tooltip = "Click to lock this project and prevent accidental edits."
+        self.btn_lock = make_icon_btn("lock-open", tooltip=self._lock_tooltip, size=30)
         self.btn_lock.setStyleSheet(
-            "QPushButton         { border-radius:16px; padding:0px; border:none; background:transparent; }"
-            "QPushButton:hover   { border-radius:16px; padding:0px; background:rgba(46,204,113,40); }"
-            "QPushButton:pressed { border-radius:16px; padding:0px; background:rgba(46,204,113,80); }"
-            "QPushButton:checked { border-radius:16px; padding:0px; background:rgba(241,196,15,180); }"
-            "QPushButton:checked:hover { border-radius:16px; padding:0px; background:rgba(241,196,15,220); }"
+            "QPushButton         { border-radius:15px; padding:0px; border:none; background:transparent; }"
+            "QPushButton:hover   { border-radius:15px; padding:0px; background:rgba(46,204,113,40); }"
+            "QPushButton:pressed { border-radius:15px; padding:0px; background:rgba(46,204,113,80); }"
+            "QPushButton:checked { border-radius:15px; padding:0px; background:rgba(241,196,15,180); }"
+            "QPushButton:checked:hover { border-radius:15px; padding:0px; background:rgba(241,196,15,220); }"
         )
         self.btn_lock.setCheckable(True)
         self.btn_lock.installEventFilter(self)
@@ -506,6 +506,8 @@ class ProjectWindow(QMainWindow):
         }
 
         self.outputs_page.register_pages(self.widget_map)
+        self.widget_map["Construction Work Data"].tab_changed.connect(self._sync_sidebar_from_tab)
+        self.widget_map["Carbon Emission Data"].tab_changed.connect(self._sync_sidebar_from_tab)
 
         for widget in self.widget_map.values():
             self.content_stack.addWidget(widget)
@@ -614,9 +616,9 @@ class ProjectWindow(QMainWindow):
         self._frozen = checked
         self.btn_lock.setIcon(make_icon("lock" if checked else "lock-open"))
         self._lock_tooltip = (
-            "Project is locked — click here to unlock"
+            "This project is locked.\nClick here to unlock and enable editing."
             if checked else
-            "Lock project to prevent editing"
+            "Click to lock this project and prevent accidental edits."
         )
         set_lock_tooltip_target(self.btn_lock if checked else None)
         for page in self.widget_map.values():
@@ -627,6 +629,12 @@ class ProjectWindow(QMainWindow):
         self.outputs_page.run_validation()
         self.content_stack.setCurrentWidget(self.outputs_page)
         items = self.sidebar.findItems("Outputs", Qt.MatchExactly)
+        if items:
+            self.sidebar.setCurrentItem(items[0])
+
+    def _sync_sidebar_from_tab(self, tab_name: str):
+        """Highlight the sidebar item matching the active tab (no content switch)."""
+        items = self.sidebar.findItems(tab_name, Qt.MatchExactly | Qt.MatchRecursive)
         if items:
             self.sidebar.setCurrentItem(items[0])
 

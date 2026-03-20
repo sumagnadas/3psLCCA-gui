@@ -41,6 +41,7 @@ from ...utils.form_builder.form_builder import build_form
 from ...utils.remarks_editor import RemarksEditor
 from ...utils.display_format import fmt, fmt_comma, DECIMAL_PLACES
 from ...utils.icons import make_icon_btn
+from ...utils.validation_helpers import freeze_widgets
 
 CHUNK = "machinery_emissions_data"
 BASE_DOCS_URL = "https://yourdocs.com/carbon/machinery/"
@@ -294,7 +295,7 @@ class _EquipmentRow:
         self.hrs.setEnabled(not frozen)
         self.days.setEnabled(not frozen)
         self.ef.setEnabled(not frozen)
-        self.btn_delete.setEnabled(not frozen)
+        freeze_widgets(frozen, self.btn_delete)
 
     def to_dict(self) -> dict:
         return {
@@ -551,10 +552,7 @@ class _DetailedTable(QWidget):
 
     def freeze(self, frozen: bool = True):
         self._frozen = frozen
-        self.btn_add.setEnabled(not frozen)
-        self.btn_defaults.setEnabled(not frozen)
-        self.btn_clear.setEnabled(not frozen)
-        self.btn_apply.setEnabled(not frozen)
+        freeze_widgets(frozen, self.btn_add, self.btn_defaults, self.btn_clear, self.btn_apply)
         for row in self._rows:
             row.freeze(frozen)
 

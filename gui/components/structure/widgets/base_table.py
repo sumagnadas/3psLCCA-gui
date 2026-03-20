@@ -14,6 +14,7 @@ from PySide6.QtGui import QPainter
 from ...utils.definitions import UNIT_DISPLAY
 from ...utils.display_format import fmt, fmt_comma
 from ...utils.icons import make_icon, make_icon_btn
+from ...utils.validation_helpers import freeze_widgets
 
 
 # ---------------------------------------------------------------------------
@@ -268,13 +269,12 @@ class StructureTableWidget(QTableWidget):
         self.update_height()
 
     def freeze(self, frozen: bool = True):
-        """Disable/enable action buttons in every row."""
+        """Freeze/unfreeze action buttons in every row."""
         self._frozen = frozen
         for row in range(self.rowCount()):
             container = self.cellWidget(row, 6)
             if container:
-                for btn in container.findChildren(QPushButton):
-                    btn.setEnabled(not frozen)
+                freeze_widgets(frozen, *container.findChildren(QPushButton))
 
     def resizeEvent(self, event):
         super().resizeEvent(event)

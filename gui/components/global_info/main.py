@@ -134,6 +134,14 @@ GENERAL_FIELDS = [
         "text",
         doc_slug="unit-system",
     ),
+    FieldDef(
+        "sor_database",
+        "Material Suggestions",
+        "Schedule of Rates database used to auto-suggest material names, rates, and emission factors.",
+        "combo",
+        options=[],
+        doc_slug="sor-database",
+    ),
     # FieldDef(
     #     "currency_to_usd_rate",
     #     "Exchange Rate to USD",
@@ -152,6 +160,8 @@ class GeneralInfo(ScrollableForm):
     created = Signal()
 
     _LOCKED = {"project_country", "project_currency", "unit_system"}
+    # sor_database is editable but should not be wiped by Clear All
+    _SKIP_CLEAR = _LOCKED | {"sor_database"}
 
     def __init__(self, controller=None):
         super().__init__(controller=controller, chunk_name="general_info")
@@ -183,8 +193,8 @@ class GeneralInfo(ScrollableForm):
         for entry in GENERAL_FIELDS:
             if isinstance(entry, Section):
                 continue
-            if entry.key in self._LOCKED:
-                continue  # never clear country or currency
+            if entry.key in self._SKIP_CLEAR:
+                continue  # never clear locked or settings fields
 
             widget = getattr(self, entry.key, None)
             if widget is None:
@@ -228,6 +238,44 @@ class GeneralInfo(ScrollableForm):
         display = self._UNIT_SYSTEM_LABELS.get(raw, raw)
         data = {**data, "unit_system": display}
         super().load_data_dict(data)
+
+        # Populate SOR combo based on project country (country is now loaded)
+        country = data.get("project_country", "")
+        saved_key = data.get("sor_database", "")
+        self._populate_sor_combo(country, saved_key)
+
+    def _populate_sor_combo(self, country: str, saved_key: str = "") -> None:
+        """Fill the Material Suggestions combo from the registry for *country*."""
+        try:
+            from ..structure.widgets.material_dialog import _list_sor_options
+            options = _list_sor_options(country)
+        except Exception:
+            options = []
+
+        cb = getattr(self, "sor_database", None)
+        if cb is None:
+            return
+
+        cb.blockSignals(True)
+        cb.clear()
+        for opt in options:
+            cb.addItem(opt["label"], opt["db_key"])
+        cb.addItem("— No suggestions —", "")
+
+        if saved_key:
+            idx = cb.findData(saved_key)
+            if idx >= 0:
+                cb.setCurrentIndex(idx)
+
+        cb.setEnabled(bool(options))
+        cb.blockSignals(False)
+
+    def get_data_dict(self) -> dict:
+        data = super().get_data_dict()
+        cb = getattr(self, "sor_database", None)
+        if cb is not None:
+            data["sor_database"] = cb.currentData() or ""
+        return data
 
     def get_data(self) -> dict:
         return {"chunk": "general_info", "data": self.get_data_dict()}

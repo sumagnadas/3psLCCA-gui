@@ -15,6 +15,7 @@ import datetime
 
 from .base_table import StructureTableWidget
 from .material_dialog import MaterialDialog
+from ...utils.validation_helpers import freeze_widgets
 
 
 # ---------------------------------------------------------------------------
@@ -111,7 +112,7 @@ class StructureManagerWidget(QWidget):
 
         add_row_btn = QPushButton(f"Add Material to {name}")
         add_row_btn.clicked.connect(lambda checked=False, n=name: self.open_dialog(n))
-        add_row_btn.setEnabled(not self._frozen)
+        freeze_widgets(self._frozen, add_row_btn)
         self._add_material_btns.append(add_row_btn)
 
         g_layout.addWidget(table)
@@ -185,6 +186,12 @@ class StructureManagerWidget(QWidget):
         except Exception:
             return ""
 
+    def _get_project_sor_db(self) -> str:
+        try:
+            return self.controller.get_chunk("general_info").get("sor_database", "") or ""
+        except Exception:
+            return ""
+
     def _existing_names(self, comp_name) -> set:
         """Return lowercased active material names for comp_name."""
         data = self.controller.engine.fetch_chunk(self.chunk_name) or {}
@@ -195,7 +202,8 @@ class StructureManagerWidget(QWidget):
         }
 
     def open_dialog(self, comp_name):
-        dialog = MaterialDialog(comp_name, self, country=self._get_project_country())
+        dialog = MaterialDialog(comp_name, self, country=self._get_project_country(),
+                                sor_db_key=self._get_project_sor_db())
         if dialog.exec():
             values = dialog.get_values()
             name = values.get("material_name", "").strip()
@@ -224,7 +232,8 @@ class StructureManagerWidget(QWidget):
                 item_to_edit = items[original_idx]
 
                 dialog = MaterialDialog(comp_name, self, data=item_to_edit,
-                                        country=self._get_project_country())
+                                        country=self._get_project_country(),
+                                        sor_db_key=self._get_project_sor_db())
                 if dialog.exec():
                     new_values = dialog.get_values()
 
@@ -300,9 +309,7 @@ class StructureManagerWidget(QWidget):
 
     def freeze(self, frozen: bool = True):
         self._frozen = frozen
-        self.add_comp_btn.setEnabled(not frozen)
-        for btn in self._add_material_btns:
-            btn.setEnabled(not frozen)
+        freeze_widgets(frozen, self.add_comp_btn, *self._add_material_btns)
         for table in self.sections.values():
             table.freeze(frozen)
 

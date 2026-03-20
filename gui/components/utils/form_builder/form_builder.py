@@ -193,8 +193,9 @@ def freeze_img_uploads(host, fields: list, frozen: bool) -> None:
         if isinstance(f, FieldDef) and f.field_type == "upload_img":
             btn_row = btn_rows.get(f.key)
             if btn_row:
+                from ..validation_helpers import freeze_widgets
                 for btn in btn_row.findChildren(QPushButton):
-                    btn.setEnabled(not frozen)
+                    freeze_widgets(frozen, btn)
 
 
 def build_form(
@@ -361,6 +362,11 @@ def build_form(
         # upload_img adds its own container widget above; all others add here
         if f.field_type != "upload_img":
             layout.addWidget(widget)
+
+        # Permanently blocked fields are frozen at build time
+        if f.blocked:
+            from ..validation_helpers import freeze_form
+            freeze_form([f], host, frozen=True)
 
         if f.required:
             required_keys.append(f.key)
