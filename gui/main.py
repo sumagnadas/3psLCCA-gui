@@ -5,18 +5,12 @@ from PySide6.QtCore import QObject, QEvent, Qt
 from PySide6.QtGui import QFocusEvent, QMouseEvent
 from gui.project_manager import ProjectManager
 from gui.palette_manager import dark, light
+from gui.theme import QSS_TOKENS
 
 
 def _apply_theme(scheme: Qt.ColorScheme, app: QApplication) -> None:
-    """
-    Take the current OS palette exactly as-is and only override the
-    interaction roles with the green accent. Nothing else is touched —
-    surfaces, text, borders all stay native.
-    """
-    if scheme == Qt.ColorScheme.Light:
-        app.setPalette(light)
-    else:
-        app.setPalette(dark)
+    # Light theme only — dark mode not currently supported
+    app.setPalette(light)
     app.setStyleSheet(app.styleSheet())
     
 
@@ -45,7 +39,7 @@ class SelectTextOnFocus(QObject):
 # ── Entry point ───────────────────────────────────────────────────────────────
 def main():
     os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
-    os.environ["QT_SCALE_FACTOR"] = "1.1"
+    os.environ["QT_SCALE_FACTOR"] = "1"
 
     app = QApplication(sys.argv)
 
@@ -69,7 +63,10 @@ def main():
     if os.path.exists(qss_path):
         try:
             with open(qss_path, "r") as f:
-                app.setStyleSheet(f.read())
+                qss = f.read()
+            for token, value in QSS_TOKENS.items():
+                qss = qss.replace(token, value)
+            app.setStyleSheet(qss)
         except Exception as e:
             print(f"Warning: Could not load stylesheet: {e}")
 

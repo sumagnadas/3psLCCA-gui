@@ -341,7 +341,8 @@ class TrafficEmissions(ScrollableForm):
         main_form.addRow(self._remarks)
 
         # Clear All
-        btn_clear = QPushButton("Clear All")
+        self.btn_clear = QPushButton("Clear All")
+        btn_clear = self.btn_clear
         btn_clear.setMinimumHeight(35)
         btn_clear.clicked.connect(self.clear_all)
 

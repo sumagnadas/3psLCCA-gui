@@ -124,7 +124,7 @@ class ProjectCardDelegate(QStyledItemDelegate):
         )
 
         pill_bg = QColor(badge_col)
-        pill_bg.setAlpha(30)
+        pill_bg.setAlpha(255)
         painter.setBrush(QBrush(pill_bg))
         painter.setPen(QPen(badge_col, 1))
         painter.drawRoundedRect(badge_rect, self.BADGE_H / 2, self.BADGE_H / 2)
@@ -257,8 +257,9 @@ class HomePage(QWidget):
 
     def _make_header(self, special_effect: bool = True) -> QWidget:
         bar = QFrame()
-        bar.setFrameShape(QFrame.StyledPanel)
+        bar.setFrameShape(QFrame.NoFrame)
         bar.setFixedHeight(64)
+        bar.setStyleSheet("QFrame { border-bottom: 1px solid palette(light); }")
 
         layout = QHBoxLayout(bar)
         layout.setContentsMargins(28, 0, 28, 0)
@@ -403,8 +404,9 @@ class HomePage(QWidget):
 
     def _make_footer(self) -> QWidget:
         bar = QFrame()
-        bar.setFrameShape(QFrame.StyledPanel)
+        bar.setFrameShape(QFrame.NoFrame)
         bar.setFixedHeight(32)
+        bar.setStyleSheet("QFrame { border-top: 1px solid palette(light); }")
 
         layout = QHBoxLayout(bar)
         layout.setContentsMargins(16, 0, 16, 0)
@@ -435,7 +437,8 @@ class HomePage(QWidget):
     def _divider() -> QFrame:
         line = QFrame()
         line.setFrameShape(QFrame.HLine)
-        line.setFrameShadow(QFrame.Sunken)
+        line.setFrameShadow(QFrame.Plain)
+        line.setStyleSheet("color: palette(light);")
         return line
 
     def _item_for_pid(self, pid: str) -> "ProjectListItem | None":

@@ -497,7 +497,7 @@ class Recycling(QWidget):
             freeze_widgets(self._frozen, edit_btn)
 
             if reason == "Missing Data":
-                t.setCellWidget(row, 8, self._btn_container(edit_btn))
+                t.setCellWidget(row, 8, self._btn_container(edit_btn, align_left=True))
             else:
                 incl_btn = make_icon_btn("include", "Include", icon_color="#2ecc71", hover_color="46, 204, 113")
                 incl_btn.setFocusPolicy(Qt.NoFocus)
@@ -505,7 +505,7 @@ class Recycling(QWidget):
                     lambda _, ci=chunk_id, cn=comp_name, i=idx: self._toggle_inclusion(ci, cn, i, True)
                 )
                 freeze_widgets(self._frozen, incl_btn)
-                t.setCellWidget(row, 8, self._btn_container(edit_btn, incl_btn))
+                t.setCellWidget(row, 8, self._btn_container(edit_btn, incl_btn, align_left=True))
 
         t.update_height()
 
@@ -547,13 +547,15 @@ class Recycling(QWidget):
             self._mark_dirty()
             QTimer.singleShot(0, self.on_refresh)
 
-    def _btn_container(self, *buttons) -> QWidget:
+    def _btn_container(self, *buttons, align_left: bool = False) -> QWidget:
         w = QWidget()
         h = QHBoxLayout(w)
         h.setContentsMargins(2, 2, 2, 2)
         h.setSpacing(4)
         for btn in buttons:
             h.addWidget(btn)
+        if align_left:
+            h.addStretch()
         return w
 
     def _open_recyclability_edit(self, chunk_id: str, comp_name: str, data_index: int, item: dict):

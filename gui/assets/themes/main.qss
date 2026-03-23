@@ -1,76 +1,402 @@
+/* ============================================================
+   Bootstrap 5-inspired light theme for 3psLCCA
+   Tokens are defined in gui/theme.py and substituted at runtime.
+
+   $primary         brand green
+   $primary-hover   ~13% darker (button hover)
+   $primary-active  ~25% darker (button pressed)
+   $white           #ffffff
+   $body-bg         app / sidebar background
+   $body-color      primary text
+   $secondary       muted / secondary text
+   $border          standard border
+   $border-subtle   slightly darker border
+   $muted           disabled / placeholder
+   $surface         neutral hover background
+   $surface-active  neutral pressed background
+   ============================================================ */
+
+/* ── Base ───────────────────────────────────────────────────────────────── */
 * {
-    font-family: "Ubuntu", Arial;
-    border-color: palette(mid);
-}
-QTreeWidget {
-    background-color: palette(alternate-base);
-}
-QTreeView::item {
-    padding: 10px;
-}
-QLineEdit,
-QTextEdit {
-    background-color: palette(alternate-base);
-    border: 1px solid palette(light);
-}
-QMenuBar {
-    background-color: palette(window);
-    color: palette(text);
-}
-QTabWidget::pane {
-    background-color: palette(alternate-base);
-    border: 0px;
-}
-QTabBar::tab {
-    background-color: palette(alternate-base);
-    border-right: 1px solid palette(light);
-    border-bottom: 0px solid palette(light);
-    padding: 10px;
-}
-QTabBar::tab:selected {
-    background-color: palette(highlight);
-    border-bottom: 1px solid palette(highlight);
-}
-QTableView {
-    gridline-color: transparent;
-}
-QTableView::item {
-    border: 1px solid palette(light);
-}
-QTableView ,
-QHeaderView ,
-QTableView QTableCornerButton ,
-QScrollBar{
-    background-color: palette(alternate-base);
-    color: palette(text);
-}
-QScrollBar{
-    margin: 15px 0 15px 0; /* Margin ensures space for buttons */
-}
-QScrollBar::handle{
-    background-color: palette(light);
-    margin: 0 2px 0 2px; /* Gap between handle and scrollbar edge */
-}
-QScrollBar::add-line:vertical {
-    height: 15px;
-    subcontrol-position: bottom; /* Or bottom for add-line */
-    subcontrol-origin: margin;
-}
-QScrollBar::sub-line:vertical {
-    height: 15px;
-    subcontrol-position: top; /* Or top for sub-line */
-    subcontrol-origin: margin;
+    font-family: "Ubuntu", Arial, sans-serif;
+    font-size: 13px;
+    color: $body-color;
+    outline: none;
 }
 
-#top_bar {
-    border-bottom: 1px solid palette(light);
+QWidget {
+    background-color: $body-bg;
+}
+
+/* ── Form controls — inputs ─────────────────────────────────────────────── */
+QLineEdit,
+QTextEdit,
+QPlainTextEdit {
+    background-color: $white;
+    border: 1px solid $border;
+    border-radius: 6px;
+    padding: 6px 12px;
+    min-height: 32px;
+    color: $body-color;
+    selection-background-color: $primary;
+    selection-color: #000000;
+}
+
+QLineEdit:hover,
+QTextEdit:hover {
+    border-color: $border-subtle;
+}
+
+QLineEdit:focus,
+QTextEdit:focus,
+QPlainTextEdit:focus {
+    border: 2px solid $primary;
+    padding: 5px 11px;
+}
+
+QLineEdit:disabled,
+QTextEdit:disabled,
+QPlainTextEdit:disabled {
+    background-color: $body-bg;
+    color: $muted;
+    border-color: $border;
+}
+
+/* ── Form controls — spin boxes ─────────────────────────────────────────── */
+QSpinBox,
+QDoubleSpinBox {
+    background-color: $white;
+    border: 1px solid $border;
+    border-radius: 6px;
+    padding: 6px 12px;
+    min-height: 32px;
+    color: $body-color;
+}
+
+QSpinBox:hover,
+QDoubleSpinBox:hover {
+    border-color: $border-subtle;
+}
+
+QSpinBox:focus,
+QDoubleSpinBox:focus {
+    border: 2px solid $primary;
+    padding: 5px 11px;
+}
+
+QSpinBox:disabled,
+QDoubleSpinBox:disabled {
+    background-color: $body-bg;
+    color: $muted;
+    border-color: $border;
+}
+
+QSpinBox::up-button,
+QSpinBox::down-button,
+QDoubleSpinBox::up-button,
+QDoubleSpinBox::down-button {
+    width: 18px;
+    border: none;
+    background: transparent;
+}
+
+/* ── Form controls — combo box ──────────────────────────────────────────── */
+QComboBox {
+    background-color: $white;
+    border: 1px solid $border;
+    border-radius: 6px;
+    padding: 6px 12px;
+    min-height: 32px;
+    color: $body-color;
+}
+
+QComboBox:hover {
+    border-color: $border-subtle;
+}
+
+QComboBox:focus {
+    border: 2px solid $primary;
+    padding: 5px 11px;
+}
+
+QComboBox:disabled {
+    background-color: $body-bg;
+    color: $muted;
+    border-color: $border;
+}
+
+QComboBox::drop-down {
+    border: none;
+    width: 24px;
+    background: transparent;
+}
+
+QComboBox QAbstractItemView {
+    background-color: $white;
+    border: 1px solid $border;
+    border-radius: 6px;
+    padding: 4px;
+    selection-background-color: $surface;
+    selection-color: $body-color;
+}
+
+/* ── Buttons ────────────────────────────────────────────────────────────── */
+QPushButton {
+    background-color: $white;
+    border: 1px solid $border;
+    border-radius: 6px;
+    padding: 6px 16px;
+    min-height: 32px;
+    color: $body-color;
+    font-weight: 500;
 }
 
 QPushButton:hover {
-    background-color: palette(highlight);
-    color: palette(highlighted-text)
+    background-color: $surface;
+    border-color: $border-subtle;
+    color: $body-color;
 }
 
-QLineEdit:focus, QTextEdit:focus {
-    border: 1px solid palette(highlight)
+QPushButton:pressed {
+    background-color: $surface-active;
+    border-color: $muted;
+}
+
+/* Primary action button (QPushButton::default) */
+QPushButton:default {
+    background-color: $primary;
+    color: #000000;
+    border: 1px solid $primary;
+    font-weight: 600;
+}
+
+QPushButton:default:hover {
+    background-color: $primary-hover;
+    border-color: $primary-hover;
+    color: #000000;
+}
+
+QPushButton:default:pressed {
+    background-color: $primary-active;
+    border-color: $primary-active;
+    color: #000000;
+}
+
+QPushButton:disabled {
+    background-color: $body-bg;
+    color: $muted;
+    border-color: $border;
+}
+
+/* ── Tab bar ────────────────────────────────────────────────────────────── */
+QTabWidget::pane {
+    background-color: $white;
+    border: none;
+    border-top: 1px solid $border;
+}
+
+QTabBar {
+    background: transparent;
+}
+
+QTabBar::tab {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 10px 18px;
+    margin-right: 4px;
+    color: $secondary;
+    font-weight: 500;
+}
+
+QTabBar::tab:selected {
+    border-bottom: 2px solid $primary;
+    color: $body-color;
+    font-weight: 600;
+}
+
+QTabBar::tab:hover:!selected {
+    color: $body-color;
+    background-color: $surface;
+    border-radius: 6px 6px 0 0;
+}
+
+/* ── Tree / sidebar ─────────────────────────────────────────────────────── */
+QTreeWidget {
+    background-color: $body-bg;
+    border: none;
+}
+
+QTreeView::item {
+    padding: 5px 8px;
+}
+
+QTreeView::branch {
+    image: none;
+    background: $body-bg;
+}
+
+/* ── Table view ─────────────────────────────────────────────────────────── */
+QTableView {
+    background-color: $white;
+    alternate-background-color: $body-bg;
+    gridline-color: transparent;
+    border: 1px solid $border;
+    border-radius: 6px;
+}
+
+QTableView::item {
+    padding: 8px 12px;
+    border: none;
+    color: $body-color;
+}
+
+QTableView::item:selected {
+    background-color: $surface;
+    color: $body-color;
+}
+
+QTableView::item:selected:active {
+    background-color: $surface-active;
+    color: $body-color;
+}
+
+QHeaderView {
+    background-color: $body-bg;
+    border: none;
+}
+
+QHeaderView::section {
+    background-color: $body-bg;
+    color: $secondary;
+    border: none;
+    border-bottom: 2px solid $border;
+    border-right: 1px solid $border;
+    padding: 8px 12px;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+QHeaderView::section:last {
+    border-right: none;
+}
+
+QTableView QTableCornerButton::section {
+    background-color: $body-bg;
+    border: none;
+    border-bottom: 2px solid $border;
+}
+
+/* ── Scrollbar ──────────────────────────────────────────────────────────── */
+QScrollBar {
+    background: transparent;
+    margin: 0;
+}
+
+QScrollBar:vertical {
+    width: 8px;
+}
+
+QScrollBar:horizontal {
+    height: 8px;
+}
+
+QScrollBar::handle {
+    background-color: $border-subtle;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:vertical {
+    min-height: 32px;
+    margin: 2px;
+}
+
+QScrollBar::handle:horizontal {
+    min-width: 32px;
+    margin: 2px;
+}
+
+QScrollBar::handle:hover {
+    background-color: $muted;
+}
+
+QScrollBar::add-line,
+QScrollBar::sub-line {
+    width: 0;
+    height: 0;
+    background: transparent;
+}
+
+QScrollBar::add-page,
+QScrollBar::sub-page {
+    background: transparent;
+}
+
+/* ── Menu bar ───────────────────────────────────────────────────────────── */
+QMenuBar {
+    background-color: $white;
+    color: $body-color;
+    border-bottom: 1px solid $border;
+    spacing: 2px;
+}
+
+QMenuBar::item {
+    padding: 6px 12px;
+    border-radius: 4px;
+    background: transparent;
+}
+
+QMenuBar::item:selected {
+    background-color: $surface;
+    color: $body-color;
+}
+
+/* ── Dropdown menu ──────────────────────────────────────────────────────── */
+QMenu {
+    background-color: $white;
+    border: 1px solid $border;
+    border-radius: 8px;
+    padding: 6px;
+}
+
+QMenu::item {
+    border-radius: 4px;
+    padding: 7px 24px;
+    color: $body-color;
+    background: transparent;
+}
+
+QMenu::item:selected {
+    background-color: $surface;
+    color: $body-color;
+}
+
+QMenu::separator {
+    height: 1px;
+    background: $border;
+    margin: 6px 8px;
+}
+
+/* ── Status bar ─────────────────────────────────────────────────────────── */
+QStatusBar {
+    background-color: $body-bg;
+    border-top: 1px solid $border;
+    color: $secondary;
+    font-size: 12px;
+}
+
+/* ── Tooltip ────────────────────────────────────────────────────────────── */
+QToolTip {
+    background-color: $body-color;
+    color: $white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 12px;
+}
+
+/* ── Top bar ────────────────────────────────────────────────────────────── */
+#top_bar {
+    background-color: $white;
+    border-bottom: 1px solid $border;
 }

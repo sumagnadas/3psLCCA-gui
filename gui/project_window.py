@@ -26,6 +26,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QAction, QColor, QIcon, QPainter, QPalette, QFont
 
 from gui.components.utils.icons import make_icon, make_icon_btn
+from gui.theme import PRIMARY, SIDEBAR_HOVER, SIDEBAR_SEL
 from PySide6.QtWidgets import QToolTip
 
 from gui.components.save_status_bar import SaveStatusBar
@@ -77,11 +78,9 @@ SIDEBAR_TREE = {
 
 # ── Sidebar tree ──────────────────────────────────────────────────────────────
 
-_HOVER_ALPHA = 50
-_V_PAD = 3  # vertical padding per side (increases row height)
-_H_PAD = 6  # left text indent (pushes text away from accent bar)
-_ACCENT_W = 3  # width of the green left bar in px
-_SEL_ALPHA = 100  # not padding but affects how "heavy" selection feels
+_V_PAD = 3    # vertical padding per side (increases row height)
+_H_PAD = 6    # left text indent (pushes text away from accent bar)
+_ACCENT_W = 3 # width of the green left bar in px
 _ICON_SIZE = 16  # sidebar icon size in pixels
 _ICON_GAP = 5   # gap between icon and label text
 
@@ -184,8 +183,7 @@ class _SidebarTree(QTreeWidget):
         """Paint the full-width row background before the delegate runs."""
         is_sel, is_hovered = self._row_state(index)
         full = option.rect  # spans full widget width
-        accent = self.palette().color(QPalette.Accent) # get the accent from the theme-specific palette
-        
+
         painter.save()
         painter.setPen(Qt.NoPen)
 
@@ -194,18 +192,14 @@ class _SidebarTree(QTreeWidget):
         painter.drawRect(full)
 
         if is_hovered and not is_sel:
-            tint = QColor(accent)
-            tint.setAlpha(_HOVER_ALPHA)
-            painter.setBrush(tint)
+            painter.setBrush(QColor(SIDEBAR_HOVER))
             painter.drawRect(full)
 
         if is_sel:
-            fill = QColor(accent)
-            fill.setAlpha(_SEL_ALPHA)
-            painter.setBrush(fill)
+            painter.setBrush(QColor(SIDEBAR_SEL))
             painter.drawRect(full)
             # Left accent bar — flush to viewport left edge
-            painter.setBrush(accent)
+            painter.setBrush(QColor(PRIMARY))
             painter.drawRect(full.left(), full.top(), _ACCENT_W, full.height())
 
         painter.restore()
@@ -217,7 +211,6 @@ class _SidebarTree(QTreeWidget):
         """Fill the branch/indentation zone with the same background as drawRow
         so there is never a differently-colored strip on the left."""
         is_sel, is_hovered = self._row_state(index)
-        accent = self.palette().color(QPalette.Accent) # get the accent from the theme-specific palette
 
         painter.save()
         painter.setPen(Qt.NoPen)
@@ -226,15 +219,11 @@ class _SidebarTree(QTreeWidget):
         painter.drawRect(rect)
 
         if is_hovered and not is_sel:
-            tint = QColor(accent)
-            tint.setAlpha(_HOVER_ALPHA)
-            painter.setBrush(tint)
+            painter.setBrush(QColor(SIDEBAR_HOVER))
             painter.drawRect(rect)
 
         if is_sel:
-            fill = QColor(accent)
-            fill.setAlpha(_SEL_ALPHA)
-            painter.setBrush(fill)
+            painter.setBrush(QColor(SIDEBAR_SEL))
             painter.drawRect(rect)
 
         painter.restore()
@@ -453,11 +442,11 @@ class ProjectWindow(QMainWindow):
         self._lock_tooltip = "Click to lock this project and prevent accidental edits."
         self.btn_lock = make_icon_btn("lock-open", tooltip=self._lock_tooltip, size=30)
         self.btn_lock.setStyleSheet(
-            "QPushButton         { border-radius:15px; padding:0px; border:none; background:transparent; }"
-            "QPushButton:hover   { border-radius:15px; padding:0px; background:rgba(46,204,113,40); }"
-            "QPushButton:pressed { border-radius:15px; padding:0px; background:rgba(46,204,113,80); }"
-            "QPushButton:checked { border-radius:15px; padding:0px; background:rgba(241,196,15,180); }"
-            "QPushButton:checked:hover { border-radius:15px; padding:0px; background:rgba(241,196,15,220); }"
+            f"QPushButton               {{ border-radius:15px; padding:0px; border:none; background:transparent; }}"
+            f"QPushButton:hover         {{ border-radius:15px; padding:0px; background:{SIDEBAR_HOVER}; }}"
+            f"QPushButton:pressed       {{ border-radius:15px; padding:0px; background:{SIDEBAR_SEL}; }}"
+            f"QPushButton:checked       {{ border-radius:15px; padding:0px; background:rgba(241,196,15,180); }}"
+            f"QPushButton:checked:hover {{ border-radius:15px; padding:0px; background:rgba(241,196,15,220); }}"
         )
         self.btn_lock.setCheckable(True)
         self.btn_lock.installEventFilter(self)
