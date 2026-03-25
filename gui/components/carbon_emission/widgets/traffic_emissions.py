@@ -1,5 +1,4 @@
 from PySide6.QtWidgets import (
-    QDoubleSpinBox,
     QFormLayout,
     QHBoxLayout,
     QHeaderView,
@@ -19,6 +18,7 @@ from ...utils.form_builder.form_definitions import FieldDef
 from ...utils.form_builder.form_builder import build_form
 from ...utils.remarks_editor import RemarksEditor
 from ...utils.display_format import fmt, DECIMAL_PLACES
+from ...utils.table_widgets import TableDoubleSpinBox, TABLE_SPINBOX_BASE_QSS, mark_editable_column, TooltipTableMixin
 
 # ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -73,13 +73,13 @@ _YELLOW_BG = QColor(255, 255, 180)
 _YELLOW_FG = QColor(100, 80, 0)
 
 
-class _EmissionsTable(QTableWidget):
+class _EmissionsTable(TooltipTableMixin, QTableWidget):
     def __init__(self, on_change, on_total_changed=None, parent=None):
         super().__init__(len(_VEHICLES), 4, parent)
         self._on_change = on_change
         self._on_total_changed = on_total_changed
         self._reroute_km: float = 0.0
-        self._factors: dict[str, QDoubleSpinBox] = {}
+        self._factors: dict[str, TableDoubleSpinBox] = {}
         self._vpd_items: dict[str, QTableWidgetItem] = {}
         self._emission_items: dict[str, QTableWidgetItem] = {}
 
@@ -102,6 +102,7 @@ class _EmissionsTable(QTableWidget):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        mark_editable_column(self, _COL_FACTOR)
 
         for row, (key, label) in enumerate(_VEHICLES):
             lbl_item = QTableWidgetItem(label)
@@ -114,10 +115,10 @@ class _EmissionsTable(QTableWidget):
             self.setItem(row, _COL_VEH_DAY, vpd_item)
             self._vpd_items[key] = vpd_item
 
-            sb = QDoubleSpinBox()
+            sb = TableDoubleSpinBox()
             sb.setRange(0.0, 9_999.0)
             sb.setDecimals(DECIMAL_PLACES)
-            sb.setButtonSymbols(QDoubleSpinBox.NoButtons)
+            sb.setButtonSymbols(TableDoubleSpinBox.NoButtons)
             sb.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
             sb.valueChanged.connect(self._on_factor_changed)
             self.setCellWidget(row, _COL_FACTOR, sb)
@@ -216,7 +217,7 @@ class _EmissionsTable(QTableWidget):
         sb = self._factors[key]
         if is_zero:
             sb.setStyleSheet(
-                "QDoubleSpinBox { background-color: #ffffb4; color: #644f00; }"
+                f"TableDoubleSpinBox {{ {TABLE_SPINBOX_BASE_QSS} background-color: #ffffb4; color: #644f00; }}"
             )
         else:
             sb.setStyleSheet("")

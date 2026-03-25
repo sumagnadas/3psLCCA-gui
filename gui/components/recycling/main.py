@@ -11,10 +11,9 @@ from PySide6.QtWidgets import (
     QSizePolicy,
     QScrollArea,
     QToolTip,
-    QGraphicsDropShadowEffect,
 )
 from PySide6.QtCore import Qt, QSize, QTimer, QRect, QEvent
-from PySide6.QtGui import QColor
+
 import time
 import datetime
 
@@ -186,17 +185,12 @@ class _FrozenActionTable(QTableWidget):
         self.setStyleSheet(
             """
             QTableWidget {
+                background-color: palette(base);
                 border-top-left-radius: 0px;
                 border-bottom-left-radius: 0px;
             }
         """
         )
-
-        shadow = QGraphicsDropShadowEffect(self)
-        shadow.setBlurRadius(6)
-        shadow.setOffset(-3, 0)
-        shadow.setColor(QColor(0, 0, 0, 40))
-        self.setGraphicsEffect(shadow)
 
         self.verticalHeader().setVisible(False)
         self.verticalHeader().setDefaultSectionSize(35)

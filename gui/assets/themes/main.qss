@@ -100,15 +100,91 @@ QDoubleSpinBox::down-button {
     background: transparent;
 }
 
+/* ── Table-cell spin boxes (transparent, borderless — cell border highlights on focus) ── */
+TableSpinBox,
+TableDoubleSpinBox {
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0 4px;
+    margin: 0;
+    min-height: 0;
+    color: $body-color;
+}
+
+TableSpinBox:hover,
+TableDoubleSpinBox:hover {
+    background-color: transparent;
+    border: none;
+    margin: 0;
+}
+
+TableSpinBox:focus,
+TableDoubleSpinBox:focus {
+    background-color: transparent;
+    border: none;
+    padding: 0 4px;
+    margin: 0;
+}
+
+TableSpinBox:disabled,
+TableDoubleSpinBox:disabled {
+    background-color: transparent;
+    color: $muted;
+    border: none;
+}
+
+TableSpinBox::up-button,
+TableSpinBox::down-button,
+TableDoubleSpinBox::up-button,
+TableDoubleSpinBox::down-button {
+    width: 0;
+    border: none;
+    background: transparent;
+}
+
+
+/* ── Table-cell line edit (transparent, borderless — cell border on focus) ── */
+TableLineEdit {
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0 4px;
+    margin: 0;
+    min-height: 0;
+    color: $body-color;
+    selection-background-color: $primary;
+    selection-color: #000000;
+}
+
+TableLineEdit:hover {
+    background-color: transparent;
+    border: none;
+    margin: 0;
+}
+
+TableLineEdit:focus {
+    background-color: transparent;
+    border: none;
+    padding: 0 4px;
+    margin: 0;
+}
+
+TableLineEdit:disabled {
+    background-color: transparent;
+    color: $muted;
+    border: none;
+}
 
 /* ── Form controls — combo box ──────────────────────────────────────────── */
 QComboBox {
     background-color: $white;
     border: 1px solid $border;
     border-radius: 6px;
-    padding: 6px 12px;
+    padding: 6px 36px 6px 12px;
     min-height: 32px;
     color: $body-color;
+    combobox-popup: 0;
 }
 
 QComboBox:hover {
@@ -117,7 +193,7 @@ QComboBox:hover {
 
 QComboBox:focus {
     border: 2px solid $primary;
-    padding: 5px 11px;
+    padding: 5px 35px 5px 11px;
 }
 
 QComboBox:disabled {
@@ -126,16 +202,134 @@ QComboBox:disabled {
     border-color: $border;
 }
 
+QComboBox[validationState="#dc3545"] {
+    border: 1px solid #dc3545;
+}
+
+QComboBox[validationState="orange"] {
+    border: 1px solid orange;
+}
+
 QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: center right;
+    width: 32px;
     border: none;
-    width: 24px;
+    border-left: 1px solid $border;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
     background: transparent;
 }
 
-QComboBox QAbstractItemView::item {
-    padding: 6px 12px;
+QComboBox::drop-down:hover {
+    background-color: $surface;
 }
 
+/* ── Dropdown popup list ────────────────────────────────────────────────── */
+QComboBox QAbstractItemView {
+    background-color: $white;
+    border: 1px solid $border;
+    border-radius: 6px;
+    padding: 6px 0;
+    outline: none;
+    selection-background-color: transparent;
+    show-decoration-selected: 1;
+}
+
+QComboBox QAbstractItemView::item {
+    padding: 10px 16px;
+    color: $body-color;
+    border: none;
+    border-radius: 4px;
+    margin: 1px 6px;
+    min-height: 20px;
+}
+
+QComboBox QAbstractItemView::item:hover {
+    background-color: $surface;
+    color: $body-color;
+}
+
+QComboBox QAbstractItemView::item:selected {
+    background-color: $surface-active;
+    color: $body-color;
+}
+
+
+
+/* ── Form controls — check box ──────────────────────────────────────────── */
+QCheckBox {
+    spacing: 8px;
+    color: $body-color;
+}
+
+QCheckBox::indicator {
+    width: 16px;
+    height: 16px;
+    border: 1px solid $border;
+    border-radius: 4px;
+    background-color: $white;
+}
+
+QCheckBox::indicator:hover {
+    border-color: $border-subtle;
+}
+
+QCheckBox::indicator:checked {
+    background-color: $primary;
+    border-color: $primary;
+}
+
+QCheckBox::indicator:checked:hover {
+    background-color: $primary-hover;
+    border-color: $primary-hover;
+}
+
+QCheckBox::indicator:disabled {
+    background-color: $body-bg;
+    border-color: $border;
+}
+
+QCheckBox:disabled {
+    color: $muted;
+}
+
+/* ── Form controls — radio button ───────────────────────────────────────── */
+QRadioButton {
+    spacing: 8px;
+    color: $body-color;
+}
+
+QRadioButton::indicator {
+    width: 16px;
+    height: 16px;
+    border: 1px solid $border;
+    border-radius: 8px;
+    background-color: $white;
+}
+
+QRadioButton::indicator:hover {
+    border-color: $border-subtle;
+}
+
+QRadioButton::indicator:checked {
+    background-color: $primary;
+    border-color: $primary;
+}
+
+QRadioButton::indicator:checked:hover {
+    background-color: $primary-hover;
+    border-color: $primary-hover;
+}
+
+QRadioButton::indicator:disabled {
+    background-color: $body-bg;
+    border-color: $border;
+}
+
+QRadioButton:disabled {
+    color: $muted;
+}
 
 /* ── Buttons ────────────────────────────────────────────────────────────── */
 QPushButton {
@@ -233,7 +427,7 @@ QTreeView::branch {
 QTableView {
     background-color: $white;
     alternate-background-color: $body-bg;
-    gridline-color: transparent;
+    gridline-color: $border;
     border: 1px solid $border;
     border-radius: 6px;
 }
@@ -257,6 +451,11 @@ QTableView::item:selected {
 QTableView::item:selected:active {
     background-color: $surface-active;
     color: $body-color;
+}
+
+/* All widgets placed inside any table cell are transparent by default */
+QTableView QWidget {
+    background-color: transparent;
 }
 
 QHeaderView {
@@ -283,6 +482,7 @@ QTableView QTableCornerButton::section {
     background-color: $body-bg;
     border: none;
     border-bottom: 2px solid $border;
+    border-right: 1px solid $border;
 }
 
 /* ── Scrollbar ──────────────────────────────────────────────────────────── */

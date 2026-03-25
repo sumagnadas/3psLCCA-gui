@@ -4,10 +4,9 @@ from PySide6.QtWidgets import (
     QHeaderView,
     QSizePolicy,
     QMessageBox,
-    QGraphicsDropShadowEffect,
 )
 from PySide6.QtCore import Qt, QSize, QRect, QEvent
-from PySide6.QtGui import QFont, QColor
+from PySide6.QtGui import QFont
 from ...utils.definitions import UNIT_DISPLAY
 from ...utils.display_format import fmt, fmt_comma
 from ...utils.icons import make_icon
@@ -137,22 +136,15 @@ class _FrozenActionTable(QTableWidget):
         self.setFocusPolicy(Qt.NoFocus)
         self.setSelectionMode(QTableWidget.NoSelection)
         self.setFrameShape(QTableWidget.NoFrame)
-        self.setAttribute(Qt.WA_TranslucentBackground, False)
         self.setStyleSheet(
             """
             QTableWidget {
+                background-color: palette(base);
                 border-top-left-radius: 0px;
                 border-bottom-left-radius: 0px;
             }
         """
         )
-
-        # Left-side drop shadow
-        shadow = QGraphicsDropShadowEffect(self)
-        shadow.setBlurRadius(6)
-        shadow.setOffset(-3, 0)  # negative x = shadow on the left
-        shadow.setColor(QColor(0, 0, 0, 40))
-        self.setGraphicsEffect(shadow)
 
         self.verticalHeader().setVisible(False)
         self.verticalHeader().setDefaultSectionSize(_ROW_H)
@@ -261,8 +253,6 @@ class StructureTableWidget(TooltipTableMixin, QTableWidget):
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         self.setEditTriggers(QTableWidget.NoEditTriggers)
-        self.setWordWrap(True)
-        self.setTextElideMode(Qt.ElideNone)
         self.verticalHeader().setDefaultSectionSize(_ROW_H)
         self.verticalHeader().setMinimumSectionSize(_ROW_H)
         self.verticalHeader().setVisible(False)

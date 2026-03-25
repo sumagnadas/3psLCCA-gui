@@ -61,18 +61,34 @@ from .form_builder.form_definitions import FieldDef
 # ── Style helpers ─────────────────────────────────────────────────────────────
 
 
-def _border_style(widget, color: str) -> str:
+def _apply_border_style(widget, color: str):
     """
-    Return a stylesheet string that applies a coloured border without breaking
-    the widget's internal child styles.
+    Apply a coloured validation border without clobbering the app QSS.
 
-    QComboBox needs a scoped ``QComboBox { ... }`` selector — a bare
-    ``border: ...`` rule cascades into the popup list and makes its
-    background transparent.  All other widgets are fine with the bare rule.
+    QComboBox: widget-level stylesheets (even scoped ones) override the entire
+    app QSS block for that widget, losing drop-down button / popup styling.
+    Instead we set a dynamic property and let main.qss handle the border via
+    a ``QComboBox[validationState="..."]`` selector.
+
+    All other widgets: a bare ``border:`` inline rule only overrides the border
+    property and leaves the rest of the app QSS intact.
     """
     if isinstance(widget, QComboBox):
-        return f"QComboBox {{ border: 1px solid {color}; }}"
-    return f"border: 1px solid {color};"
+        widget.setProperty("validationState", color)
+        widget.style().unpolish(widget)
+        widget.style().polish(widget)
+    else:
+        widget.setStyleSheet(f"border: 1px solid {color};")
+
+
+def _clear_border_style(widget):
+    """Clear a validation border set by ``_apply_border_style``."""
+    if isinstance(widget, QComboBox):
+        widget.setProperty("validationState", "")
+        widget.style().unpolish(widget)
+        widget.style().polish(widget)
+    else:
+        widget.setStyleSheet("")
 
 
 # ── Field helpers ─────────────────────────────────────────────────────────────
@@ -102,7 +118,7 @@ def clear_field_styles(fields: list, widget_owner, skip_keys: set = None):
             continue
         widget = getattr(widget_owner, f.key, None)
         if widget:
-            widget.setStyleSheet("")
+            _clear_border_style(widget)
 
 
 # ── Centralised form validation ───────────────────────────────────────────────
@@ -140,7 +156,7 @@ def validate_form(
             error_keys.add(f.key)
             continue
         if isinstance(widget, QLineEdit) and not widget.text().strip():
-            widget.setStyleSheet(_border_style(widget, "#dc3545"))
+            _apply_border_style(widget, "#dc3545")
             errors.append(f"Missing: {f.title}")
             error_keys.add(f.key)
         elif (isinstance(widget, QAbstractSpinBox)
@@ -148,7 +164,7 @@ def validate_form(
               and widget.value() == widget.minimum()):
             # Spinbox with an explicit default uses the minimum as the "blank" sentinel.
             # If still at minimum it has never been filled — treat as a required error.
-            widget.setStyleSheet(_border_style(widget, "#dc3545"))
+            _apply_border_style(widget, "#dc3545")
             errors.append(f"Required: {f.title}")
             error_keys.add(f.key)
         # QSpinBox/QDoubleSpinBox without default: 0 is a valid value — use warn_rules
@@ -192,13 +208,13 @@ def validate_form(
         if too_low:
             label = low_msg if low_msg else f"{field_title(key, fields)} looks unusual ({val})"
             warnings.append(label)
-            widget.setStyleSheet(_border_style(widget, "orange"))
+            _apply_border_style(widget, "orange")
         elif too_high:
             label = high_msg if high_msg else f"{field_title(key, fields)} looks unusual ({val})"
             warnings.append(label)
-            widget.setStyleSheet(_border_style(widget, "orange"))
+            _apply_border_style(widget, "orange")
         else:
-            widget.setStyleSheet("")  # passed both checks — clear any stale style
+            _clear_border_style(widget)  # passed both checks — clear any stale style
 
     # ── Step 4 (caller's responsibility): cross-field checks ──────────────────
     # See module docstring for the extra-validation pattern.

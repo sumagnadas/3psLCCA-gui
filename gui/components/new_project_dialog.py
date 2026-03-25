@@ -8,23 +8,13 @@ from PySide6.QtWidgets import (
     QDialogButtonBox,
 )
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QPalette
 
 
-def _combo_error_style(widget: QComboBox) -> str:
-    """Return a full QComboBox stylesheet that adds a red border while
-    preserving the widget's palette-based background and text colours.
-    Without explicit background-color, Qt's CSS renderer leaves it blank."""
-    p = widget.palette()
-    bg  = p.color(QPalette.Base).name()
-    fg  = p.color(QPalette.Text).name()
-    sel_bg = p.color(QPalette.Highlight).name()
-    sel_fg = p.color(QPalette.HighlightedText).name()
-    return (
-        f"QComboBox {{ border: 1.5px solid #e53e3e; background-color: {bg}; color: {fg}; }}"
-        f"QComboBox QAbstractItemView {{ background-color: {bg}; color: {fg};"
-        f" selection-background-color: {sel_bg}; selection-color: {sel_fg}; }}"
-    )
+def _set_combo_error(widget: QComboBox, error: bool):
+    """Set or clear a validation error on a QComboBox via dynamic property."""
+    widget.setProperty("validationState", "#dc3545" if error else "")
+    widget.style().unpolish(widget)
+    widget.style().polish(widget)
 
 from .utils.countries_data import CURRENCIES, COUNTRIES
 
@@ -132,12 +122,8 @@ class NewProjectDialog(QDialog):
         currency_ok = bool(self.currency_input.currentData())
 
         self.name_input.setStyleSheet("" if name_ok else "border: 1.5px solid #e53e3e;")
-        self.country_input.setStyleSheet(
-            "" if country_ok else _combo_error_style(self.country_input)
-        )
-        self.currency_input.setStyleSheet(
-            "" if currency_ok else _combo_error_style(self.currency_input)
-        )
+        _set_combo_error(self.country_input, not country_ok)
+        _set_combo_error(self.currency_input, not currency_ok)
 
         if name_ok and country_ok and currency_ok:
             self.accept()

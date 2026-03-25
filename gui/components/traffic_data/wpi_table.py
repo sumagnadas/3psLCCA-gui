@@ -12,18 +12,19 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from PySide6.QtCore import Qt, QSize, Signal
+from PySide6.QtCore import Qt, QSize, Signal, QEvent
 from PySide6.QtGui import QFont, QPalette
 from PySide6.QtWidgets import (
     QCheckBox,
-    QDoubleSpinBox,
     QHeaderView,
     QSizePolicy,
     QTableWidget,
     QTableWidgetItem,
+    QToolTip,
     QWidget,
     QHBoxLayout,
 )
+from ..utils.table_widgets import TableDoubleSpinBox, TABLE_SPINBOX_BASE_QSS
 
 # ── Vehicles ──────────────────────────────────────────────────────────────────
 
@@ -118,6 +119,7 @@ class _WPITable(QTableWidget):
         self._spinboxes: dict[tuple[int, int], QDoubleSpinBox] = {}
         self._checkboxes: dict[int, QCheckBox] = {}
         self._loading: bool = False
+        self._resizing: bool = False
 
         self._setup_table()
         self._build_group_row()
@@ -127,6 +129,7 @@ class _WPITable(QTableWidget):
         # Apply initial read-only opacity to all spinboxes
         for sb in self._spinboxes.values():
             self._apply_spinbox_opacity(sb, False)
+        self.updateGeometry()
 
     # ── Setup ─────────────────────────────────────────────────────────────────
 
@@ -134,19 +137,22 @@ class _WPITable(QTableWidget):
         self.setEditTriggers(QTableWidget.NoEditTriggers)
         self.setSelectionMode(QTableWidget.NoSelection)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        self.setWordWrap(True)
+        self.setTextElideMode(Qt.ElideNone)
 
         # Hide Qt's built-in column header — we use row 0 and 1 instead
         self.horizontalHeader().setVisible(False)
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
-        self.horizontalHeader().setMinimumSectionSize(72)
+        self.horizontalHeader().setMinimumSectionSize(90)
 
         self.verticalHeader().setVisible(True)
-        self.verticalHeader().setDefaultSectionSize(34)
+        self.verticalHeader().setDefaultSectionSize(42)
 
-        self.setRowHeight(_ROW_GROUP, 22)
-        self.setRowHeight(_ROW_LABEL, 26)
-        self.setRowHeight(_ROW_CB, 30)
+        self.setRowHeight(_ROW_GROUP, 42)
+        self.setRowHeight(_ROW_LABEL, 56)  # extra height for word-wrapped labels
+        self.setRowHeight(_ROW_CB, 42)
 
     def _build_group_row(self):
         """Row 0 — group labels with colspan (setSpan) per group."""
@@ -166,7 +172,8 @@ class _WPITable(QTableWidget):
                 item = QTableWidgetItem(cdef.group)
                 item.setFlags(Qt.ItemIsEnabled)
                 item.setFont(bold)
-                item.setTextAlignment(Qt.AlignCenter)
+                item.setTextAlignment(Qt.AlignCenter | Qt.TextWordWrap)
+                item.setToolTip(cdef.group)
                 self.setItem(_ROW_GROUP, col, item)
                 if span > 1:
                     self.setSpan(_ROW_GROUP, col, 1, span)
@@ -183,7 +190,8 @@ class _WPITable(QTableWidget):
             item = QTableWidgetItem(cdef.label)
             item.setFlags(Qt.ItemIsEnabled)
             item.setFont(small_bold)
-            item.setTextAlignment(Qt.AlignCenter)
+            item.setTextAlignment(Qt.AlignCenter | Qt.TextWordWrap)
+            item.setToolTip(f"{cdef.group} — {cdef.label}")
             self.setItem(_ROW_LABEL, col, item)
         self.setVerticalHeaderItem(_ROW_LABEL, QTableWidgetItem(""))
 
@@ -223,14 +231,16 @@ class _WPITable(QTableWidget):
             self.setVerticalHeaderItem(row, QTableWidgetItem(vlabel))
 
             for col in range(_N_COLS):
-                sb = QDoubleSpinBox()
+                cdef = _COLUMNS[col]
+                sb = TableDoubleSpinBox()
                 sb.setRange(0.0, float("inf"))
                 sb.setDecimals(4)
                 sb.setValue(1.0)
-                sb.setButtonSymbols(QDoubleSpinBox.NoButtons)
+                sb.setButtonSymbols(TableDoubleSpinBox.NoButtons)
                 sb.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
                 sb.setReadOnly(True)
                 sb.setFrame(False)
+                sb.setToolTip(f"{vlabel}: {cdef.group} / {cdef.label}")
                 # opacity applied via _apply_spinbox_opacity after palette is available
                 sb.valueChanged.connect(
                     lambda val, r=row, c=col: self._on_spinbox_changed(r, c, val)
@@ -242,10 +252,40 @@ class _WPITable(QTableWidget):
 
     def sizeHint(self):
         h = sum(self.rowHeight(r) for r in range(self.rowCount()))
-        return QSize(super().sizeHint().width(), h + 4)
+        # Always reserve horizontal scrollbar height — 16 cols × 90px min = 1440px
+        # exceeds typical window width, so the scrollbar is almost always present.
+        sb_h = self.horizontalScrollBar().sizeHint().height()
+        return QSize(super().sizeHint().width(), h + sb_h + 2)
 
     def minimumSizeHint(self):
-        return QSize(200, self.sizeHint().height())
+        # Return a compact minimum so the parent page doesn't overflow horizontally.
+        # The table itself scrolls internally via ScrollBarAsNeeded.
+        vh_w = self.verticalHeader().sizeHint().width()
+        return QSize(vh_w + 3 * 90, self.sizeHint().height())
+
+    def resizeEvent(self, event):
+        if self._resizing:
+            return
+        self._resizing = True
+        super().resizeEvent(event)
+        w = self.viewport().width()
+        col_w = max(90, w // _N_COLS)
+        for c in range(_N_COLS):
+            self.setColumnWidth(c, col_w)
+        self._resizing = False
+
+    def viewportEvent(self, event):
+        """Show item tooltips for all columns (no action-column skip)."""
+        if event.type() == QEvent.ToolTip:
+            index = self.indexAt(event.pos())
+            if index.isValid():
+                item = self.item(index.row(), index.column())
+                if item and item.toolTip():
+                    QToolTip.showText(event.globalPos(), item.toolTip(), self)
+                    return True
+            QToolTip.hideText()
+            return True
+        return super().viewportEvent(event)
 
     # ── Mode ──────────────────────────────────────────────────────────────────
 
@@ -319,8 +359,7 @@ class _WPITable(QTableWidget):
             base.setAlpha(102)  # ~40% of 255
             r, g, b, a = base.red(), base.green(), base.blue(), base.alpha()
             sb.setStyleSheet(
-                f"QDoubleSpinBox {{ background: transparent; border: none;"
-                f" color: rgba({r},{g},{b},{a}); }}"
+                f"TableDoubleSpinBox {{ {TABLE_SPINBOX_BASE_QSS} color: rgba({r},{g},{b},{a}); }}"
             )
 
     def _apply_common_style(self, col: int, is_common: bool):

@@ -7,14 +7,12 @@ from pathlib import Path
 from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
-    QDoubleSpinBox,
     QFormLayout,
     QHBoxLayout,
     QHeaderView,
     QLabel,
     QPushButton,
     QSizePolicy,
-    QSpinBox,
     QStackedWidget,
     QTableWidget,
     QTableWidgetItem,
@@ -30,6 +28,7 @@ from ..utils.remarks_editor import RemarksEditor
 from ..utils.wpi_manager import WPIManager, WPIProfile
 from .wpi_table import _WPITable
 from .wpi_selector import _WPISelector
+from ..utils.table_widgets import TableDoubleSpinBox, TableSpinBox, TABLE_SPINBOX_BASE_QSS, mark_editable_column, TooltipTableMixin
 
 # ── WPI DB path ───────────────────────────────────────────────────────────────
 
@@ -317,7 +316,7 @@ PROJECT_MODE_FIELDS = [
 # ── Vehicle Table ─────────────────────────────────────────────────────────────
 
 
-class _VehicleTrafficTable(QTableWidget):
+class _VehicleTrafficTable(TooltipTableMixin, QTableWidget):
     def __init__(self, on_change, parent=None):
         super().__init__(len(_VEHICLES), 4, parent)
         self.on_change = on_change
@@ -331,6 +330,9 @@ class _VehicleTrafficTable(QTableWidget):
         self.setSelectionMode(QTableWidget.NoSelection)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        mark_editable_column(self, 1)
+        mark_editable_column(self, 2)
+        mark_editable_column(self, 3)
 
         self._vpd, self._acc, self._pwr = {}, {}, {}
         for row, (key, label) in enumerate(_VEHICLES):
@@ -338,29 +340,29 @@ class _VehicleTrafficTable(QTableWidget):
             item.setFlags(Qt.ItemIsEnabled)
             self.setItem(row, 0, item)
 
-            vpd = QSpinBox()
+            vpd = TableSpinBox()
             vpd.setRange(0, 9_999_999)
-            vpd.setButtonSymbols(QSpinBox.NoButtons)
+            vpd.setButtonSymbols(TableSpinBox.NoButtons)
             vpd.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
             vpd.valueChanged.connect(self.on_change)
             self.setCellWidget(row, 1, vpd)
             self._vpd[key] = vpd
 
-            acc = QDoubleSpinBox()
+            acc = TableDoubleSpinBox()
             acc.setRange(0.0, 100.0)
             acc.setDecimals(2)
-            acc.setButtonSymbols(QDoubleSpinBox.NoButtons)
+            acc.setButtonSymbols(TableDoubleSpinBox.NoButtons)
             acc.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
             acc.valueChanged.connect(self.on_change)
             self.setCellWidget(row, 2, acc)
             self._acc[key] = acc
 
             if key in _HAS_PWR:
-                pwr = QDoubleSpinBox()
+                pwr = TableDoubleSpinBox()
                 pwr.setRange(0.0, 999.9)
                 pwr.setDecimals(2)
                 pwr.setValue(_DEFAULT_PWR.get(key, 7.0))
-                pwr.setButtonSymbols(QDoubleSpinBox.NoButtons)
+                pwr.setButtonSymbols(TableDoubleSpinBox.NoButtons)
                 pwr.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
                 pwr.valueChanged.connect(self.on_change)
                 self.setCellWidget(row, 3, pwr)
@@ -416,7 +418,7 @@ class _VehicleTrafficTable(QTableWidget):
 # ── Peak Hours Table ──────────────────────────────────────────────────────────
 
 
-class _PeakHoursTable(QTableWidget):
+class _PeakHoursTable(TooltipTableMixin, QTableWidget):
     def __init__(self, on_change, parent=None):
         super().__init__(0, 2, parent)
         self.setHorizontalHeaderLabels(["Hour Category", "Traffic Proportion (%)"])
@@ -426,6 +428,7 @@ class _PeakHoursTable(QTableWidget):
         self.setEditTriggers(QTableWidget.NoEditTriggers)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        mark_editable_column(self, 1)
 
         self._on_change = on_change
         self._spinboxes = []
@@ -446,11 +449,11 @@ class _PeakHoursTable(QTableWidget):
 
         for i in range(n):
             self.setItem(i, 0, QTableWidgetItem(f"Peak Hour {i + 1}"))
-            sb = QDoubleSpinBox()
+            sb = TableDoubleSpinBox()
             sb.setRange(0.0, 100.0)
             sb.setDecimals(2)
             sb.setSuffix(" %")
-            sb.setButtonSymbols(QDoubleSpinBox.NoButtons)
+            sb.setButtonSymbols(TableDoubleSpinBox.NoButtons)
             sb.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
             sb.setValue(old_vals[i] if i < len(old_vals) else 4.0)
             sb.valueChanged.connect(self._on_value_changed)
@@ -501,7 +504,9 @@ class _PeakHoursTable(QTableWidget):
     def freeze(self, frozen: bool = True):
         for sb in self._spinboxes:
             sb.setReadOnly(frozen)
-            sb.setStyleSheet("color: #a0a0a0;" if frozen else "")
+            sb.setStyleSheet(
+                f"TableDoubleSpinBox {{ {TABLE_SPINBOX_BASE_QSS} color: #a0a0a0; }}" if frozen else ""
+            )
 
     def collect_to_dict(self) -> dict:
         return {
@@ -1055,10 +1060,14 @@ class TrafficData(ScrollableForm):
             if hasattr(self, "alternate_road_carriageway"):
                 if self.alternate_road_carriageway.currentText() == _NONE_LANE:
                     errors.append("Alternate Road Carriageway must be selected")
-                    self.alternate_road_carriageway.setStyleSheet(
-                        "QComboBox { border: 1px solid #dc3545; }"
-                    )
-                elif hasattr(self, "carriage_width_in_m") and self.carriage_width_in_m.value() == 0.0:
+                    self.alternate_road_carriageway.setProperty("validationState", "#dc3545")
+                    self.alternate_road_carriageway.style().unpolish(self.alternate_road_carriageway)
+                    self.alternate_road_carriageway.style().polish(self.alternate_road_carriageway)
+                else:
+                    self.alternate_road_carriageway.setProperty("validationState", "")
+                    self.alternate_road_carriageway.style().unpolish(self.alternate_road_carriageway)
+                    self.alternate_road_carriageway.style().polish(self.alternate_road_carriageway)
+                if hasattr(self, "carriage_width_in_m") and self.carriage_width_in_m.value() == 0.0:
                     errors.append("Carriageway Width cannot be 0")
                     self.carriage_width_in_m.setStyleSheet("border: 1px solid #dc3545;")
 

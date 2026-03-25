@@ -21,7 +21,7 @@ DANGER_BG      = "rgba(239,68,68,0.08)"
 DANGER_BG_PRESSED = "rgba(239,68,68,0.18)"
 
 # ── Neutrals (Bootstrap 5 tokens) ─────────────────────────────────────────
-WHITE          = "#ffffff"
+WHITE          = "#fafafa"   # off-white elevated surface (inputs, cards, tables)
 BODY_BG        = "#f8f9fa"   # app window / sidebar background
 BODY_COLOR     = "#212529"   # primary text
 SECONDARY      = "#6c757d"   # muted / secondary text
@@ -30,7 +30,7 @@ BORDER_SUBTLE  = "#ced4da"   # slightly darker border (inputs on hover)
 MUTED          = "#adb5bd"   # disabled / placeholder elements
 SURFACE        = "#e9ecef"   # neutral hover background
 SURFACE_ACTIVE = "#dee2e6"   # neutral pressed background
-CARD_BG        = "#ffffff"   # card / list-item explicit background
+CARD_BG        = "#fafafa"   # card / list-item explicit background
 
 # ── Sidebar states (pre-computed solid — no alpha blending) ───────────────
 # PRIMARY at 12% on BODY_BG (#f8f9fa) → fully opaque light green

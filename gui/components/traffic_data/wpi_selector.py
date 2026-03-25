@@ -128,7 +128,6 @@ class _ImportLibraryDialog(QDialog):
 
         # Delete from library button
         self._btn_del = QPushButton("🗑 Remove from Library")
-        self._btn_del.setFixedHeight(26)
         self._btn_del.clicked.connect(self._on_delete)
         layout.addWidget(self._btn_del)
 
@@ -240,7 +239,6 @@ class _WPISelector(QWidget):
         self._btn_save_as = QPushButton("✎ Save As")
         self._btn_delete  = QPushButton("🗑 Delete")
         for btn in (self._btn_new, self._btn_save_as, self._btn_delete):
-            btn.setFixedHeight(28)
             btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
             row1.addWidget(btn)
 
@@ -255,7 +253,6 @@ class _WPISelector(QWidget):
         self._btn_save_lib   = QPushButton("⬆ Save to My Library")
         self._btn_import_lib = QPushButton("⬇ Import from Library")
         for btn in (self._btn_save_lib, self._btn_import_lib):
-            btn.setFixedHeight(28)
             btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
             row2.addWidget(btn)
 

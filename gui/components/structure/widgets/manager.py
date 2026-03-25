@@ -7,6 +7,8 @@ from PySide6.QtWidgets import (
     QGroupBox,
     QInputDialog,
     QMessageBox,
+    QLabel,
+    QFrame,
 )
 from PySide6.QtCore import Qt, QTimer
 import time
@@ -16,6 +18,7 @@ import datetime
 from .base_table import StructureTableWidget
 from .material_dialog import MaterialDialog
 from ...utils.validation_helpers import freeze_widgets
+from ...utils.display_format import fmt_comma
 
 
 # ---------------------------------------------------------------------------
@@ -36,6 +39,21 @@ class StructureManagerWidget(QWidget):
         self._add_material_btns = []
 
         self.main_layout = QVBoxLayout(self)
+
+        # ── Summary bar ──────────────────────────────────────────────────
+        summary_bar = QWidget()
+        summary_layout = QHBoxLayout(summary_bar)
+        summary_layout.setContentsMargins(4, 4, 4, 4)
+        self.total_lbl = QLabel("Total: —")
+        self.count_lbl = QLabel("Items: —")
+        sep = QFrame()
+        sep.setFrameShape(QFrame.VLine)
+        sep.setFrameShadow(QFrame.Sunken)
+        summary_layout.addWidget(self.total_lbl)
+        summary_layout.addWidget(sep)
+        summary_layout.addWidget(self.count_lbl)
+        summary_layout.addStretch()
+        self.main_layout.addWidget(summary_bar)
 
         self.scroll = QScrollArea()
         self.scroll.setWidgetResizable(True)
@@ -99,9 +117,24 @@ class StructureManagerWidget(QWidget):
 
         self.container_layout.addStretch()
         self.container.adjustSize()
+        self._update_summary()
 
         if getattr(self, "_frozen", False):
             self.freeze(True)
+
+    def _update_summary(self):
+        total = 0.0
+        count = 0
+        for items in self.data.values():
+            for item in items:
+                if not item.get("state", {}).get("in_trash", False):
+                    v = item.get("values", {})
+                    total += float(v.get("quantity", 0) or 0) * float(v.get("rate", 0) or 0)
+                    count += 1
+        currency = getattr(self, "_currency", "")
+        suffix = f" ({currency})" if currency else ""
+        self.total_lbl.setText(f"Total{suffix}: {fmt_comma(total)}")
+        self.count_lbl.setText(f"{count} item{'s' if count != 1 else ''}")
 
     def create_section(self, name):
         group = QGroupBox(name)

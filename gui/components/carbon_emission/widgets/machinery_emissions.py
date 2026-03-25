@@ -18,7 +18,6 @@ from PySide6.QtWidgets import (
     QDialogButtonBox,
     QDoubleSpinBox,
     QFormLayout,
-    QGraphicsDropShadowEffect,
     QGroupBox,
     QHBoxLayout,
     QHeaderView,
@@ -36,7 +35,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 from PySide6.QtCore import Qt, QEvent, QRect, QSize
-from PySide6.QtGui import QColor, QFont
+from PySide6.QtGui import QFont
 
 from ...base_widget import ScrollableForm
 from ...utils.form_builder.form_definitions import FieldDef, Section
@@ -44,7 +43,7 @@ from ...utils.form_builder.form_builder import build_form
 from ...utils.remarks_editor import RemarksEditor
 from ...utils.display_format import fmt, fmt_comma, DECIMAL_PLACES
 from ...utils.icons import make_icon
-from ...utils.table_widgets import BaseActionDelegate
+from ...utils.table_widgets import BaseActionDelegate, TooltipTableMixin
 from ...utils.validation_helpers import freeze_widgets
 
 CHUNK = "machinery_emissions_data"
@@ -361,14 +360,8 @@ class _FrozenActionCol(QTableWidget):
         self.setSelectionMode(QTableWidget.NoSelection)
         self.setFrameShape(QTableWidget.NoFrame)
         self.setStyleSheet(
-            "QTableWidget { border-top-left-radius: 0px; border-bottom-left-radius: 0px; }"
+            "QTableWidget { background-color: palette(base); border-top-left-radius: 0px; border-bottom-left-radius: 0px; }"
         )
-
-        shadow = QGraphicsDropShadowEffect(self)
-        shadow.setBlurRadius(6)
-        shadow.setOffset(-3, 0)
-        shadow.setColor(QColor(0, 0, 0, 40))
-        self.setGraphicsEffect(shadow)
 
         self.verticalHeader().setVisible(False)
         self.verticalHeader().setDefaultSectionSize(row_h)
@@ -409,6 +402,10 @@ class _FrozenActionCol(QTableWidget):
 # ── Detailed equipment table ──────────────────────────────────────────────────
 
 
+class _MachineryTable(TooltipTableMixin, QTableWidget):
+    """QTableWidget with tooltip + word-wrap for machinery equipment rows."""
+
+
 class _DetailedTable(QWidget):
     HEADERS = [
         ("Equipment Name",      Qt.AlignLeft   | Qt.AlignVCenter),  # 0
@@ -436,7 +433,7 @@ class _DetailedTable(QWidget):
         layout.setSpacing(6)
 
         # Table — no fixed height; grows/shrinks via sizeHint override
-        self._table = QTableWidget(0, len(self.HEADERS))
+        self._table = _MachineryTable(0, len(self.HEADERS))
         for col, (label, align) in enumerate(self.HEADERS):
             item = QTableWidgetItem(label)
             item.setTextAlignment(align)

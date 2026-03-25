@@ -22,6 +22,21 @@ from PySide6.QtCore import Qt, QSize, QTimer
 from .transport_dialog import TransportDialog
 from PySide6.QtGui import QColor
 from ...utils.definitions import STRUCTURE_CHUNKS, UNIT_DIMENSION
+from ...utils.table_widgets import TooltipTableMixin
+
+
+class _TransportEmissionsTable(TooltipTableMixin, QTableWidget):
+    """QTableWidget with tooltip + word-wrap for transport emissions rows."""
+
+    # Material, Category, kg Factor, Qty (kg), Trips, Emission, Warnings
+    _COL_RATIOS = [0.20, 0.12, 0.09, 0.11, 0.07, 0.16, 0.25]
+    _COL_MINS   = [80,   60,   55,   70,   45,   100,  80]
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        w = self.viewport().width()
+        for col, (ratio, min_w) in enumerate(zip(self._COL_RATIOS, self._COL_MINS)):
+            self.setColumnWidth(col, max(min_w, int(w * ratio)))
 from ...utils.display_format import fmt, fmt_comma
 from ...utils.icons import make_icon, make_icon_btn
 from ...utils.validation_helpers import freeze_widgets
@@ -277,7 +292,7 @@ class VehicleCard(QGroupBox):
         layout.addLayout(btn_row)
 
     def _build_table(self, mat_results: list) -> QTableWidget:
-        table = QTableWidget()
+        table = _TransportEmissionsTable()
         table.setColumnCount(7)
         _L = Qt.AlignLeft  | Qt.AlignVCenter
         _R = Qt.AlignRight | Qt.AlignVCenter
@@ -295,13 +310,7 @@ class VehicleCard(QGroupBox):
             table.setHorizontalHeaderItem(col, item)
         h = table.horizontalHeader()
         h.setStretchLastSection(False)
-        h.setSectionResizeMode(0, QHeaderView.Stretch)          # Material — most variable
-        h.setSectionResizeMode(1, QHeaderView.ResizeToContents) # Category
-        table.setColumnWidth(2, 75)   # kg Factor
-        table.setColumnWidth(3, 95)   # Qty (kg)
-        table.setColumnWidth(4, 55)   # Trips
-        table.setColumnWidth(5, 130)  # Emission (kgCO₂e)
-        h.setSectionResizeMode(6, QHeaderView.Stretch)          # Warnings
+        h.setSectionResizeMode(QHeaderView.Interactive)
         table.setEditTriggers(QTableWidget.NoEditTriggers)
         table.setSelectionMode(QTableWidget.NoSelection)
         table.verticalHeader().setVisible(False)
@@ -367,8 +376,9 @@ class VehicleCard(QGroupBox):
                 warn_item.setBackground(QColor("#fff1f0"))
                 table.setItem(row, 6, warn_item)
 
-        header_h = table.horizontalHeader().height() or 32
-        table.setFixedHeight(header_h + table.rowCount() * 32 + 10)
+        row_h = table.verticalHeader().defaultSectionSize()
+        header_h = table.horizontalHeader().sizeHint().height()
+        table.setFixedHeight(header_h + table.rowCount() * row_h + 4)
         return table
 
     def _item(self, text="", align=None) -> QTableWidgetItem:

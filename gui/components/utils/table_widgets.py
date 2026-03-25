@@ -2,12 +2,19 @@
 Reusable table widgets shared across the application.
 
 Exports:
-    GroupedHeaderView   — two-tier grouped horizontal header
-    BaseActionDelegate  — base for painted action-column delegates
-    TooltipTableMixin   — mixin that shows cell tooltip on overflow
+    GroupedHeaderView       — two-tier grouped horizontal header
+    BaseActionDelegate      — base for painted action-column delegates
+    TooltipTableMixin       — mixin that shows cell tooltip on overflow
+    TableDoubleSpinBox      — QDoubleSpinBox styled for table cells
+    TableSpinBox            — QSpinBox styled for table cells
+    TableLineEdit           — QLineEdit styled for table cells
+    mark_editable_column    — tints a column to indicate it is editable
 """
 from PySide6.QtWidgets import (
+    QDoubleSpinBox,
     QHeaderView,
+    QLineEdit,
+    QSpinBox,
     QStyledItemDelegate,
     QStyleOptionHeader,
     QTableView,
@@ -226,9 +233,15 @@ class BaseActionDelegate(QStyledItemDelegate):
 # ---------------------------------------------------------------------------
 
 class TooltipTableMixin:
-    """Mixin for QTableWidget: shows a tooltip when cell text overflows its column.
+    """Mixin for QTableWidget: always shows a tooltip with the full cell text,
+    and enables word wrap + ElideNone so text is never silently cut off.
     The last column (action column) is always skipped.
     """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setWordWrap(True)
+        self.setTextElideMode(Qt.ElideNone)
 
     def viewportEvent(self, event):
         if event.type() == QEvent.ToolTip:
@@ -237,9 +250,59 @@ class TooltipTableMixin:
             if index.isValid() and index.column() != action_col:
                 item = self.item(index.row(), index.column())
                 if item and item.text():
-                    text = item.text()
-                    if self.fontMetrics().horizontalAdvance(text) > self.columnWidth(index.column()) - 8:
-                        QToolTip.showText(event.globalPos(), text, self)
-                        return True
+                    QToolTip.showText(event.globalPos(), item.text(), self)
+                    return True
             QToolTip.hideText()
         return super().viewportEvent(event)
+
+
+# ---------------------------------------------------------------------------
+# Editable-column tint
+# ---------------------------------------------------------------------------
+
+# PRIMARY (#90af13) at ~8 % alpha — blends with any cell bg (white, alternate, hover)
+_EDITABLE_TINT = QColor(144, 175, 19, 20)
+
+
+class _EditableColumnDelegate(QStyledItemDelegate):
+    """Paints a faint green tint behind every cell in an editable column.
+    Transparent cell widgets (TableDoubleSpinBox etc.) let the tint show through.
+    """
+    def paint(self, painter, option, index):
+        painter.save()
+        painter.fillRect(option.rect, _EDITABLE_TINT)
+        painter.restore()
+        super().paint(painter, option, index)
+
+
+def mark_editable_column(table, col: int) -> None:
+    """Register the editable-column tint delegate on *col* of *table*."""
+    table.setItemDelegateForColumn(col, _EditableColumnDelegate(table))
+
+
+# ---------------------------------------------------------------------------
+# Compact spin boxes for use inside QTableWidget cells
+# ---------------------------------------------------------------------------
+
+# Base inline style to include whenever setStyleSheet is called on these widgets.
+# Required because a widget-level stylesheet overrides the app QSS entirely for
+# that widget — any properties omitted fall back to platform defaults, not main.qss.
+TABLE_SPINBOX_BASE_QSS = (
+    "background-color: transparent; border: none; border-radius: 0;"
+    " margin: 0; padding: 0 4px; min-height: 0;"
+)
+
+
+class TableDoubleSpinBox(QDoubleSpinBox):
+    """QDoubleSpinBox subclass for table cells.
+    Named differently so main.qss compact rules apply instead of the
+    standard form-control padding/min-height rules.
+    """
+
+
+class TableSpinBox(QSpinBox):
+    """QSpinBox subclass for table cells. Same rationale as TableDoubleSpinBox."""
+
+
+class TableLineEdit(QLineEdit):
+    """QLineEdit subclass for table cells. Same rationale as TableDoubleSpinBox."""
