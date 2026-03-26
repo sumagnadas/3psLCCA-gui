@@ -18,9 +18,30 @@ from PySide6.QtGui import QFont
 from gui.theme import VALIDATION_ERROR
 
 from gui.components.base_widget import ScrollableForm
-from gui.components.utils.form_builder.form_definitions import ValidationStatus
+from gui.components.utils.form_builder.form_definitions import FieldDef, ValidationStatus
+from gui.components.utils.form_builder.form_builder import build_form
+from gui.components.utils.validation_helpers import clear_field_styles, freeze_form, validate_form
 
 CHUNK = "outputs_data"
+CHUNK_AP = "analysis_period"
+
+OUTPUTS_FIELDS = [
+    FieldDef(
+        "analysis_period",
+        "Analysis Period",
+        "Total time horizon used for life cycle financial evaluation.",
+        "int",
+        options=(0, 999),
+        required=True,
+        unit="(years)",
+        doc_slug="analysis-period",
+        default=0,
+    ),
+]
+
+OUTPUTS_WARN_RULES = {
+    "analysis_period": (None, 500, None, "Analysis period exceeds 500 years — please verify"),
+}
 DEBUG = False
 
 def _dbg(*args):
@@ -50,6 +71,9 @@ class OutputsPage(ScrollableForm):
         bold.setPointSize(13)
         header.setFont(bold)
         f.addRow(header)
+
+        # ── Analysis Period ───────────────────────────────────────────────
+        self.required_keys = build_form(self, OUTPUTS_FIELDS, None)
 
         btn_row = QWidget()
         btn_layout = QHBoxLayout(btn_row)
@@ -151,8 +175,16 @@ class OutputsPage(ScrollableForm):
 
     def run_validation(self):
         _dbg("=== run_validation START ===")
+
         all_errors = {}
         all_warnings = {}
+
+        ap = self.analysis_period.value()
+        if ap <= 0:
+            self.analysis_period.setStyleSheet(f"border: 1.5px solid {VALIDATION_ERROR};")
+            all_errors["Analysis Period"] = ["Analysis Period is required — please enter a value greater than zero."]
+        else:
+            self.analysis_period.setStyleSheet("")
 
         for name, page in self._pages.items():
             _dbg(f"Validating page: '{name}' ({type(page).__name__})")
@@ -341,6 +373,33 @@ class OutputsPage(ScrollableForm):
 
     def freeze(self, frozen: bool):
         self.btn_calculate.setEnabled(not frozen)
+        freeze_form(OUTPUTS_FIELDS, self, frozen)
+
+    def clear_validation(self):
+        clear_field_styles(OUTPUTS_FIELDS, self)
+
+    def validate(self):
+        return validate_form(OUTPUTS_FIELDS, self, warn_rules=OUTPUTS_WARN_RULES)
+
+    # ── Chunk routing — analysis_period saves to its own chunk ────────────────
+
+    def _on_field_changed(self):
+        if self._loading:
+            return
+        self.data_changed.emit()
+        if self.controller:
+            self.controller.save_chunk_data(CHUNK_AP, self.get_data_dict())
+
+    def refresh_from_engine(self):
+        if not self.controller or not self.controller.engine:
+            return
+        if not self.controller.engine.is_active():
+            return
+        data = self.controller.get_chunk(CHUNK_AP) or {}
+        if not data or data == self._loaded_data:
+            return
+        self._loaded_data = data
+        self.load_data_dict(data)
 
     #==========Prepare-Mapping-for-Core==============================================
     
@@ -446,7 +505,7 @@ class OutputsPage(ScrollableForm):
                 "Please fill in the Financial Data page and try again."
             )
 
-        analysis_period_years             = int(_financial_data.get("analysis_period"))
+        analysis_period_years             = int(self.analysis_period.value())
         discount_rate_percent             = float(_financial_data.get("discount_rate"))
         inflation_rate_percent            = float(_financial_data.get("inflation_rate"))
         interest_rate_percent             = float(_financial_data.get("interest_rate"))
@@ -850,6 +909,9 @@ class OutputsPage(ScrollableForm):
         if not self.controller or not self.controller.engine:
             _dbg("on_refresh: no controller/engine, skipping")
             return
+
+        self.refresh_from_engine()
+
         state = self.controller.engine.fetch_chunk(CHUNK) or {}
         status = state.get("status", "idle")
         data = state.get("data", {})

@@ -62,18 +62,6 @@ FINANCIAL_FIELDS = [
         doc_slug="investment-ratio",
         default=0.0,
     ),
-    Section("Analysis"),
-    FieldDef(
-        "analysis_period",
-        "Analysis Period",
-        "Total time horizon used for life cycle financial evaluation.",
-        "int",
-        options=(0, 999),
-        required=True,
-        unit="(years)",
-        doc_slug="analysis-period",
-        default=0,
-    )
 ]
 
 FINANCIAL_WARN_RULES = {
@@ -86,9 +74,6 @@ FINANCIAL_WARN_RULES = {
     "interest_rate": (0.0, 35.0,
                       None,
                       "Interest rate exceeds 35% — please verify"),
-    "analysis_period": (None, 500,
-                        None,
-                        "Analysis period exceeds 500 years — please verify"),
 }
 
 SUGGESTED_VALUES = {
@@ -100,8 +85,6 @@ SUGGESTED_VALUES = {
     # ── Carbon & Currency ─────────────────────────────────────────────────
     "social_cost_of_carbon": 86.40,
     "currency_conversion": 88.73,
-    # ── Analysis ─────────────────────────────────────────────────────────
-    "analysis_period": 150,
 }
 
 
