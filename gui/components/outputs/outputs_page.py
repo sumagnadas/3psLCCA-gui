@@ -253,6 +253,7 @@ class OutputsPage(ScrollableForm):
             )
             _dbg(f"run_full_lcc_analysis returned keys: {list(results.keys()) if isinstance(results, dict) else type(results).__name__}")
             _dbg(f"results: {results}")
+            print(results)
             self._last_all_data = all_data
             self._last_lcc_breakdown = life_cycle_construction_cost_breakdown
             self._show_calculation_success(results)
@@ -350,13 +351,19 @@ class OutputsPage(ScrollableForm):
 
         # ── Chart ──────────────────────────────────────────────────────────
         try:
-            from .lcc_plot import LCCChartWidget, LCCDetailsTable
+            from .lcc_plot import LCCBreakdownTable, LCCChartWidget, LCCDetailsTable
+            from .Pie import LCCPieWidget
             chart = LCCChartWidget(results)
             self._status_layout.addWidget(chart)
+            pie = LCCPieWidget(results)
+            self._status_layout.addWidget(pie)
+            breakdown = LCCBreakdownTable(results)
+            self._status_layout.addWidget(breakdown)
             table = LCCDetailsTable(results)
             self._status_layout.addWidget(table)
         except Exception as e:
-            err = QLabel(f"Chart error: {e}")
+            import traceback
+            err = QLabel(f"Chart error: {e}\n{traceback.format_exc(limit=4)}")
             err.setStyleSheet("color: gray; font-style: italic;")
             self._status_layout.addWidget(err)
 

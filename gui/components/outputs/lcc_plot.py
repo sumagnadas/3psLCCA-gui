@@ -10,11 +10,12 @@ import matplotlib
 matplotlib.use("QtAgg")
 import matplotlib.pyplot as plt
 
-from PySide6.QtCore import QEvent, QObject, QSize, Qt
+from PySide6.QtCore import QEvent, QObject, QRect, QSize, Qt
 from PySide6.QtGui import QColor, QFont
 from PySide6.QtWidgets import (
     QApplication, QHeaderView, QLabel, QScrollArea,
-    QSizePolicy, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget,
+    QSizePolicy, QStyledItemDelegate, QTableWidget, QTableWidgetItem,
+    QVBoxLayout, QWidget,
 )
 
 try:
@@ -380,6 +381,233 @@ class LCCDetailsTable(QWidget):
 
         lbl = QLabel("<b>LCC Summary</b>")
         lbl.setContentsMargins(0, 12, 0, 4)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(lbl)
+        layout.addWidget(table)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+
+
+# ---------------------------------------------------------------------------
+# Detailed breakdown table
+# ---------------------------------------------------------------------------
+
+_CATEGORY_COLORS = {
+    "economic":     "#DBEAFE",   # soft blue
+    "environmental":"#DCFCE7",   # soft green
+    "social":       "#FEF3C7",   # soft amber
+}
+
+_BREAKDOWN_STAGES = [
+    {
+        "label": "Initial Stage\nCosts",
+        "stage_color": "#F9C74F",
+        "result_key": "initial_stage",
+        "optional": False,
+        "rows": [
+            ("economic",     "initial_construction_cost",
+             "Initial construction costs"),
+            ("environmental","initial_material_carbon_emission_cost",
+             "Initial carbon emissions (material)"),
+            ("environmental","initial_vehicular_emission_cost",
+             "Carbon emissions due to rerouting during initial construction (vehicles)"),
+            ("economic",     "time_cost_of_loan",
+             "Time costs"),
+            ("social",       "initial_road_user_cost",
+             "Road user costs during initial construction"),
+        ],
+    },
+    {
+        "label": "Use Stage\nCosts",
+        "stage_color": "#82E0AA",
+        "result_key": "use_stage",
+        "optional": False,
+        "rows": [
+            ("economic",     "routine_inspection_costs",
+             "Routine inspection costs"),
+            ("economic",     "periodic_maintenance",
+             "Periodic maintenance costs"),
+            ("environmental","periodic_carbon_costs",
+             "Periodic maintenance carbon emissions (material)"),
+            ("economic",     "major_inspection_costs",
+             "Major inspection costs"),
+            ("economic",     "major_repair_cost",
+             "Major repair costs"),
+            ("environmental","major_repair_material_carbon_emission_costs",
+             "Major repair related carbon emissions (materials)"),
+            ("environmental","major_repair_vehicular_emission_costs",
+             "Carbon emissions due to rerouting during major repairs (vehicles)"),
+            ("social",       "major_repair_road_user_costs",
+             "Road user costs during major repairs"),
+            ("economic",     "replacement_costs_for_bearing_and_expansion_joint",
+             "Replacement cost of bearing and expansion joint"),
+            ("social",       "road_user_costs_for_replacement_of_bearing_and_expansion_joint",
+             "Road user costs during replacement"),
+            ("environmental","vehicular_emission_costs_for_replacement_of_bearing_and_expansion_joint",
+             "Carbon emissions due to rerouting during replacement (vehicles)"),
+        ],
+    },
+    {
+        "label": "Reconstruction\nStage",
+        "stage_color": "#F5B041",
+        "result_key": "reconstruction",
+        "optional": True,
+        "rows": [
+            ("economic",     "cost_of_reconstruction_after_demolition",
+             "Cost of reconstruction after demolition"),
+            ("environmental","carbon_cost_of_reconstruction_after_demolition",
+             "Carbon cost of reconstruction after demolition"),
+            ("economic",     "time_cost_of_loan",
+             "Time costs"),
+            ("economic",     "total_demolition_and_disposal_costs",
+             "Demolition and disposal costs"),
+            ("environmental","carbon_costs_demolition_and_disposal",
+             "Carbon emissions from demolition and disposal (materials)"),
+            ("environmental","demolition_vehicular_emission_cost",
+             "Carbon emissions due to rerouting during demolition (vehicles)"),
+            ("environmental","reconstruction_vehicular_emission_cost",
+             "Carbon emissions due to rerouting during reconstruction (vehicles)"),
+            ("social",       "ruc_demolition",
+             "Road user costs during demolition"),
+            ("social",       "ruc_reconstruction",
+             "Road user costs during reconstruction"),
+        ],
+    },
+    {
+        "label": "End-of-Life\nStage",
+        "stage_color": "#E59866",
+        "result_key": "end_of_life",
+        "optional": False,
+        "rows": [
+            ("economic",     "total_demolition_and_disposal_costs",
+             "Demolition and disposal costs of existing bridge"),
+            ("environmental","carbon_costs_demolition_and_disposal",
+             "Demolition and disposal related carbon emissions (materials) of existing bridge"),
+            ("environmental","demolition_vehicular_emission_cost",
+             "Carbon emissions due to rerouting during demolition (vehicles)"),
+            ("social",       "ruc_demolition",
+             "Road user costs during demolition and disposal of existing bridge"),
+        ],
+    },
+]
+
+
+class _VerticalTextDelegate(QStyledItemDelegate):
+    """Renders cell text rotated 90° counter-clockwise for the stage column."""
+
+    def paint(self, painter, option, index):
+        painter.save()
+        bg = index.data(Qt.BackgroundRole)
+        if bg:
+            c = bg.color() if hasattr(bg, "color") else QColor(bg)
+            painter.fillRect(option.rect, c)
+
+        painter.translate(
+            option.rect.x() + option.rect.width() / 2,
+            option.rect.y() + option.rect.height() / 2,
+        )
+        painter.rotate(-90)
+
+        text_rect = QRect(
+            -option.rect.height() // 2,
+            -option.rect.width() // 2,
+            option.rect.height(),
+            option.rect.width(),
+        )
+        text = (index.data(Qt.DisplayRole) or "").replace("\n", " ")
+        font = index.data(Qt.FontRole)
+        if font:
+            painter.setFont(font)
+        fg = index.data(Qt.ForegroundRole)
+        painter.setPen(fg.color() if fg and hasattr(fg, "color") else option.palette.text().color())
+        painter.drawText(text_rect, Qt.AlignCenter, text)
+        painter.restore()
+
+    def sizeHint(self, option, index):
+        return QSize(64, 80)
+
+
+class LCCBreakdownTable(QWidget):
+    """Detailed row-by-row LCC cost breakdown with stage-coloured groups."""
+
+    def __init__(self, results: dict, parent=None):
+        super().__init__(parent)
+        self._build(results)
+
+    def _build(self, results: dict):
+        # Collect applicable stages — keep cat for row colouring
+        active_stages = []
+        for stage_def in _BREAKDOWN_STAGES:
+            stage_data = results.get(stage_def["result_key"], {})
+            if stage_def.get("optional") and not isinstance(stage_data.get("economic"), dict):
+                continue
+            rows = [
+                (label, float(stage_data.get(cat, {}).get(key, 0.0)), cat)
+                for cat, key, label in stage_def["rows"]
+                if stage_data.get(cat, {}).get(key) is not None
+            ]
+            if rows:
+                active_stages.append((stage_def, rows))
+
+        total_rows = sum(len(r) for _, r in active_stages)
+
+        table = QTableWidget(total_rows, 3, self)
+        table.setHorizontalHeaderLabels(["", "Costs", "Cost in Present Time"])
+        table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Fixed)
+        table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Fixed)
+        table.setColumnWidth(0, 64)
+        table.setColumnWidth(2, 190)
+        table.verticalHeader().setVisible(False)
+        table.setEditTriggers(QTableWidget.NoEditTriggers)
+        table.setSelectionMode(QTableWidget.NoSelection)
+        table.setShowGrid(True)
+        table.setWordWrap(True)
+        table.setItemDelegateForColumn(0, _VerticalTextDelegate(table))
+
+        bold = QFont()
+        bold.setBold(True)
+
+        def _cell(text, bg: QColor, align=Qt.AlignCenter | Qt.AlignVCenter, font=None):
+            it = QTableWidgetItem(text)
+            it.setTextAlignment(align)
+            it.setBackground(bg)
+            if font:
+                it.setFont(font)
+            it.setFlags(Qt.ItemIsEnabled)
+            return it
+
+        row_idx = 0
+        for stage_def, stage_rows in active_stages:
+            stage_bg = QColor(stage_def["stage_color"])
+            n        = len(stage_rows)
+
+            # Stage label cell — spans all rows in this stage
+            table.setItem(row_idx, 0, _cell(stage_def["label"], stage_bg, font=bold))
+            if n > 1:
+                table.setSpan(row_idx, 0, n, 1)
+
+            for i, (desc, val, cat) in enumerate(stage_rows):
+                r      = row_idx + i
+                row_bg = QColor(_CATEGORY_COLORS.get(cat, "#FFFFFF"))
+                table.setItem(r, 1, _cell(desc, row_bg, align=Qt.AlignLeft | Qt.AlignVCenter))
+                cost_item = _cell(
+                    f"INR \u20b9{val:,.2f}", row_bg,
+                    align=Qt.AlignRight | Qt.AlignVCenter,
+                )
+                if val < 0:
+                    cost_item.setForeground(QColor("#2e7d32"))
+                table.setItem(r, 2, cost_item)
+
+            row_idx += n
+
+        table.resizeRowsToContents()
+        table.setSizeAdjustPolicy(QTableWidget.AdjustToContents)
+        table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+
+        lbl = QLabel("<b>LCC Breakdown</b>")
+        lbl.setContentsMargins(0, 16, 0, 4)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
