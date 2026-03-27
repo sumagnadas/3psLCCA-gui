@@ -77,21 +77,18 @@ _ROW_CB = 2
 _ROW_DATA = 3
 
 
-def _get_value(data: dict, path: tuple, vehicle_key: str) -> float:
-    node = data
-    for segment in path:
-        key = vehicle_key if segment == "{v}" else segment
-        node = node.get(key, {})
-    return float(node) if isinstance(node, (int, float)) else 1.0
+def _col_key(col: _ColDef) -> str:
+    """Last non-{v} segment of the column path — used as the flat data key."""
+    return next(s for s in reversed(col.path) if s != "{v}")
 
 
-def _set_value(data: dict, path: tuple, vehicle_key: str, value: float):
-    node = data
-    for segment in path[:-1]:
-        key = vehicle_key if segment == "{v}" else segment
-        node = node.setdefault(key, {})
-    last = vehicle_key if path[-1] == "{v}" else path[-1]
-    node[last] = value
+def _get_value(data: dict, col: _ColDef, vehicle_key: str) -> float:
+    val = data.get(vehicle_key, {}).get(_col_key(col), 1.0)
+    return float(val) if isinstance(val, (int, float)) else 1.0
+
+
+def _set_value(data: dict, col: _ColDef, vehicle_key: str, value: float):
+    data.setdefault(vehicle_key, {})[_col_key(col)] = value
 
 
 def _is_vehicle_dim(col: _ColDef) -> bool:
@@ -390,7 +387,7 @@ class _WPITable(QTableWidget):
             for col, cdef in enumerate(_COLUMNS):
                 values = []
                 for row_idx, (vkey, _) in enumerate(_VEHICLES):
-                    val = _get_value(data, cdef.path, vkey)
+                    val = _get_value(data, cdef, vkey)
                     values.append(val)
                     self._spinboxes[(_ROW_DATA + row_idx, col)].setValue(val)
 
@@ -404,13 +401,12 @@ class _WPITable(QTableWidget):
         self.set_editable(self._editable)
 
     def collect_to_data(self) -> dict:
-
         data = empty_data()
         for col, cdef in enumerate(_COLUMNS):
             for row_idx, (vkey, _) in enumerate(_VEHICLES):
                 row = _ROW_DATA + row_idx
                 val = self._spinboxes[(row, col)].value()
-                _set_value(data, cdef.path, vkey, val)
+                _set_value(data, cdef, vkey, val)
         return data
 
     def validate(self) -> list[str]:

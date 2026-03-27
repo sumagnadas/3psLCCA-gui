@@ -31,6 +31,10 @@ from .wpi_selector import _WPISelector
 from ..utils.table_widgets import TableDoubleSpinBox, TableSpinBox, TABLE_SPINBOX_BASE_QSS, mark_editable_column, TooltipTableMixin
 from gui.theme import VALIDATION_ERROR
 
+# ── Dev mode ──────────────────────────────────────────────────────────────────
+
+DEV = True
+
 # ── WPI DB path ───────────────────────────────────────────────────────────────
 
 _WPI_DB_PATH = Path(__file__).parent.parent.parent.parent / "data" / "wpi_db.json"
@@ -691,6 +695,11 @@ class TrafficData(ScrollableForm):
         self._wpi_table.data_changed.connect(self._on_field_changed)
         india_layout.addRow(self._wpi_table)
 
+        if DEV:
+            _print_btn = QPushButton("Print WPI Data")
+            _print_btn.clicked.connect(self._print_wpi_data)
+            india_layout.addRow(_print_btn)
+
         # Load first profile into table
         first = self._wpi_selector.current_profile()
         if first:
@@ -858,6 +867,9 @@ class TrafficData(ScrollableForm):
         """
         data = self._wpi_table.collect_to_data()
         self._wpi_selector.collect_and_save(data)
+
+    def _print_wpi_data(self):
+        print(self._wpi_table.collect_to_data())
 
     # ── Data collection ───────────────────────────────────────────────────────
 

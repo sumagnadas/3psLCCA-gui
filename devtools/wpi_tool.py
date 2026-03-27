@@ -46,33 +46,17 @@ ICON_MISMATCH = "⚠"
 ICON_MISSING  = "·"
 ICON_EDITING  = "●"
 
-VEHICLES       = ["small_cars", "big_cars", "two_wheelers", "o_buses",
-                  "d_buses", "lcv", "hcv", "mcv"]
-VEHICLE_LABELS = ["Small Cars", "Big Cars", "Two Wheelers", "O.Buses",
-                  "D.Buses", "LCV", "HCV", "MCV"]
+VEHICLES  = ["small_cars", "big_cars", "two_wheelers", "o_buses",
+             "d_buses", "lcv", "hcv", "mcv"]
 
-VEHICLE_COST_CATS = [
-    ("property_damage",    "Property Damage"),
-    ("tyre_cost",          "Tyre Cost"),
-    ("spare_parts",        "Spare Parts"),
-    ("fixed_depreciation", "Fixed Depreciation"),
+COST_KEYS = [
+    "petrol", "diesel", "engine_oil", "other_oil", "grease",
+    "property_damage", "tyre_cost", "spare_parts", "fixed_depreciation",
+    "commodity_holding_cost",
+    "passenger_cost", "crew_cost",
+    "fatal", "major", "minor",
+    "vot_cost",
 ]
-
-FUEL_KEYS   = ["petrol", "diesel", "engine_oil", "other_oil", "grease"]
-FUEL_LABELS = ["Petrol", "Diesel", "Engine Oil", "Other Oil", "Grease"]
-
-# ── Expected schema used for validation ────────────────────────────────────────
-# Maps top-level data key → expected sub-keys (or nested dict for vehicle_cost)
-_SCHEMA: dict = {
-    "fuel_cost":              FUEL_KEYS,
-    "vehicle_cost": {
-        cat: VEHICLES for cat, _ in VEHICLE_COST_CATS
-    },
-    "commodity_holding_cost": VEHICLES,
-    "passenger_crew_cost":    ["passenger_cost", "crew_cost"],
-    "medical_cost":           ["fatal", "major", "minor"],
-    "vot_cost":               VEHICLES,
-}
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
@@ -92,17 +76,7 @@ def _hash_status(entry: dict) -> str:
 
 def _make_skeleton(name: str, year: int) -> dict:
     """Create a new entry with all data values set to 0.0."""
-    data = {
-        "fuel_cost": {k: 0.0 for k in FUEL_KEYS},
-        "vehicle_cost": {
-            cat_key: {vk: 0.0 for vk in VEHICLES}
-            for cat_key, _ in VEHICLE_COST_CATS
-        },
-        "commodity_holding_cost": {vk: 0.0 for vk in VEHICLES},
-        "passenger_crew_cost":    {"passenger_cost": 0.0, "crew_cost": 0.0},
-        "medical_cost":           {"fatal": 0.0, "major": 0.0, "minor": 0.0},
-        "vot_cost":               {vk: 0.0 for vk in VEHICLES},
-    }
+    data = {v: {k: 0.0 for k in COST_KEYS} for v in VEHICLES}
     return {
         "metadata": {
             "id":        f"wpi_custom_{year}",
@@ -118,7 +92,7 @@ def _make_skeleton(name: str, year: int) -> dict:
 
 def _validate_schema(data: dict) -> tuple[list[str], list[str]]:
     """
-    Validate a data block against _SCHEMA.
+    Validate a data block against the flat vehicle-grouped schema.
     Returns (errors, warnings).
       errors   — missing required keys (blocks hashing)
       warnings — present but zero values (suggest updating)
@@ -126,31 +100,16 @@ def _validate_schema(data: dict) -> tuple[list[str], list[str]]:
     errors: list[str] = []
     warnings: list[str] = []
 
-    for top_key, expected in _SCHEMA.items():
-        if top_key not in data:
-            errors.append(f"Missing section: '{top_key}'")
+    for vk in VEHICLES:
+        if vk not in data:
+            errors.append(f"Missing vehicle: '{vk}'")
             continue
-
-        block = data[top_key]
-
-        if top_key == "vehicle_cost":
-            # nested: vehicle_cost → {cat → {vehicle → float}}
-            for cat_key, veh_list in expected.items():
-                if cat_key not in block:
-                    errors.append(f"Missing vehicle_cost sub-section: '{cat_key}'")
-                    continue
-                cat_block = block[cat_key]
-                for vk in veh_list:
-                    if vk not in cat_block:
-                        errors.append(f"Missing key: vehicle_cost.{cat_key}.{vk}")
-                    elif cat_block[vk] == 0:
-                        warnings.append(f"vehicle_cost.{cat_key}.{vk} is 0")
-        else:
-            for sub_key in expected:
-                if sub_key not in block:
-                    errors.append(f"Missing key: {top_key}.{sub_key}")
-                elif block[sub_key] == 0:
-                    warnings.append(f"{top_key}.{sub_key} is 0")
+        block = data[vk]
+        for ck in COST_KEYS:
+            if ck not in block:
+                errors.append(f"Missing key: {vk}.{ck}")
+            elif block[ck] == 0:
+                warnings.append(f"{vk}.{ck} is 0")
 
     return errors, warnings
 

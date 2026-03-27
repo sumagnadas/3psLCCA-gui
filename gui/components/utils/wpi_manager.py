@@ -51,31 +51,19 @@ VEHICLES = [
     "mcv",
 ]
 
-VEHICLE_COST_KEYS = [
-    "property_damage",
-    "tyre_cost",
-    "spare_parts",
-    "fixed_depreciation",
+COST_KEYS = [
+    "petrol", "diesel", "engine_oil", "other_oil", "grease",
+    "property_damage", "tyre_cost", "spare_parts", "fixed_depreciation",
+    "commodity_holding_cost",
+    "passenger_cost", "crew_cost",
+    "fatal", "major", "minor",
+    "vot_cost",
 ]
-
-FUEL_KEYS = ["petrol", "diesel", "engine_oil", "other_oil", "grease"]
-MEDICAL_KEYS = ["fatal", "major", "minor"]
-PASSENGER_CREW_KEYS = ["passenger_cost", "crew_cost"]
 
 
 def empty_data() -> dict:
-    """Return a zeroed WPI data block with correct structure."""
-    return {
-        "fuel_cost": {k: 1.0 for k in FUEL_KEYS},
-        "vehicle_cost": {
-            sub: {v: 1.0 for v in VEHICLES}
-            for sub in VEHICLE_COST_KEYS
-        },
-        "commodity_holding_cost": {v: 1.0 for v in VEHICLES},
-        "passenger_crew_cost": {k: 1.0 for k in PASSENGER_CREW_KEYS},
-        "medical_cost": {k: 1.0 for k in MEDICAL_KEYS},
-        "vot_cost": {v: 1.0 for v in VEHICLES},
-    }
+    """Return a WPI data block with all values set to 1.0 (no adjustment)."""
+    return {v: {k: 1.0 for k in COST_KEYS} for v in VEHICLES}
 
 
 # ── WPIProfile ────────────────────────────────────────────────────────────────
