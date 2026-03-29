@@ -23,7 +23,8 @@ from ..utils.validation_helpers import clear_field_styles, freeze_form, freeze_w
 from ..utils.countries_data import CURRENCIES, COUNTRIES
 
 
-BASE_DOCS_URL = "https://yourdocs.com/general/"
+from ..utils.doc_handler import make_doc_opener
+_DOC_OPENER = make_doc_opener("general")
 
 
 GENERAL_FIELDS = [
@@ -32,7 +33,7 @@ GENERAL_FIELDS = [
     FieldDef(
         "project_name",
         "Project Name",
-        "Official name or title of the bridge/infrastructure project.",
+        "The official name of the bridge project. Appears in all reports and exports.",
         "text",
         required=True,
         doc_slug="project-name",
@@ -40,21 +41,21 @@ GENERAL_FIELDS = [
     FieldDef(
         "project_code",
         "Project Code",
-        "Unique reference code assigned to this project.",
+        "A short identifier or reference code for internal tracking.",
         "text",
         doc_slug="project-code",
     ),
     FieldDef(
         "project_description",
         "Project Description",
-        "Brief description of the project scope, objectives, or background.",
+        "A free-text summary of the project scope, objectives, and context.",
         "textarea",
         doc_slug="project-description",
     ),
     FieldDef(
         "remarks",
         "Remarks",
-        "Any additional notes, assumptions, or comments relevant to this evaluation.",
+        "Additional notes or observations. Does not affect any calculations.",
         "textarea",
         doc_slug="remarks",
     ),
@@ -63,7 +64,7 @@ GENERAL_FIELDS = [
     FieldDef(
         "agency_name",
         "Agency Name",
-        "Name of the organization responsible for this evaluation.",
+        "The name of the organisation or department responsible for this project. Appears in the report header.",
         "text",
         # required=True,
         doc_slug="agency-name",
@@ -71,21 +72,21 @@ GENERAL_FIELDS = [
     FieldDef(
         "contact_person",
         "Contact Person",
-        "Primary contact handling this project.",
+        "The name of the primary point of contact for this project within the agency.",
         "text",
         doc_slug="contact-person",
     ),
     FieldDef(
         "agency_address",
         "Agency Address",
-        "Street address of the evaluating agency.",
+        "The postal address of the agency or office handling this project. Appears in the report footer.",
         "text",
         doc_slug="agency-address",
     ),
     FieldDef(
         "agency_country",
         "Country",
-        "Country where the evaluating agency is based.",
+        "Country where the evaluating agency is based. Used for report localisation.",
         "combo",
         options=COUNTRIES,
         doc_slug="agency-country",
@@ -93,20 +94,21 @@ GENERAL_FIELDS = [
     FieldDef(
         "agency_email",
         "Email",
-        "Official email address for correspondence.",
+        "The official email address for the agency or project team.",
         "text",
         doc_slug="agency-email",
     ),
     FieldDef(
         "agency_phone",
         "Phone",
-        "Contact phone number.",
-        "phone",   # ← new custom type
+        "The contact phone number for the agency or project team. Include country code where applicable.",
+        "phone",
+        doc_slug="agency-phone",
     ),
     FieldDef(
         "agency_logo",
         "Agency Logo",
-        "Upload agency logo (JPG or PNG, auto-resized to 3 cm × 3 cm print size).",
+        "Upload agency logo (JPG or PNG). Auto-resized to fit a 3 cm × 3 cm print area. Transparent PNG recommended.",
         "upload_img",
         options="default",
         doc_slug="agency-logo",
@@ -118,26 +120,26 @@ GENERAL_FIELDS = [
         "Country",
         "Country where the bridge project is located. Set at project creation.",
         "text",
-        doc_slug="project_country",
+        doc_slug="project-country",
     ),
     FieldDef(
         "project_currency",
         "Currency",
-        "Currency used for all cost figures. Set at project creation.",
+        "Currency used for all cost inputs and outputs. Set at project creation.",
         "text",
-        doc_slug="project_currency",
+        doc_slug="project-currency",
     ),
     FieldDef(
         "unit_system",
         "Unit System",
-        "Measurement unit system (Metric or Imperial). Set at project creation.",
+        "Measurement system for all dimensional inputs (Metric or Imperial). Set at project creation.",
         "text",
         doc_slug="unit-system",
     ),
     FieldDef(
         "sor_database",
         "Material Suggestions",
-        "Schedule of Rates database used to auto-suggest material names, rates, and emission factors.",
+        "Schedule of Rates database used to auto-suggest material names, rates, and emission factors in the Material Dialog.",
         "combo",
         options=[],
         doc_slug="sor-database",
@@ -166,7 +168,7 @@ class GeneralInfo(ScrollableForm):
     def __init__(self, controller=None):
         super().__init__(controller=controller, chunk_name="general_info")
 
-        self.required_keys = build_form(self, GENERAL_FIELDS, BASE_DOCS_URL)
+        self.required_keys = build_form(self, GENERAL_FIELDS, _DOC_OPENER)
 
         # Lock country and currency — disable widget so user can't edit,
         # but keep in _field_map so get_data_dict() saves them normally

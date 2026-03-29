@@ -1,5 +1,3 @@
-from .config import BASE_DOCS_URL
-
 FIELD_DEFINITIONS = {
     # ── Basic Info ──────────────────────────────────────────────────────────
     "material_name": {

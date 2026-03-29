@@ -25,7 +25,8 @@ from ...utils.table_widgets import TableDoubleSpinBox, TABLE_SPINBOX_BASE_QSS, m
 CHUNK = "diversion_emissions"
 GEN_CHUNK = "general_info"
 TRAFFIC_CHUNK = "traffic_and_road_data"
-BASE_DOCS_URL = "https://yourdocs.com/carbon/traffic/"
+from ...utils.doc_handler import make_doc_opener
+_DOC_OPENER = make_doc_opener("carbon/traffic")
 
 _VEHICLES = [
     ("small_cars", "Small Car"),
@@ -255,7 +256,7 @@ class TrafficEmissions(ScrollableForm):
         build_form(
             self,
             [FieldDef("mode", "Calculation Mode", "", "combo", options=_MODES)],
-            BASE_DOCS_URL,
+            _DOC_OPENER,
         )
         self._field_map.pop("mode", None)  # ← prevent base save loop from firing
 
@@ -327,7 +328,7 @@ class TrafficEmissions(ScrollableForm):
 
         _temp = self.form
         self.form = direct_layout
-        build_form(self, DIRECT_FIELDS, BASE_DOCS_URL)
+        build_form(self, DIRECT_FIELDS, _DOC_OPENER)
         self._field_map.pop("total_direct_emissions", None)  # handled in collect_data
         self.form = _temp
 

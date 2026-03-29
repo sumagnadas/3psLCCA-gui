@@ -13,7 +13,8 @@ from ..utils.form_builder.form_builder import build_form
 from ..utils.validation_helpers import clear_field_styles, freeze_form, freeze_widgets, validate_form
 
 
-BASE_DOCS_URL = "https://yourdocs.com/financial/"
+from ..utils.doc_handler import make_doc_opener
+_DOC_OPENER = make_doc_opener("financial")
 
 FINANCIAL_FIELDS = [
     Section("Economic Parameters"),
@@ -92,7 +93,7 @@ class FinancialData(ScrollableForm):
     def __init__(self, controller=None):
         super().__init__(controller=controller, chunk_name="financial_data")
 
-        self.required_keys = build_form(self, FINANCIAL_FIELDS, BASE_DOCS_URL)
+        self.required_keys = build_form(self, FINANCIAL_FIELDS, _DOC_OPENER)
 
         # ── Buttons row ───────────────────────────────────────────────────
         btn_row = QWidget()

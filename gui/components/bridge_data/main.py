@@ -28,7 +28,8 @@ from ..utils.display_format import DECIMAL_PLACES
 from gui.theme import VALIDATION_ERROR
 
 
-BASE_DOCS_URL = "https://yourdocs.com/bridge/"
+from ..utils.doc_handler import make_doc_opener
+_DOC_OPENER = make_doc_opener("bridge")
 
 
 BRIDGE_FIELDS = [
@@ -253,7 +254,7 @@ class BridgeData(ScrollableForm):
     def __init__(self, controller=None):
         super().__init__(controller=controller, chunk_name="bridge_data")
 
-        self.required_keys = build_form(self, BRIDGE_FIELDS, BASE_DOCS_URL)
+        self.required_keys = build_form(self, BRIDGE_FIELDS, _DOC_OPENER)
 
         # location_country is set at project creation — lock it
 

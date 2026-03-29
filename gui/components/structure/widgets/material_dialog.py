@@ -42,7 +42,7 @@ from ...utils.unit_resolver import (
     load_custom_units,
     _UNIT_ALIASES as _SOR_UNIT_ALIASES,
 )
-from ...utils.input_fields.add_material import FIELD_DEFINITIONS, BASE_DOCS_URL
+from ...utils.input_fields.add_material import FIELD_DEFINITIONS
 
 
 # ---------------------------------------------------------------------------
@@ -84,9 +84,9 @@ class InfoPopup(QDialog):
             read_more = QPushButton("Read More →")
             read_more.setStyleSheet("font-weight: 600; border: none;")
             read_more.setCursor(Qt.PointingHandCursor)
-            read_more.clicked.connect(
-                lambda: QDesktopServices.openUrl(QUrl(f"{BASE_DOCS_URL}{doc_slug}"))
-            )
+            # read_more.clicked.connect(
+            #     lambda: QDesktopServices.openUrl(QUrl(f"{BASE_DOCS_URL}{doc_slug}"))
+            # )
             btn_row.addWidget(read_more)
 
         btn_row.addStretch()
