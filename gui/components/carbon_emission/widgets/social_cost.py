@@ -124,7 +124,7 @@ class SocialCost(ScrollableForm):
         self._build_ui()
 
     # ── Suppression ───────────────────────────────────────────────────────────
-    # Simple counter so nested suppression scopes don't clobber each other.
+    # Simple counter so nested suppression scopes dont clobber each other.
     # Stored as int; the bool property keeps all `if self._suppress_signals:` checks working.
 
     @property
@@ -196,6 +196,32 @@ class SocialCost(ScrollableForm):
         vbox.addWidget(lbl)
         return container, lbl
 
+    def _find_row_for_widget(self, layout, target_widget):
+        """Helper to safely and recursively locate the QFormLayout row index containing a specific widget."""
+        def _contains(item, target):
+            if not item:
+                return False
+            # Check direct widget match
+            if item.widget() == target:
+                return True
+            # Check if it's deeply nested inside a wrapper widget
+            if item.widget() and item.widget().isAncestorOf(target):
+                return True
+            # Check if it's nested inside a sub-layout
+            lay = item.layout()
+            if lay:
+                for j in range(lay.count()):
+                    if _contains(lay.itemAt(j), target):
+                        return True
+            return False
+
+        # Scan every row in the form layout
+        for i in range(layout.rowCount()):
+            for role in (QFormLayout.FieldRole, QFormLayout.SpanningRole, QFormLayout.LabelRole):
+                if _contains(layout.itemAt(i, role), target_widget):
+                    return i
+        return -1  # Not found
+
     def _build_niti_panel(self):
         w = QWidget()
         layout = self._make_panel_layout(w)
@@ -217,9 +243,9 @@ class SocialCost(ScrollableForm):
 
         self.inr_to_local_rate.valueChanged.connect(self._update_niti_result)
 
-        # Track inr row for show/hide — row was just added, so it's at rowCount-1
+        # Track inr row for show/hide robustly
         self._niti_layout = layout
-        self._inr_row = layout.rowCount() - 1
+        self._inr_row = self._find_row_for_widget(layout, self.inr_to_local_rate)
 
         _nrc, self._niti_result_lbl = self._padded_label(top=6, bottom=4)
         layout.addRow(_nrc)
@@ -241,6 +267,10 @@ class SocialCost(ScrollableForm):
         self.usd_to_local_rate.valueChanged.connect(self._update_ricke_result)
         self.ssp_scenario.currentIndexChanged.connect(self._update_ricke_result)
         self.rcp_scenario.currentIndexChanged.connect(self._update_ricke_result)
+
+        # Track usd row for show/hide robustly
+        self._ricke_layout = layout
+        self._usd_row = self._find_row_for_widget(layout, self.usd_to_local_rate)
 
         _rrc, self._ricke_result_lbl = self._padded_label(top=6, bottom=4)
         layout.addRow(_rrc)
@@ -295,19 +325,34 @@ class SocialCost(ScrollableForm):
 
     # ── Calculations ──────────────────────────────────────────────────────────
 
-    def _toggle_inr_row(self):
-        self._niti_layout.setRowVisible(self._inr_row, self._project_currency != "INR")
+    def _toggle_currency_rows(self):
+        cur = str(self._project_currency or "").strip().upper()
+        
+        # Hide INR Conversion input field if current project currency is INR
+        if hasattr(self, '_inr_row') and self._inr_row >= 0:
+            self._niti_layout.setRowVisible(self._inr_row, cur != "INR")
+            
+        # Hide USD Conversion input field if current project currency is USD
+        if hasattr(self, '_usd_row') and self._usd_row >= 0:
+            self._ricke_layout.setRowVisible(self._usd_row, cur != "USD")
 
     def _update_niti_result(self):
         if self._suppress_signals:
             return
-        cur = self._project_currency or "INR"
+        cur = str(self._project_currency or "INR").strip().upper()
         rate = self.inr_to_local_rate.value() if cur != "INR" else 1.0
         val = NITI_AAYOG_SCC_INR * rate
-        self._niti_result_lbl.setText(
-            f"NITI Aayog Base: <b>{fmt(NITI_AAYOG_SCC_INR)} INR/kgCO₂e</b><br/>"
-            f"Adjusted Local Cost: <b>{fmt(val)} {cur}/kgCO₂e</b>"
-        )
+        
+        if cur == "INR":
+            self._niti_result_lbl.setText(
+                f"NITI Aayog Base: <b>{fmt(NITI_AAYOG_SCC_INR)} INR/kgCO₂e</b>"
+            )
+        else:
+            self._niti_result_lbl.setText(
+                f"NITI Aayog Base: <b>{fmt(NITI_AAYOG_SCC_INR)} INR/kgCO₂e</b><br/>"
+                f"Adjusted Local Cost: <b>{fmt(val)} {cur}/kgCO₂e</b>"
+            )
+            
         self._set_result(
             val,
             mode=_MODE_NITI,
@@ -326,7 +371,8 @@ class SocialCost(ScrollableForm):
         base = _RICKE_SCC_TABLE.get((ssp, rcp), 0.0)
         usd_rate = self.usd_to_local_rate.value()
         val = base * usd_rate
-        cur = self._project_currency or "USD"
+        cur = str(self._project_currency or "USD").strip().upper()
+        
         if base == 0:
             self._ricke_result_lbl.setText(
                 "<span style='color:red;'><b>Invalid combination</b> — this SSP/RCP pair "
@@ -343,10 +389,16 @@ class SocialCost(ScrollableForm):
                 rate_unit=f"{cur}/USD",
             )
         else:
-            self._ricke_result_lbl.setText(
-                f"Scenario Baseline: <b>${fmt(base)} USD/kg</b><br/>"
-                f"Adjusted Local Cost: <b>{fmt(val)} {cur}/kgCO₂e</b>"
-            )
+            if cur == "USD":
+                self._ricke_result_lbl.setText(
+                    f"Scenario Baseline: <b>${fmt(base)} USD/kgCO₂e</b>"
+                )
+            else:
+                self._ricke_result_lbl.setText(
+                    f"Scenario Baseline: <b>${fmt(base)} USD/kgCO₂e</b><br/>"
+                    f"Adjusted Local Cost: <b>{fmt(val)} {cur}/kgCO₂e</b>"
+                )
+                
             self._set_result(
                 val,
                 mode=_MODE_RICKE,
@@ -375,12 +427,19 @@ class SocialCost(ScrollableForm):
     def _set_result(self, value, mode=None, base_price=None, base_unit=None, conversion_rate=None, rate_unit=None):
         cur = self._project_currency or ""
         if mode is not None and base_price is not None and conversion_rate is not None:
-            self._result_lbl.setText(
-                f"<b>Selected Mode:</b> {mode}<br/>"
-                f"<b>Base Price:</b> {fmt(base_price)} {base_unit}<br/>"
-                f"<b>Conversion Rate:</b> {fmt(conversion_rate)} {rate_unit}<br/>"
-                f"<b>Effective SCC:</b> {fmt(value)} {cur}/kgCO₂e"
-            )
+            # Build the result label dynamically
+            lines = [
+                f"<b>Selected Mode:</b> {mode}",
+                f"<b>Base Price:</b> {fmt(base_price)} {base_unit}"
+            ]
+            
+            # Only add the Conversion Rate line if it's a cross-currency conversion
+            if rate_unit not in ("INR/INR", "USD/USD"):
+                lines.append(f"<b>Conversion Rate:</b> {fmt(conversion_rate)} {rate_unit}")
+                
+            lines.append(f"<b>Effective SCC:</b> {fmt(value)} {cur}/kgCO₂e")
+            
+            self._result_lbl.setText("<br/>".join(lines))
         else:
             self._result_lbl.setText(f"<b>Effective SCC: {fmt(value)} {cur}/kgCO₂e</b>")
 
@@ -390,7 +449,8 @@ class SocialCost(ScrollableForm):
         if not self.controller or not self.controller.engine:
             return
         info = self.controller.engine.fetch_chunk(GLOBAL_CHUNK) or {}
-        self._project_currency = info.get("currency", "INR")
+        raw_cur = info.get("project_currency", "INR")
+        self._project_currency = str(raw_cur).strip().upper() if raw_cur else "INR"
         rate_usd = float(info.get("currency_to_usd_rate", 1.0))
 
         self.usd_to_local_rate.setSuffix(f" {self._project_currency}/USD")
@@ -404,7 +464,7 @@ class SocialCost(ScrollableForm):
             self.inr_to_local_rate.setValue(1.0)
         self._suppress_signals = False
 
-        self._toggle_inr_row()
+        self._toggle_currency_rows()
         self._on_mode_changed()
 
     # ── Data ──────────────────────────────────────────────────────────────────
