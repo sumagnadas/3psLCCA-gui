@@ -43,6 +43,22 @@ from ...utils.unit_resolver import (
     _UNIT_ALIASES as _SOR_UNIT_ALIASES,
 )
 from ...utils.input_fields.add_material import FIELD_DEFINITIONS
+from ...utils.unit_resolver import get_unit_info as _get_unit_info_impl
+
+import os
+import sys
+
+from gui.themes import get_token
+
+try:
+    from ..registry.custom_material_db import CustomMaterialDB, CUSTOM_PREFIX
+except ImportError:
+    CustomMaterialDB = None
+    CUSTOM_PREFIX = "custom::"
+
+# NOTE: material_catalog and search_engine live inside the registry directory
+# which is only added to sys.path at runtime by _ensure_registry_on_path().
+# These are therefore imported lazily inside each function that needs them.
 
 
 # ---------------------------------------------------------------------------
@@ -445,16 +461,12 @@ def _resolve_unit_code(sor_unit: str, combo: "QComboBox") -> int:
 
 
 def _registry_dir() -> str:
-    import os
-
     return os.path.normpath(
         os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "registry")
     )
 
 
 def _ensure_registry_on_path():
-    import sys
-
     d = _registry_dir()
     if d not in sys.path:
         sys.path.insert(0, d)
@@ -478,17 +490,16 @@ def _list_sor_options(country: str = None) -> list[dict]:
         print(f"[MaterialDialog] Could not list SOR options: {ex}")
 
     try:
-        from ..registry.custom_material_db import CustomMaterialDB, CUSTOM_PREFIX
-
-        cdb = CustomMaterialDB()
-        for db_name in cdb.list_db_names():
-            result.append(
-                {
-                    "db_key": f"{CUSTOM_PREFIX}{db_name}",
-                    "region": "Custom",
-                    "label": f"{db_name}  (Custom)",
-                }
-            )
+        if CustomMaterialDB is not None:
+            cdb = CustomMaterialDB()
+            for db_name in cdb.list_db_names():
+                result.append(
+                    {
+                        "db_key": f"{CUSTOM_PREFIX}{db_name}",
+                        "region": "Custom",
+                        "label": f"{db_name}  (Custom)",
+                    }
+                )
     except Exception as ex:
         print(f"[MaterialDialog] Could not list custom databases: {ex}")
 
@@ -743,8 +754,8 @@ def _migrate_embedded_custom_units(values: dict) -> None:
         return
 
     try:
-        from ..registry.custom_material_db import CustomMaterialDB
-
+        if CustomMaterialDB is None:
+            raise ImportError("custom_material_db not available")
         cdb = CustomMaterialDB()
         for u in new_units:
             cdb.save_custom_unit(u)
@@ -1169,8 +1180,6 @@ class MaterialDialog(QDialog):
         # ── Button bar ────────────────────────────────────────────────────
         btn_bar = QWidget()
         btn_bar.setObjectName("btn_bar")
-        from gui.themes import get_token
-
         btn_bar.setStyleSheet(
             f"#btn_bar {{ border-top: 1px solid {get_token('$border', '#dee2e6')}; }}"
         )
@@ -1644,8 +1653,8 @@ class MaterialDialog(QDialog):
             return
 
         try:
-            from ..registry.custom_material_db import CustomMaterialDB
-
+            if CustomMaterialDB is None:
+                raise ImportError("custom_material_db not available")
             cdb = CustomMaterialDB()
             existing = cdb.list_db_names()
         except Exception as e:
@@ -1835,9 +1844,7 @@ class MaterialDialog(QDialog):
         return cb
 
     def _get_unit_info(self, code: str):
-        from ...utils.unit_resolver import get_unit_info as _get_unit_info
-
-        return _get_unit_info(code)
+        return _get_unit_info_impl(code)
 
     _DB_NA = frozenset({"not_available", "", None})
 
@@ -1924,9 +1931,8 @@ class MaterialDialog(QDialog):
             cu = dialog.get_unit()
             # Persist to DB and refresh the global cache so all open dialogs see it
             try:
-                from ..registry.custom_material_db import CustomMaterialDB
-
-                CustomMaterialDB().save_custom_unit(cu)
+                if CustomMaterialDB is not None:
+                    CustomMaterialDB().save_custom_unit(cu)
                 load_custom_units()
             except Exception as exc:
                 print(f"[MaterialDialog] Could not save custom unit: {exc}")
@@ -2175,11 +2181,9 @@ class MaterialDialog(QDialog):
     def keyPressEvent(self, event):
         """Escape → Cancel. Enter/Return → trigger the default button only if
         focus is not on a text field (prevents accidental submission)."""
-        from PySide6.QtCore import Qt as _Qt
-
-        if event.key() == _Qt.Key_Escape:
+        if event.key() == Qt.Key_Escape:
             self.reject()
-        elif event.key() in (_Qt.Key_Return, _Qt.Key_Enter):
+        elif event.key() in (Qt.Key_Return, Qt.Key_Enter):
             focused = self.focusWidget()
             if isinstance(focused, QLineEdit):
                 event.ignore()  # let the line-edit handle it, don't submit

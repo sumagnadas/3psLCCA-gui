@@ -32,6 +32,36 @@ from gui.components.utils.validation_helpers import (
 from .lcc_plot import LCCBreakdownTable, LCCChartWidget, LCCDetailsTable
 from .Pie import LCCPieWidget
 
+
+from three_ps_lcca_core.inputs.input import (
+    InputMetaData,
+    GeneralParameters,
+    TrafficAndRoadData,
+    VehicleData,
+    VehicleMetaData,
+    AccidentSeverityDistribution,
+    AdditionalInputs,
+    MaintenanceAndStageParameters,
+    UseStageCost,
+    Routine,
+    RoutineInspection,
+    RoutineMaintenance,
+    Major,
+    MajorInspection,
+    MajorRepair,
+    ReplacementCost,
+    EndOfLifeStageCosts,
+    DemolitionDisposal,
+)
+from three_ps_lcca_core.inputs.input_global import (
+    InputGlobalMetaData,
+    DailyRoadUserCost,
+    TotalCarbonEmission,
+)
+from three_ps_lcca_core.core.main import run_full_lcc_analysis
+from three_ps_lcca_core.inputs.wpi import WPIMetaData
+
+
 CHUNK = "outputs_data"
 CHUNK_AP = "analysis_period"
 
@@ -107,7 +137,7 @@ class _LCCAWorker(QObject):
             )
 
             _dbg("Worker: calling run_full_lcc_analysis …")
-            from three_ps_lcca_core.core.main import run_full_lcc_analysis
+            
 
             results = run_full_lcc_analysis(
                 data_object,
@@ -730,8 +760,6 @@ class OutputsPage(ScrollableForm):
         This function creates a WPI object using the data from saved chunks.
         """
         _dbg("=== _prepare_wpi_object START ===")
-        from three_ps_lcca_core.inputs.wpi import WPIMetaData
-
         wpi_data = data.get("traffic_and_road_data").get("wpi")
         _dbg(f"  wpi_data keys: {list(wpi_data.keys()) if wpi_data else 'MISSING'}")
         wpi_dict = wpi_data.get("data_snapshot").get("ratio")
@@ -751,31 +779,6 @@ class OutputsPage(ScrollableForm):
         This function creates Core Data Object using the data from saved chunks.
         To be passed to 3psLCCAFile-core for calculation.
         """
-        from three_ps_lcca_core.inputs.input import (
-            InputMetaData,
-            GeneralParameters,
-            TrafficAndRoadData,
-            VehicleData,
-            VehicleMetaData,
-            AccidentSeverityDistribution,
-            AdditionalInputs,
-            MaintenanceAndStageParameters,
-            UseStageCost,
-            Routine,
-            RoutineInspection,
-            RoutineMaintenance,
-            Major,
-            MajorInspection,
-            MajorRepair,
-            ReplacementCost,
-            EndOfLifeStageCosts,
-            DemolitionDisposal,
-        )
-        from three_ps_lcca_core.inputs.input_global import (
-            InputGlobalMetaData,
-            DailyRoadUserCost,
-            TotalCarbonEmission,
-        )
 
         # --------------Prepare-General-Parameters-Start-------------------------------------------------
         _dbg("=== _prepare_data_object START ===")

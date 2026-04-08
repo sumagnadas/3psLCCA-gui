@@ -19,6 +19,9 @@ from PySide6.QtGui import QFontDatabase, QIcon
 from gui.components.splash_screen import SplashScreen
 from gui.project_manager import ProjectManager
 from gui.themes import get_light_theme, get_dark_theme, resolve_is_dark, track_mode
+import winreg
+import ctypes
+from gui.components.utils.unit_resolver import load_custom_units
 
 _QSS_PATH = os.path.join("gui", "assets", "themes", "main.qss")
 
@@ -35,7 +38,6 @@ def _is_dark(scheme=None) -> bool:
 
     # Windows registry fallback
     try:
-        import winreg
 
         key = winreg.OpenKey(
             winreg.HKEY_CURRENT_USER,
@@ -131,7 +133,6 @@ def main():
     # shows the app icon instead of the Python interpreter icon.
     if platform.system() == "Windows":
         try:
-            import ctypes
             ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
                 "OSBridge.3psLCCA"
             )
@@ -183,7 +184,6 @@ def main():
     # Load Custom Units (deferred to start of event loop)
     def _load_custom_units():
         try:
-            from gui.components.utils.unit_resolver import load_custom_units
 
             load_custom_units()
         except Exception as _e:

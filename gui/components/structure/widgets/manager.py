@@ -14,6 +14,7 @@ from PySide6.QtCore import Qt, QTimer
 import time
 import uuid
 import datetime
+import traceback
 
 from .base_table import StructureTableWidget
 from .material_dialog import MaterialDialog
@@ -90,7 +91,6 @@ class StructureManagerWidget(QWidget):
             self.data = data
             self.refresh_ui()
         except Exception as e:
-            import traceback
 
             print(f"[ERROR] on_refresh crashed: {e}")
             traceback.print_exc()
@@ -318,7 +318,6 @@ class StructureManagerWidget(QWidget):
                     self.save_current_state()
                     QTimer.singleShot(0, self.on_refresh)
         except Exception as e:
-            import traceback
 
             print(f"[ERROR] open_edit_dialog crashed: {e}")
             traceback.print_exc()

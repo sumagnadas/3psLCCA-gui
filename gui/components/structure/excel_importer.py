@@ -65,8 +65,20 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+from PySide6.QtWidgets import QButtonGroup, QRadioButton, QGroupBox
 from gui.themes import get_token
 from .widgets.material_dialog import build_excel_snapshot
+import sys
+from ..utils.unit_resolver import (
+    get_unit_info as _gui,
+    get_known_units as _gku,
+)
+from ..utils.unit_resolver import get_known_units as _gku
+from ..utils.unit_resolver import get_unit_info
+from PySide6.QtWidgets import QPlainTextEdit
+import traceback
+import json
+import datetime as _dt
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -381,10 +393,6 @@ def verify_schema(parsed: dict[str, list[dict]]) -> dict[str, list[dict]]:
             unit = record.get("unit", "").strip()
             if unit:
                 try:
-                    from ..utils.unit_resolver import (
-                        get_unit_info as _gui,
-                        get_known_units as _gku,
-                    )
 
                     _si, _ = _gui(unit)
                     if _si is None:
@@ -395,7 +403,6 @@ def verify_schema(parsed: dict[str, list[dict]]) -> dict[str, list[dict]]:
                 except Exception:
                     # unit_resolver not available (standalone mode) — derive from definitions
                     try:
-                        from ..utils.unit_resolver import get_known_units as _gku
 
                         _known = _gku()
                     except Exception:
@@ -477,8 +484,6 @@ def record_to_material_dict(record: dict) -> dict:
             return float(record.get(key, 0) or 0)
         except (ValueError, TypeError):
             return 0.0
-
-    from ..utils.unit_resolver import get_unit_info  # noqa: PLC0415
 
     raw_unit = record.get("unit", "").strip()
     carbon_ef = _float("carbon_emission")
@@ -1338,7 +1343,6 @@ class DuplicateComponentDialog(QDialog):
         desc.setWordWrap(True)
         layout.addWidget(desc)
 
-        from PySide6.QtWidgets import QButtonGroup, QRadioButton, QGroupBox
 
         for comp in conflicts:
             box = QGroupBox(comp)
@@ -1684,7 +1688,6 @@ class ImportPreviewWindow(QDialog):
         )
         layout.addWidget(summary)
 
-        from PySide6.QtWidgets import QPlainTextEdit
 
         txt = QPlainTextEdit()
         txt.setReadOnly(True)
@@ -1721,8 +1724,6 @@ def _emit_result(
     If *manager* is None (standalone / test mode), falls back to printing.
     """
     if manager is None:
-        import json
-
         print("\n===== IMPORT RESULT =====")
         for chunk_key, components in data.items():
             print(f"\n[chunk: {chunk_key}]")
@@ -1807,7 +1808,6 @@ def _emit_result(
                     # --- Write to engine -------------------------------------
                     if force_overwrite:
                         # Update the existing entry in-place (overwrite)
-                        import datetime as _dt
                         from .material_dialog import build_excel_snapshot
 
                         included_carbon = values_dict.pop(
@@ -1906,7 +1906,6 @@ def _emit_result(
                     imported += 1
 
                 except Exception as exc:
-                    import traceback
 
                     failures.append(
                         f'[{comp_name}] "{mat_name}" failed — {exc}\n'
@@ -1929,7 +1928,6 @@ def _emit_result(
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    import sys
 
     app = QApplication.instance() or QApplication(sys.argv)
     path, _ = QFileDialog.getOpenFileName(
